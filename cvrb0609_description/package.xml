@@ -1,0 +1,24 @@
+<package format="3">
+  <name>cvrb0609_description</name>
+  <version>1.0.0</version>
+  <description>
+    <p>URDF Description package for cobotta_pro_description</p>
+    <p>
+      This package contains configuration data, 3D models and launch files
+for cobotta_pro_description robot
+    </p>
+  </description>
+  <author>TODO</author>
+  <maintainer email="rwu@ipa.fraunhofer.de"/>
+  <license>BSD</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

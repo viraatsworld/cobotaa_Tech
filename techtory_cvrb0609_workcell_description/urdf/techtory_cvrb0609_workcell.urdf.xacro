@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="techtory_demo_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find cvrb0609_description)/urdf/cvrb0609.urdf.xacro"/>
+  <xacro:include filename="$(find techtory_cell_description)/urdf/techtory_cell.xaco" />
+
+
+  <xacro:arg name="parent" default="world" />
+  <xacro:arg name="prefix" default="" />
+
+  <link name="$(arg parent)" />
+
+  <xacro:arg name="cvrb_prefix" default="cobotta_pro_"/>
+
+   <!-- Instantiate cobotta pro -->
+  <xacro:cvrb0609 prefix="$(arg cvrb_prefix)"/>
+
+  <joint name="$(arg prefix)joint_w" type="fixed">
+    <origin xyz="0.04 -0.3 0.93" rpy="0 0 0"/>
+    <parent link="world"/>
+    <child link="$(arg cvrb_prefix)base_link"/>
+  </joint>
+
+
+
+    <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:techtory_cell>
+</robot>
