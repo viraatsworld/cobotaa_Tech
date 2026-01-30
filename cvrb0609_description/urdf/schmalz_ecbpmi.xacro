@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="schmalz_ecbpmi">
+
+
+    <xacro:macro name="schmalz_ecbpmi" params="
+        name
+        prefix
+        parent
+        *origin
+    ">
+
+        <xacro:include filename="$(find cvrb0609_description)/urdf/inertial_macros.xacro"/>
+
+        <xacro:property name="cup_diameter" value="0.031" />   
+        <xacro:property name="cup_length" value="0.037" />
+        <xacro:property name="body_length" value="0.063" />
+        <xacro:property name="body_width" value="0.063" />
+        <xacro:property name="body_height" value="0.06740" />
+        <xacro:property name="body_height_max" value="0.1004" />
+        
+
+        <material name="blue">
+            <color rgba="0 0.2 1 1" />
+        </material>
+
+        <material name="green">
+            <color rgba="0 0.9 0.3 1" />
+        </material>
+
+        <material name="white">
+            <color rgba="1 1 1 1" />
+        </material>
+
+
+        <!--Base Link-->
+        <link name="${prefix}schmalz_ecbpmi_base_link">
+            <visual>
+                <geometry>
+                    <cylinder length="${cup_length}" radius="${cup_diameter/2}" />
+                </geometry>
+                <material name="blue" />
+                <origin rpy="0 0 0" xyz="0 0 ${cup_length/2}" />
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder length="${cup_length}" radius="${cup_diameter/2}" />
+                </geometry>
+                <origin rpy="0 0 0" xyz="0 0 ${cup_length/2}" />
+            </collision>
+            <xacro:inertial_cylinder mass="0.1" length="${cup_length}" radius="${cup_diameter/2}">
+                <origin rpy="0 0 0" xyz="0 0 ${cup_length/2}" />
+            </xacro:inertial_cylinder>
+        </link>
+
+        <!--Main gripper-->
+        <link name="${prefix}schmalz_ecbpmi_body_link">
+            <visual>
+                <geometry>
+                <mesh filename="package://cvrb0609_description/meshes/Schmalz_ECBPMi.stl" scale="1 1 1" />
+                </geometry>
+                <origin rpy="-${pi/2} 0 0" xyz="0 0 ${cup_length/2}"  />
+                <material name="green" />
+            </visual>
+            <collision>
+                <geometry>
+                <mesh filename="package://cvrb0609_description/meshes/Schmalz_ECBPMi.stl" scale="1 1 1" />
+                </geometry>
+                <origin rpy="-${pi/2} 0 0" xyz="0 0 ${cup_length/2}"  />
+            </collision>
+            <xacro:inertial_box mass="0.224" x="${body_length}" y="${body_width}" z="${body_height}">
+                <origin rpy="${pi/2} 0 0" xyz="0 0 ${cup_length/2}"  />
+            </xacro:inertial_box>
+        </link>
+
+        <!-- Virtual link for visualizytion and planning-->
+        <link name="tool_tip" />
+
+        <!-- Joints-->
+
+        <joint name="${prefix}schmalz_ecbpmi_body_joint" type="fixed">
+            <parent link="${prefix}schmalz_ecbpmi_base_link" />
+            <child link="${prefix}schmalz_ecbpmi_body_link" />
+            <origin xyz="0.0 0.0 ${cup_length/2+body_height/2}" rpy="0.0 0.0 0.0" />
+        </joint>
+
+
+        <joint name="${prefix}schmalz_ecbpmi_tip_joint" type="fixed">
+            <parent link="${prefix}schmalz_ecbpmi_base_link" />
+            <child link="tool_tip" />
+            <origin xyz="0 0 ${body_height_max}" rpy="0.0 0.0 0.0" />
+        </joint>
+
+        <joint
+            name="schmalz_ecbpmi_cup_joint"
+            type="fixed"
+        >
+            <parent link="${parent}" />
+            <child link="${prefix}schmalz_ecbpmi_base_link" />
+            <xacro:insert_block name="origin" />
+        </joint>
+
+
+    </xacro:macro>
+</robot>
