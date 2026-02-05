@@ -15,9 +15,10 @@
   <xacro:cvrb0609 prefix="$(arg cvrb_prefix)"/>
 
 
+   <!-- base_plate link to cobotta link -->
   <joint name="$(arg prefix)joint_w" type="fixed">
-    <origin xyz="0.04 -0.3 0.93" rpy="0 0 0"/>
-    <parent link="world"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="robot_base_plate_link"/>
     <child link="$(arg cvrb_prefix)base_link"/>
   </joint>
 
