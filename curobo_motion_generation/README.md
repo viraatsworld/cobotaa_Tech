@@ -9,3 +9,5 @@
     - Inverse kinematics
     - Colision checking
 - [ ] Interface Action Server. 
+- [ ] BT Framework skills 
+- [ ] Complete application BT
