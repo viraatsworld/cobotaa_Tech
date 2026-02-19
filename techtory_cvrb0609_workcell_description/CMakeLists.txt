@@ -16,7 +16,7 @@ find_package(techtory_cell_description)
 
 install(
 	DIRECTORY
-	launch meshes urdf
+	launch urdf
 	DESTINATION share/${PROJECT_NAME}
 )
 
