@@ -66,6 +66,16 @@
     <limit effort="1" lower="-4.71238898038469" upper="4.71238898038469" velocity="0.397935"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_1">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_1">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <link name="cobotta_pro_J2">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -93,6 +103,16 @@
     <limit effort="1" lower="-2.61799387799149" upper="2.61799387799149" velocity="0.331612"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_2">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_2">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <link name="cobotta_pro_J3">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -120,6 +140,16 @@
     <limit effort="1" lower="-2.61799387799149" upper="2.61799387799149" velocity="0.397935"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_3">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_3">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_3">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <link name="cobotta_pro_J4">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -147,6 +177,16 @@
     <limit effort="1" lower="-4.71238898038469" upper="4.71238898038469" velocity="0.497418"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_4">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_4">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_4">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <link name="cobotta_pro_J5">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -174,6 +214,16 @@
     <limit effort="1" lower="-2.61799387799149" upper="2.61799387799149" velocity="0.497418"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_5">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_5">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_5">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <link name="cobotta_pro_J6">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -201,6 +251,16 @@
     <limit effort="1" lower="-6.28318530717959" upper="6.28318530717959" velocity="0.596903"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <transmission name="trans_6">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="cobotta_pro_joint_6">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_6">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
   <!-- Instantiate Schmalz_ecbpmi Gripper -->
   <!-- Specify some standard inertial calculations https://en.wikipedia.org/wiki/List_of_moments_of_inertia -->
   <!-- These make use of xacro's mathematical functionality -->

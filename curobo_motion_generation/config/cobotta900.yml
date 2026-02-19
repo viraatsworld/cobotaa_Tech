@@ -33,18 +33,13 @@ robot_cfg:
     ee_link: "panda_hand"
     collision_link_names:
       [
-        "cobotta_pro_J1",
-        "panda_link1",
-        "panda_link2",
-        "panda_link3",
-        "panda_link4",
-        "panda_link5",
-        "panda_link6",
-        "panda_link7",
-        "panda_hand",
-        "panda_leftfinger",
-        "panda_rightfinger",
-        "attached_object",
+        "base_link",
+        "J1",
+        "J2",
+        "J3",
+        "J4",
+        "J5",
+        "J6", #TODO: ADD techtory link also
       ]
     collision_spheres: "spheres/franka_mesh.yml"
     collision_sphere_buffer: 0.004 # 0.0025
