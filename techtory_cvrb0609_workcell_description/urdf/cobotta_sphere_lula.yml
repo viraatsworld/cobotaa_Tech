@@ -1,81 +1,44 @@
-# The robot description defines the generalized coordinates and how to map those
-# to the underlying URDF dofs.
-
-api_version: 1.0
-
-# Defines the generalized coordinates. Each generalized coordinate is assumed
-# to have an entry in the URDF.
-# Lula will only use these joints to control the robot position.
-cspace:
-    - cobotta_pro_joint_1
-    - cobotta_pro_joint_2
-    - cobotta_pro_joint_3
-    - cobotta_pro_joint_4
-    - cobotta_pro_joint_5
-    - cobotta_pro_joint_6
-default_q: [
-    -2.4,0.0,-1.7419,-0.0,-0.0,-0.0
-]
-
-acceleration_limits: [
-   10,10,10,10,10,10
-]
-
-jerk_limits: [
-   10000,10000,10000,10000,10000,10000
-]
-
-# Most dimensions of the cspace have a direct corresponding element
-# in the URDF. This list of rules defines how unspecified coordinates
-# should be extracted or how values in the URDF should be overwritten.
-
-cspace_to_urdf_rules:
-
-# Lula uses collision spheres to define the robot geometry in order to avoid
-# collisions with external obstacles.  If no spheres are specified, Lula will
-# not be able to avoid obstacles.
-
 collision_spheres:
-  - cobotta_pro_J1:
-    - "center": [0.0, 0.002, 0.077]
-      "radius": 0.10821
-    - "center": [0.001, 0.029, 0.103]
-      "radius": 0.10708
-  - cobotta_pro_J2:
-    - "center": [-0.0, 0.174, 0.004]
-      "radius": 0.10616
-    - "center": [-0.002, 0.141, 0.509]
-      "radius": 0.09552
-    - "center": [0.0, 0.182, 0.191]
-      "radius": 0.08954
-    - "center": [0.0, 0.175, 0.323]
-      "radius": 0.08688
-    - "center": [0.003, 0.185, 0.094]
-      "radius": 0.09286
-    - "center": [-0.002, 0.171, 0.393]
-      "radius": 0.08488
-    - "center": [0.0, 0.182, 0.253]
-      "radius": 0.08754
-    - "center": [0.0, 0.173, 0.441]
-      "radius": 0.08555
-  - cobotta_pro_J3:
-    - "center": [0.001, 0.004, 0.002]
-      "radius": 0.09794
-    - "center": [-0.0, -0.03, 0.144]
-      "radius": 0.08494
-    - "center": [0.0, -0.029, 0.245]
-      "radius": 0.0825
-    - "center": [0.002, -0.028, 0.065]
-      "radius": 0.08738
-  - cobotta_pro_J4:
-    - "center": [0.0, 0.005, 0.079]
-      "radius": 0.09125
-  - cobotta_pro_J5:
-    - "center": [0.0, 0.108, 0.003]
-      "radius": 0.09099
-  - cobotta_pro_J6:
-    - "center": [0.001, 0.003, -0.044]
-      "radius": 0.07775
-  - cobotta_pro_base_link:
-    - "center": [0.012, -0.004, 0.047]
-      "radius": 0.06261
+    cobotta_pro_J1:
+        - "center": [0.0, 0.002, 0.077]
+          "radius": 0.10821
+        - "center": [0.001, 0.029, 0.103]
+          "radius": 0.10708
+    cobotta_pro_J2:
+        - "center": [-0.0, 0.174, 0.004]
+          "radius": 0.10616
+        - "center": [-0.002, 0.141, 0.509]
+          "radius": 0.09552
+        - "center": [0.0, 0.182, 0.191]
+          "radius": 0.08954
+        - "center": [0.0, 0.175, 0.323]
+          "radius": 0.08688
+        - "center": [0.003, 0.185, 0.094]
+          "radius": 0.09286
+        - "center": [-0.002, 0.171, 0.393]
+          "radius": 0.08488
+        - "center": [0.0, 0.182, 0.253]
+          "radius": 0.08754
+        - "center": [0.0, 0.173, 0.441]
+          "radius": 0.08555
+    cobotta_pro_J3:
+        - "center": [0.001, 0.004, 0.002]
+          "radius": 0.09794
+        - "center": [-0.0, -0.03, 0.144]
+          "radius": 0.08494
+        - "center": [0.0, -0.029, 0.245]
+          "radius": 0.0825
+        - "center": [0.002, -0.028, 0.065]
+          "radius": 0.08738
+    cobotta_pro_J4:
+        - "center": [0.0, 0.005, 0.079]
+          "radius": 0.09125
+    cobotta_pro_J5:
+        - "center": [0.0, 0.108, 0.003]
+          "radius": 0.09099
+    cobotta_pro_J6:
+        - "center": [0.001, 0.003, -0.044]
+          "radius": 0.07775
+    cobotta_pro_base_link:
+        - "center": [0.012, -0.004, 0.047]
+          "radius": 0.06261
