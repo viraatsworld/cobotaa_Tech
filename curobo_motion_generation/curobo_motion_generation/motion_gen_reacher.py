@@ -35,7 +35,7 @@ parser.add_argument("--robot", type=str, default="franka.yml", help="robot confi
 parser.add_argument(
     "--external_asset_path",
     type=str,
-    default=None,
+    default="/home/anm-vi/Techtory/src/techtory_cvrb0609_workcell_description",
     help="Path to external assets when loading an externally located robot",
 )
 parser.add_argument(
@@ -115,6 +115,7 @@ from omni.isaac.core.utils.types import ArticulationAction
 from pxr import UsdLux, UsdGeom, Gf
 
 
+
 # CuRobo
 # from curobo.wrap.reacher.ik_solver import IKSolver, IKSolverConfig
 from curobo.geom.sdf.world import CollisionCheckerType
@@ -126,7 +127,7 @@ from curobo.types.state import JointState
 from curobo.util.logger import log_error, setup_curobo_logger
 from curobo.util.usd_helper import UsdHelper
 from curobo.util_file import (
-    get_assets_path,
+    
     get_filename,
     get_path_of_dir,
     get_robot_configs_path,
@@ -160,7 +161,6 @@ def main():
     # my_world.stage.SetDefaultPrim(my_world.stage.GetPrimAtPath("/World"))
     stage = my_world.stage
     # stage.SetDefaultPrim(stage.GetPrimAtPath("/World"))
-
 
     #set light position
     # Create Cylinder Light
