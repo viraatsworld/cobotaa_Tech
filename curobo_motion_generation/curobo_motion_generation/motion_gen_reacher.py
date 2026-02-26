@@ -110,6 +110,11 @@ from omni.isaac.core.objects import cuboid, sphere
 ########### OV #################
 from omni.isaac.core.utils.types import ArticulationAction
 
+
+##### Cylinder Light ######
+from pxr import UsdLux, UsdGeom, Gf
+
+
 # CuRobo
 # from curobo.wrap.reacher.ik_solver import IKSolver, IKSolverConfig
 from curobo.geom.sdf.world import CollisionCheckerType
@@ -156,10 +161,47 @@ def main():
     stage = my_world.stage
     # stage.SetDefaultPrim(stage.GetPrimAtPath("/World"))
 
+
+    #set light position
+    # Create Cylinder Light
+    light_path = "/World/CylinderLight"
+    cylinder_light = UsdLux.CylinderLight.Define(stage, light_path)
+    # Set light intensity
+    cylinder_light.CreateIntensityAttr(2500)
+    # (Optional but recommended) Light size
+    cylinder_light.CreateRadiusAttr(5)
+    cylinder_light.CreateLengthAttr(100)
+
+    # Transform API
+    xform_api = UsdGeom.XformCommonAPI(stage.GetPrimAtPath(light_path))
+    # Set Position
+    xform_api.SetTranslate(Gf.Vec3d(3.85931, -11.67055, 12.94707))
+    # Set Orientation (degrees)
+    xform_api.SetRotate(Gf.Vec3f(90.0, 90.0, 0.0), 
+                        UsdGeom.XformCommonAPI.RotationOrderXYZ)
+
+    #Cylinder Light 2
+    light_path2 = "/World/CylinderLight2"
+    cylinder_light2 = UsdLux.CylinderLight.Define(stage, light_path2)
+    # Set light intensity
+    cylinder_light2.CreateIntensityAttr(2500)
+    # (Optional but recommended) Light size
+    cylinder_light2.CreateRadiusAttr(5)
+    cylinder_light2.CreateLengthAttr(100)
+
+    # Transform API
+    xform_api2 = UsdGeom.XformCommonAPI(stage.GetPrimAtPath(light_path2))
+    # Set Position
+    xform_api2.SetTranslate(Gf.Vec3d(-3.85931, 11.67055, 12.94707))
+    # Set Orientation (degrees)
+    xform_api2.SetRotate(Gf.Vec3f(90.0, 270.0, 0.0), 
+                        UsdGeom.XformCommonAPI.RotationOrderXYZ)
+    
+
     # Make a target to follow
     target = cuboid.VisualCuboid(
         "/World/target",
-        position=np.array([0.5, 0, 0.5]),
+        position=np.array([1.2, 0, 1.2]),
         orientation=np.array([0, 1, 0, 0]),
         color=np.array([1.0, 0, 0]),
         size=0.05,
