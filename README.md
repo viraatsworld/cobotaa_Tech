@@ -9,12 +9,15 @@ ros2 launch techtory_cvrb0609_workcell_description  display.launch.py
 ```
 ## Curobo Integration (WIP)
 
+Prerequisite:-
+ - You already have Curo Installed. If not, please follow link :-
+ https://curobo.org/get_started/1_install_instructions.html
+
 Quick Test:
 
 ```bash
  python motion_gen_reacher.py --robot ~/src/curobo_motion_generation/config/cobotta900.yml 
 ```
-Note: 
-* Make sure Light is Set to Camera Light in IsaacSim.
+Note:
 * You are inside right directory to execute `motion_gen_reacher`
-* Make sure you use the full path for `cobotta900.yml` file.
+* Make sure you update the variable `--external_asset_path` in `motion_gen_reacher.py` with correct directory
