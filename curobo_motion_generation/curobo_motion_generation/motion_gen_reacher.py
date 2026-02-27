@@ -7,7 +7,7 @@
 # disclosure or distribution of this material and related documentation
 # without an express license agreement from NVIDIA CORPORATION or
 # its affiliates is strictly prohibited.
-#
+
 
 
 try:
@@ -233,17 +233,38 @@ def main():
 
     articulation_controller = None
 
-    world_cfg_table = WorldConfig.from_dict(
-        load_yaml(join_path(get_world_configs_path(), "collision_table.yml"))
-    )
-    world_cfg_table.cuboid[0].pose[2] -= 0.02
+    # Load the mesh world from the YAML
     world_cfg1 = WorldConfig.from_dict(
-        load_yaml(join_path(get_world_configs_path(), "collision_table.yml"))
+        load_yaml(join_path(get_world_configs_path(), "collision_packing_table.yml"))
     ).get_mesh_world()
-    world_cfg1.mesh[0].name += "_mesh"
-    world_cfg1.mesh[0].pose[2] = -10.5
 
-    world_cfg = WorldConfig(cuboid=world_cfg_table.cuboid, mesh=world_cfg1.mesh)
+    # Optional: rename the first mesh if needed
+    if len(world_cfg1.mesh) > 0:
+        world_cfg1.mesh[0].name += "_mesh"
+
+
+    # # Load the cuboid from  Yaml ---- ToDo-----
+    # world_cfg2 = WorldConfig.from_dict(
+    #  load_yaml(join_path(get_world_configs_path(), "collision_cell.yml"))
+    #  ).get_mesh_world()
+    
+    # if len(world_cfg2.mesh) > 0:
+    #     world_cfg2.mesh[0].name += "_floor"
+
+    
+    world_cfg = WorldConfig(
+        mesh=world_cfg1.mesh
+    )
+
+
+    # world_cfg_table.cuboid[0].pose[2] -= 0.02
+    # world_cfg1 = WorldConfig.from_dict(
+    #     load_yaml(join_path(get_world_configs_path(), "collision_packing_table.yml"))
+    # ).get_mesh_world()
+    # world_cfg1.mesh[0].name += "_mesh"
+    # world_cfg1.mesh[0].pose[2] = -10.5
+
+    # world_cfg = WorldConfig(cuboid=world_cfg_table.cuboid, mesh=world_cfg1.mesh)
 
     trajopt_dt = None
     optimize_dt = True

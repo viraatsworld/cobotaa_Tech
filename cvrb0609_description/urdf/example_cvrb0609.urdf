@@ -324,7 +324,7 @@
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.052199999999999996"/>
   </joint>
   <joint name="schmalz_ecbpmi_tip_joint" type="fixed">
-    <parent link="schmalz_ecbpmi_base_link"/>
+    <parent link="schmalz_ecbpmi_body_link"/>
     <child link="tool_tip"/>
     <origin rpy="0.0 0.0 0.0" xyz="0 0 0.1004"/>
   </joint>

@@ -11,7 +11,7 @@
 
 robot_cfg:
   kinematics:
-    usd_path: "../techtory_cvrb0609_workcell_description/urdf/techtory_cvrb060_controller.usd"
+    usd_path: "../techtory_cvrb0609_workcell_description/urdf/techtory_cvrb0609_controller.usd"
     usd_robot_root: "/robot"
     isaac_usd_path: ""
     usd_flip_joints: ["cobotta_pro_joint_1","cobotta_pro_joint_2","cobotta_pro_joint_3","cobotta_pro_joint_4","cobotta_pro_joint_5","cobotta_pro_joint_6"]
@@ -29,44 +29,47 @@ robot_cfg:
     asset_root_path: ""
     
     base_link: "world"
-    ee_link: "cobotta_pro_J6"
+    ee_link: "tool_tip"
     link_names: null
     lock_joints: null
     extra_links: null
 
     
     collision_link_names: [
-
-      "cobotta_pro_base_link",
       "cobotta_pro_J1",
       "cobotta_pro_J2",
       "cobotta_pro_J3",
       "cobotta_pro_J4",
       "cobotta_pro_J5",
       "cobotta_pro_J6",
+      "schmalz_ecbpmi_body_link",
     ] # List[str]
     collision_spheres: "/home/anm-vi/Techtory/src/techtory_cvrb0609_workcell_description/urdf/cobotta_sphere_lula.yml"  #
     collision_sphere_buffer: 0.0 # float or Dict[str, float]
     extra_collision_spheres: {}
     self_collision_ignore: {
-
       "cobotta_pro_base_link":["cobotta_pro_J1","cobotta_pro_J6"],
       "cobotta_pro_J1":["cobotta_pro_base_link", "cobotta_pro_J2","cobotta_pro_J6"],
       "cobotta_pro_J2":["cobotta_pro_J1","cobotta_pro_J3","cobotta_pro_J6"],
       "cobotta_pro_J3":["cobotta_pro_J2","cobotta_pro_J4","cobotta_pro_J6"],
       "cobotta_pro_J4":["cobotta_pro_J3", "cobotta_pro_J5","cobotta_pro_J6"],
       "cobotta_pro_J5":["cobotta_pro_J4","cobotta_pro_J6"],
-      "cobotta_pro_J6":["cobotta_pro_J5", "schmalz_ecbpmi_base_link","schmalz_ecbpmi_body_link"]
+      "cobotta_pro_J6":["cobotta_pro_J5", "schmalz_ecbpmi_base_link","schmalz_ecbpmi_body_link"],
+      "schmalz_ecbpmi_base_link":["cobotta_pro_J6","schmalz_ecbpmi_body_link"],
+      "schmalz_ecbpmi_body_link":["cobotta_pro_J6","schmalz_ecbpmi_base_link"]
 
     } # Dict[str, List[str]]
     self_collision_buffer: {
-      "cobotta_pro_base_link":0.0,
-      "cobotta_pro_J1":0.0,
-      "cobotta_pro_J2":0.0,
-      "cobotta_pro_J3":0.0,
-      "cobotta_pro_J4":0.0,
-      "cobotta_pro_J5":0.0,
+      "cobotta_pro_base_link":0.01,
+      "cobotta_pro_J1":0.01,
+      "cobotta_pro_J2":0.01,
+      "cobotta_pro_J3":0.01,
+      "cobotta_pro_J4":0.01,
+      "cobotta_pro_J5":0.01,
       "cobotta_pro_J6":0.01,
+      "schmalz_ecbpmi_base_link":0.01,
+      "schmalz_ecbpmi_body_link":0.01,
+      "tool_tip":0.05,
     } # Dict[str, float]
 
     use_global_cumul: True
@@ -79,6 +82,7 @@ robot_cfg:
       "cobotta_pro_J4",
       "cobotta_pro_J5",
       "cobotta_pro_J6",
+      "tool_tip",
     ] # List[str]
     external_asset_path: null # Use this to add path for externally located assets/robot folder.
 

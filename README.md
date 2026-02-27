@@ -7,7 +7,7 @@ This package provides a URDF description of a techtory cell + cobotta robot. To 
 ```bash
 ros2 launch techtory_cvrb0609_workcell_description  display.launch.py
 ```
-## Curobo Integration (WIP)
+## Curobo Integration
 
 Prerequisite:-
  - You already have Curobo Installed. If not, please follow link :-
