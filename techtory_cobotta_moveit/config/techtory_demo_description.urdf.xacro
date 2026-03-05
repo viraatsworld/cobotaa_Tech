@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="techtory_demo_description">
+    <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
+
+    <!-- Import techtory_demo_description urdf file -->
+    <xacro:include filename="$(find techtory_cvrb0609_workcell_description)/urdf/techtory_cvrb0609_workcell.urdf.xacro" />
+
+    <!-- Import control_xacro -->
+    <xacro:include filename="techtory_demo_description.ros2_control.xacro" />
+
+
+    <xacro:techtory_demo_description_ros2_control name="FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+
+</robot>

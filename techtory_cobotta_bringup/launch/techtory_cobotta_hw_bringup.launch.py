@@ -114,7 +114,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "use_mock_hardware",
-            default_value="false",
+            default_value="true",
             description="Use mock ros2_control hardware plugin.",
         )
     )
@@ -247,7 +247,7 @@ def generate_launch_description():
             [
                 PathJoinSubstitution(
                     [
-                        FindPackageShare("techtory_cobotta_moveit_config"),
+                        FindPackageShare("techtory_cobotta_moveit"),
                         "launch",
                         "move_group.launch.py",
                     ]
