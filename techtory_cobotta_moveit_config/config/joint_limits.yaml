@@ -1,0 +1,31 @@
+joint_limits:
+  cobotta_pro_joint_1:
+    has_velocity_limits: true
+    max_velocity: 0.397935
+    has_acceleration_limits: true
+    max_acceleration: 0.310886
+  cobotta_pro_joint_2:
+    has_velocity_limits: true
+    max_velocity: 0.331612
+    has_acceleration_limits: true
+    max_acceleration: 0.218166
+  cobotta_pro_joint_3:
+    has_velocity_limits: true
+    max_velocity: 0.397935
+    has_acceleration_limits: true
+    max_acceleration: 0.621773
+  cobotta_pro_joint_4:
+    has_velocity_limits: true
+    max_velocity: 0.497418
+    has_acceleration_limits: true
+    max_acceleration: 0.049741
+  cobotta_pro_joint_5:
+    has_velocity_limits: true
+    max_velocity: 0.497418
+    has_acceleration_limits: true
+    max_acceleration: 0.690860
+  cobotta_pro_joint_6:
+    has_velocity_limits: true
+    max_velocity: 0.596903
+    has_acceleration_limits: true
+    max_acceleration: 0.690860

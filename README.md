@@ -5,6 +5,18 @@
 This package provides a URDF description of a techtory cell + cobotta robot. To visualize the cell in RViz, run:
 
 ```bash
+mkdir -p colcon_tectory_ws/src 
+cd colcon_techtory_ws
+git clone git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/dynamic_planning_demo.git src
+cd src 
+vcs import . < upstream.repo
+cd ..
+source /opt/ros/jazzy/setup.bash
+rosdep update
+rosdep install --from-paths src -iry
+``` 
+
+```bash
 ros2 launch techtory_cvrb0609_workcell_description  display.launch.py
 ```
 ## Curobo Integration
