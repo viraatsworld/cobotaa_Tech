@@ -7,3 +7,11 @@ repositories:
     type: git
     url: https://github.com/ipa-vsp/mujoco_ros2_control.git
     version: fix/large-stl-conversion
+  techtory_cell_description: 
+    type: git
+    url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/techtory_cell_description.git
+    version: main
+  denso_robot_ros2:
+    type: git
+    url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
+    vesion: master
