@@ -339,4 +339,58 @@
     <parent link="world"/>
     <child link="cobotta_pro_base_link"/>
   </joint>
+
+
+<ros2_control name="FakeSystem" type="system">
+    <hardware>
+      <!-- By default, set up controllers for simulation. This won't work on real hardware -->
+      <!-- <plugin>mock_components/GenericSystem</plugin> -->
+      <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+      <param name="joint_commands_topic">/denso_joint_trajectory_controller/joint_trajectory</param>
+      <param name="joint_states_topic">/joint_states</param>
+    </hardware>
+    <joint name="cobotta_pro_joint_1">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-0.942</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="cobotta_pro_joint_2">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="cobotta_pro_joint_3">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.571</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="cobotta_pro_joint_4">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-3.031</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="cobotta_pro_joint_5">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.543</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="cobotta_pro_joint_6">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.102</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
 </robot>

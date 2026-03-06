@@ -427,8 +427,8 @@
       <!-- By default, set up controllers for simulation. This won't work on real hardware -->
       <!-- <plugin>mock_components/GenericSystem</plugin> -->
       <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
-      <plugin name="joint_command_topic">/isaac_joint_command</plugin>
-      <plugin name="joint_state_topic">/isaac_joint_states</plugin>
+      <param name="joint_commands_topic">/denso_joint_trajectory_controller/joint_trajectory</param>
+      <param name="joint_states_topic">/joint_states</param>
     </hardware>
     <joint name="cobotta_pro_joint_1">
       <command_interface name="position"/>
