@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="techtory_demo_description">
     <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
 
+    <xacro:arg name="isaac_control" default="true" />
     <!-- Import techtory_demo_description urdf file -->
     <xacro:include filename="$(find techtory_cvrb0609_workcell_description)/urdf/techtory_cvrb0609_workcell.urdf.xacro" />
 

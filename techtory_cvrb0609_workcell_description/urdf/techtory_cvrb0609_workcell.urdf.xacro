@@ -24,17 +24,25 @@
 
 
   <!-- arm -->
-  <xacro:denso_robot
-    model="$(arg model)"
-    namespace="$(arg namespace)"
-    transmission_hw_interface="$(arg transmission_hw_interface)"
-    sim="$(arg sim)"
-    use_mock_hardware="$(arg use_mock_hardware)"
-    ip_address="$(arg ip_address)"
-    verbose="$(arg verbose)"
-    send_format="$(arg send_format)"
-    recv_format="$(arg recv_format)"
-  />
+  <!-- When isaac_control=true, only include kinematics — hardware is provided externally (e.g. moveit FakeSystem) -->
+  <xacro:if value="$(arg isaac_control)">
+    <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
+    <xacro:denso_robot_arm_kinematics namespace="$(arg namespace)" model="$(arg model)"/>
+  </xacro:if>
+
+  <xacro:unless value="$(arg isaac_control)">
+    <xacro:denso_robot
+      model="$(arg model)"
+      namespace="$(arg namespace)"
+      transmission_hw_interface="$(arg transmission_hw_interface)"
+      sim="$(arg sim)"
+      use_mock_hardware="$(arg use_mock_hardware)"
+      ip_address="$(arg ip_address)"
+      verbose="$(arg verbose)"
+      send_format="$(arg send_format)"
+      recv_format="$(arg recv_format)"
+    />
+  </xacro:unless>
 
   <link name="$(arg parent)" />
    <!-- base_plate link to cobotta link -->
@@ -48,67 +56,5 @@
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:techtory_cell>
 
-  <xacro:if value="$(arg isaac_control)">
-    <ros2_control name="techtory_cvrb0609_workcell_ros2_control" type="system">
-      <hardware>
-        <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
-        <param name="joint_commands_topic">isaac_joint_commands</param>
-        <param name="joint_states_topic">isaac_joint_states</param>
-      </hardware>
-      <joint name="$(arg cvrb_prefix)joint1">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-      <joint name="$(arg cvrb_prefix)joint2">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-      <joint name="$(arg cvrb_prefix)joint3">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-      <joint name="$(arg cvrb_prefix)joint4">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-      <joint name="$(arg cvrb_prefix)joint5">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-      <joint name="$(arg cvrb_prefix)joint6">
-          <command_interface name="position" />
-          <state_interface name="position">
-            <param name="initial_value">0.0</param>
-          </state_interface>
-          <state_interface name="velocity">
-              <param name="initial_value">0.0</param>
-          </state_interface>
-      </joint>
-    </ros2_control>
-  </xacro:if>
+
 </robot>

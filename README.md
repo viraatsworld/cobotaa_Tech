@@ -1,11 +1,23 @@
 # techtory cell description
 
+## Creating Isaac Sim Environment
+
+To create the Isaac Sim environment, run the following command:
+
+```bash
+mkdir -p colcon_tectory_ws/src 
+cd colcon_tectory_ws
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+```
+
 ## Getting started
 
 This package provides a URDF description of a techtory cell + cobotta robot. To visualize the cell in RViz, run:
 
 ```bash
-mkdir -p colcon_tectory_ws/src 
 cd colcon_techtory_ws
 git clone git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/dynamic_planning_demo.git src
 cd src 

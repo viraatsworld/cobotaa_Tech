@@ -1,16 +1,19 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="techtory_demo_description_ros2_control" params="name initial_positions_file">
+    <xacro:macro name="techtory_demo_description_ros2_control" params="name initial_positions_file sim_type:='topic'">
         <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file)['initial_positions']}"/>
 
         <ros2_control name="${name}" type="system">
             <hardware>
-                <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-                <!-- <plugin>mock_components/GenericSystem</plugin> -->
-                <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
-                <plugin name="joint_command_topic">/isaac_joint_command</plugin>
-                <plugin name="joint_state_topic">/isaac_joint_states</plugin>
-
+                <xacro:if value="${sim_type == 'mujoco'}">
+                    <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+                    <param name="mujoco_model">$(find techtory_cobotta_moveit)/description/scene.xml</param>
+                </xacro:if>
+                <xacro:if value="${sim_type == 'topic'}">
+                    <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+                    <param name="joint_command_topic">/isaac_joint_command</param>
+                    <param name="joint_state_topic">/isaac_joint_states</param>
+                </xacro:if>
             </hardware>
             <joint name="cobotta_pro_joint_1">
                 <command_interface name="position"/>
