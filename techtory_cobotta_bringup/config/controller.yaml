@@ -11,12 +11,12 @@ controller_manager:
 denso_joint_trajectory_controller:
   ros__parameters:
     joints:
-      - $(var namespace)joint_1
-      - $(var namespace)joint_2
-      - $(var namespace)joint_3
-      - $(var namespace)joint_4
-      - $(var namespace)joint_5
-      - $(var namespace)joint_6
+      - cobotta_pro_joint_1
+      - cobotta_pro_joint_2
+      - cobotta_pro_joint_3
+      - cobotta_pro_joint_4
+      - cobotta_pro_joint_5
+      - cobotta_pro_joint_6
     command_interfaces:
       - position
     state_interfaces:
