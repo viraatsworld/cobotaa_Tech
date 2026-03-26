@@ -8,9 +8,9 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    pkg_share = FindPackageShare("techtory_cvrb0609_workcell_description")
+    pkg_share = FindPackageShare("techtory_cobotta_workcell_description")
     xacro_file = PathJoinSubstitution(
-        [pkg_share, "urdf", "techtory_cvrb0609_workcell.urdf.xacro"]
+        [pkg_share, "urdf", "techtory_cobotta_workcell.urdf.xacro"]
     )
 
     use_gui = LaunchConfiguration("use_gui")

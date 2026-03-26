@@ -35,7 +35,7 @@ parser.add_argument("--robot", type=str, default="franka.yml", help="robot confi
 parser.add_argument(
     "--external_asset_path",
     type=str,
-    default="/home/anm-vi/Techtory/src/techtory_cvrb0609_workcell_description",
+    default="/home/anm-vi/Techtory/src/techtory_cobotta_workcell_description",
     help="Path to external assets when loading an externally located robot",
 )
 parser.add_argument(

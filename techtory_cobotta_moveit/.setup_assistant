@@ -1,7 +1,7 @@
 moveit_setup_assistant_config:
   urdf:
-    package: techtory_cvrb0609_workcell_description
-    relative_path: urdf/techtory_cvrb0609_workcell.urdf.xacro
+    package: techtory_cobotta_workcell_description
+    relative_path: urdf/techtory_cobotta_workcell.urdf.xacro
   srdf:
     relative_path: config/techtory_demo_description.srdf
   package_settings:

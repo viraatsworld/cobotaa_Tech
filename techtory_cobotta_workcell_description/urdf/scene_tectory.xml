@@ -1,5 +1,5 @@
 <mujoco model="scene">
-  <include file="mjcf/techtory_cvrb0609_workcell.xml"/>
+  <include file="mjcf/techtory_cobotta_workcell.xml"/>
 
   <statistic center="0.4 0 0.4" extent="1"/>
 

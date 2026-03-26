@@ -1,6 +1,0 @@
-moveit_setup_assistant_config:
-  URDF:
-    package: techtory_cvrb0609_workcell_description
-    relative_path: urdf/techtory_cvrb0609_workcell.urdf.xacro
-  SRDF:
-    relative_path: config/techtory_cvrb0609_workcell.srdf

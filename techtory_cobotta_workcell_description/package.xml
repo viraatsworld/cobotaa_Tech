@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>techtory_cvrb0609_workcell_description</name>
+  <name>techtory_cobotta_workcell_description</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="anm-vi@todo.todo">anm-vi</maintainer>
@@ -11,6 +11,8 @@
 
   <depend>cvrb0609_description</depend>
   <depend>techtory_cell_description</depend>
+  <depend>mujoco_ros2_control</depend>
+  <depend>topic_based_ros2_control</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

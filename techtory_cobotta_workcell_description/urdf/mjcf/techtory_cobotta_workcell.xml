@@ -1,5 +1,5 @@
-<mujoco model="techtory_cvrb0609_workcell">
-  <compiler angle="radian" meshdir="mjcf/assets/" texturedir="mjcf/assets/"/>
+<mujoco model="techtory_cobotta_workcell">
+  <compiler angle="radian" meshdir="assets/" texturedir="assets/"/>
   <option integrator="implicitfast"/>
   <default>
     <default class="cobotta">

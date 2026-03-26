@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(techtory_cvrb0609_workcell_description)
+project(techtory_cobotta_workcell_description)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -16,7 +16,7 @@ find_package(techtory_cell_description)
 
 install(
 	DIRECTORY
-	launch urdf
+	launch urdf config
 	DESTINATION share/${PROJECT_NAME}
 )
 
