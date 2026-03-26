@@ -11,7 +11,7 @@
 
 robot_cfg:
   kinematics:
-    usd_path: "../techtory_cvrb0609_workcell_description/urdf/techtory_cvrb0609_controller.usd"
+    usd_path: "../techtory_cobotta_workcell_description/urdf/techtory_cobotta_controller.usd"
     usd_robot_root: "/robot"
     isaac_usd_path: ""
     usd_flip_joints: ["cobotta_pro_joint_1","cobotta_pro_joint_2","cobotta_pro_joint_3","cobotta_pro_joint_4","cobotta_pro_joint_5","cobotta_pro_joint_6"]
@@ -25,7 +25,7 @@ robot_cfg:
     }
     usd_flip_joint_limits: []
 
-    urdf_path: "../techtory_cvrb0609_workcell_description/urdf/techtory_cvrb0609_workcell.urdf"
+    urdf_path: "../techtory_cobotta_workcell_description/urdf/techtory_cobotta_workcell.urdf"
     asset_root_path: ""
     
     base_link: "world"
@@ -44,7 +44,7 @@ robot_cfg:
       "cobotta_pro_J6",
       "schmalz_ecbpmi_body_link",
     ] # List[str]
-    collision_spheres: "/home/anm-vi/Techtory/src/techtory_cvrb0609_workcell_description/urdf/cobotta_sphere_lula.yml"  #
+    collision_spheres: "/home/anm-vi/Techtory/src/techtory_cobotta_workcell_description/urdf/cobotta_sphere_lula.yml"  #
     collision_sphere_buffer: 0.0 # float or Dict[str, float]
     extra_collision_spheres: {}
     self_collision_ignore: {

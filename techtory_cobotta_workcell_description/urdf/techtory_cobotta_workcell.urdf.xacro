@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="techtory_demo_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find techtory_cell_description)/urdf/techtory_cell.xaco" />
+  <xacro:arg name="model" default="cvrb0609"/>
+  <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_macro.xacro"/>
+  <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/cobotta_hardware.ros2_control.xacro"/>
+
+  <xacro:arg name="parent" default="world" />
+  <xacro:arg name="prefix" default="" />
+  <xacro:arg name="isaac_control" default="false" />
+
+  <!-- parameters -->
+  <xacro:arg name="namespace" default="cobotta_pro_"/>
+  <xacro:arg name="transmission_hw_interface" default=""/>
+
+  <!-- hardware_type selects the hardware backend:
+       real        - real Denso robot (default)
+       mock        - mock_components/GenericSystem (no hardware)
+       mujoco      - MuJoCo physics simulation
+       topic_based - topic-based ROS2 control (e.g. for external simulators) -->
+  <xacro:arg name="hardware_type" default="real"/>
+  <xacro:property name="hw_type" value="$(arg hardware_type)"/>
+
+  <!-- ros2_control related parameters (used for real/mock modes) -->
+  <xacro:arg name="verbose" default="false"/>
+  <xacro:arg name="sim" default="false"/>
+  <xacro:arg name="use_mock_hardware" default="false"/>
+  <xacro:arg name="ip_address" default="192.168.0.2"/>
+  <xacro:arg name="send_format" default="288"/>
+  <xacro:arg name="recv_format" default="292"/>
+
+  <xacro:arg name="cvrb_prefix" default="cobotta_pro_"/>
+
+  <!-- arm: mujoco and topic_based load kinematics only; hardware plugin added separately -->
+  <xacro:if value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+    <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
+    <xacro:denso_robot_arm_kinematics namespace="$(arg namespace)" model="$(arg model)"/>
+  </xacro:if>
+
+  <!-- real and mock modes use the denso_robot macro -->
+  <xacro:unless value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+    <!-- When isaac_control=true, only include kinematics — hardware is provided externally (e.g. moveit FakeSystem) -->
+    <xacro:if value="$(arg isaac_control)">
+      <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
+      <xacro:denso_robot_arm_kinematics namespace="$(arg namespace)" model="$(arg model)"/>
+    </xacro:if>
+
+    <xacro:unless value="$(arg isaac_control)">
+      <xacro:denso_robot
+        model="$(arg model)"
+        namespace="$(arg namespace)"
+        transmission_hw_interface="$(arg transmission_hw_interface)"
+        sim="$(arg sim)"
+        use_mock_hardware="${hw_type == 'mock' or '$(arg use_mock_hardware)' == 'true'}"
+        ip_address="$(arg ip_address)"
+        verbose="$(arg verbose)"
+        send_format="$(arg send_format)"
+        recv_format="$(arg recv_format)"
+      />
+    </xacro:unless>
+  </xacro:unless>
+
+  <!-- mujoco hardware plugin -->
+  <xacro:if value="${hw_type == 'mujoco'}">
+    <xacro:cobotta_mujoco_ros2_control namespace="$(arg namespace)"/>
+  </xacro:if>
+
+  <!-- topic_based hardware plugin -->
+  <xacro:if value="${hw_type == 'topic_based'}">
+    <xacro:cobotta_topic_based_ros2_control namespace="$(arg namespace)"/>
+  </xacro:if>
+
+  <link name="$(arg parent)" />
+  <!-- base_plate link to cobotta link -->
+  <joint name="$(arg prefix)joint_w" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 1.5708"/>
+    <parent link="robot_base_plate_link"/>
+    <child link="$(arg cvrb_prefix)base_link"/>
+  </joint>
+
+  <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:techtory_cell>
+
+</robot>

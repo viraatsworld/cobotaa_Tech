@@ -55,14 +55,14 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
-            default_value="techtory_cvrb0609_workcell_description",
+            default_value="techtory_cobotta_workcell_description",
             description="Description package with robot URDF/XACRO files.",
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="urdf/techtory_cvrb0609_workcell.urdf.xacro",
+            default_value="urdf/techtory_cobotta_workcell.urdf.xacro",
             description="URDF/XACRO description file.",
         )
     )
@@ -114,7 +114,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "use_mock_hardware",
-            default_value="false",
+            default_value="true",
             description="Use mock ros2_control hardware plugin.",
         )
     )
@@ -247,7 +247,7 @@ def generate_launch_description():
             [
                 PathJoinSubstitution(
                     [
-                        FindPackageShare("techtory_cobotta_moveit_config"),
+                        FindPackageShare("techtory_cobotta_moveit"),
                         "launch",
                         "move_group.launch.py",
                     ]

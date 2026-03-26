@@ -3,10 +3,10 @@ repositories:
     type: git
     url: https://github.com/PickNikRobotics/topic_based_ros2_control.git
     version: main
-  # mujoco_ros2_control:
-  #   type: git
-  #   url: https://github.com/ipa-vsp/mujoco_ros2_control.git
-  #   version: fix/large-stl-conversion
+  mujoco_ros2_control:
+    type: git
+    url: https://github.com/ipa-vsp/mujoco_ros2_control.git
+    version: fix/large-stl-conversion
   techtory_cell_description: 
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/techtory_cell_description.git
@@ -15,3 +15,7 @@ repositories:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
     vesion: master
+  # isaac_ros_cumotion:
+  #   type: git
+  #   url: git@github.com:NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
+  #   version: main

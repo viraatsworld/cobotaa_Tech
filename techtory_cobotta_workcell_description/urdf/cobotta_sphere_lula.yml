@@ -1,0 +1,50 @@
+collision_spheres:
+    cobotta_pro_J1:
+        - "center": [0.0, 0.002, 0.077]
+          "radius": 0.11221
+        - "center": [0.001, 0.029, 0.103]
+          "radius": 0.11108
+    cobotta_pro_J2:
+        - "center": [-0.0, 0.174, 0.004]
+          "radius": 0.10016
+        - "center": [-0.002, 0.141, 0.509]
+          "radius": 0.08952
+        - "center": [0.0, 0.182, 0.191]
+          "radius": 0.08354
+        - "center": [0.0, 0.175, 0.323]
+          "radius": 0.08088
+        - "center": [0.003, 0.185, 0.094]
+          "radius": 0.08686
+        - "center": [-0.002, 0.171, 0.393]
+          "radius": 0.07888
+        - "center": [0.0, 0.182, 0.253]
+          "radius": 0.08154
+        - "center": [0.0, 0.173, 0.441]
+          "radius": 0.07955
+    cobotta_pro_J3:
+        - "center": [0.001, 0.004, 0.002]
+          "radius": 0.09194
+        - "center": [-0.0, -0.03, 0.144]
+          "radius": 0.07894
+        - "center": [0.0, -0.029, 0.245]
+          "radius": 0.0765
+        - "center": [0.002, -0.028, 0.065]
+          "radius": 0.08138
+    cobotta_pro_J4:
+        - "center": [0.0, 0.005, 0.079]
+          "radius": 0.08125
+        - "center": [-0.0, 0.004, 0.049]
+          "radius": 0.07631
+        - "center": [0.0, 0.03, 0.083]
+          "radius": 0.07714
+    cobotta_pro_J5:
+        - "center": [0.0, 0.108, 0.003]
+          "radius": 0.08099
+        - "center": [0.001, 0.12, 0.033]
+          "radius": 0.07703
+    cobotta_pro_J6:
+        - "center": [0.001, 0.003, -0.044]
+          "radius": 0.06775
+    schmalz_ecbpmi_body_link:
+        - "center": [0.0, 0.014, -0.011]
+          "radius": 0.05785

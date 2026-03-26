@@ -1,0 +1,98 @@
+format: "xrdf"
+
+format_version: 1.0
+
+default_joint_positions: 
+  cobotta_pro_joint_1: -2.4
+  cobotta_pro_joint_2: 0.0
+  cobotta_pro_joint_3: -1.7419
+  cobotta_pro_joint_4: -0.0
+  cobotta_pro_joint_5: -0.0
+  cobotta_pro_joint_6: -0.0
+
+cspace: 
+  joint_names: 
+    - "cobotta_pro_joint_1"
+    - "cobotta_pro_joint_2"
+    - "cobotta_pro_joint_3"
+    - "cobotta_pro_joint_4"
+    - "cobotta_pro_joint_5"
+    - "cobotta_pro_joint_6"
+  acceleration_limits: [10, 10, 10, 10, 10, 10]
+  jerk_limits: [10000, 10000, 10000, 10000, 10000, 10000]
+
+collision: 
+  geometry: "auto_generated_collision_sphere_group"
+
+self_collision: 
+  geometry: "auto_generated_collision_sphere_group"
+  ignore: 
+    world: 
+      - "cell_link"
+    cell_link: 
+      - "robot_base_plate_link"
+    robot_base_plate_link: 
+      - "cobotta_pro_base_link"
+    cobotta_pro_base_link: 
+      - "cobotta_pro_J1"
+    cobotta_pro_J1: 
+      - "cobotta_pro_J2"
+    cobotta_pro_J2: 
+      - "cobotta_pro_J3"
+    cobotta_pro_J3: 
+      - "cobotta_pro_J4"
+    cobotta_pro_J4: 
+      - "cobotta_pro_J5"
+    cobotta_pro_J5: 
+      - "cobotta_pro_J6"
+    cobotta_pro_J6: 
+      - "schmalz_ecbpmi_base_link"
+    schmalz_ecbpmi_base_link: 
+      - "schmalz_ecbpmi_body_link"
+
+geometry: 
+  auto_generated_collision_sphere_group: 
+    spheres: 
+      cobotta_pro_J1: 
+        - center: [0.0, 0.002, 0.077]
+          radius: 0.1082
+        - center: [0.001, 0.029, 0.103]
+          radius: 0.1071
+      cobotta_pro_J2: 
+        - center: [-0.0, 0.174, 0.004]
+          radius: 0.1062
+        - center: [-0.002, 0.141, 0.509]
+          radius: 0.0955
+        - center: [0.0, 0.182, 0.191]
+          radius: 0.0895
+        - center: [0.0, 0.175, 0.323]
+          radius: 0.0869
+        - center: [0.003, 0.185, 0.094]
+          radius: 0.0929
+        - center: [-0.002, 0.171, 0.393]
+          radius: 0.0849
+        - center: [0.0, 0.182, 0.253]
+          radius: 0.0875
+        - center: [0.0, 0.173, 0.441]
+          radius: 0.0855
+      cobotta_pro_J3: 
+        - center: [0.001, 0.004, 0.002]
+          radius: 0.0979
+        - center: [-0.0, -0.03, 0.144]
+          radius: 0.0849
+        - center: [0.0, -0.029, 0.245]
+          radius: 0.0825
+        - center: [0.002, -0.028, 0.065]
+          radius: 0.0874
+      cobotta_pro_J4: 
+        - center: [0.0, 0.005, 0.079]
+          radius: 0.0913
+      cobotta_pro_J5: 
+        - center: [0.0, 0.108, 0.003]
+          radius: 0.091
+      cobotta_pro_J6: 
+        - center: [0.001, 0.003, -0.044]
+          radius: 0.0778
+      cobotta_pro_base_link: 
+        - center: [0.012, -0.004, 0.047]
+          radius: 0.0626
