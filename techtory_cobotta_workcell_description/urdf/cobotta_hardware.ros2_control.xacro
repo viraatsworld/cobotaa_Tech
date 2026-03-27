@@ -125,4 +125,61 @@
     </ros2_control>
   </xacro:macro>
 
+  <!-- mock hardware interface for the Cobotta workcell -->
+  <xacro:macro name="cobotta_mock_ros2_control" params="namespace">
+    <ros2_control name="${namespace}TopicBasedSystem" type="system">
+      <hardware>
+       <plugin>mock_components/GenericSystem</plugin> 
+      </hardware>
+      <joint name="${namespace}joint_1">
+        <command_interface name="position">
+          <param name="min">-4.712389</param>
+          <param name="max">4.712389</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${namespace}joint_2">
+        <command_interface name="position">
+          <param name="min">-2.617994</param>
+          <param name="max">2.617994</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${namespace}joint_3">
+        <command_interface name="position">
+          <param name="min">-2.617994</param>
+          <param name="max">2.617994</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${namespace}joint_4">
+        <command_interface name="position">
+          <param name="min">-4.712389</param>
+          <param name="max">4.712389</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${namespace}joint_5">
+        <command_interface name="position">
+          <param name="min">-2.617994</param>
+          <param name="max">2.617994</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="${namespace}joint_6">
+        <command_interface name="position">
+          <param name="min">-6.283185</param>
+          <param name="max">6.283185</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+  </xacro:macro>
+
 </robot>
