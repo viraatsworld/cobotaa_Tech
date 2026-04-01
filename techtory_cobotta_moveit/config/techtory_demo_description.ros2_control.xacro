@@ -11,8 +11,8 @@
                 </xacro:if>
                 <xacro:if value="${sim_type == 'topic'}">
                     <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
-                    <param name="joint_command_topic">/isaac_joint_command</param>
-                    <param name="joint_state_topic">/isaac_joint_states</param>
+                    <param name="joint_command_topic">/topic_based_joint_commands</param>
+                    <param name="joint_state_topic">/topic_based_joint_states</param>
                 </xacro:if>
             </hardware>
             <joint name="cobotta_pro_joint_1">

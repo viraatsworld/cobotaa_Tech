@@ -18,7 +18,7 @@
        mock        - mock_components/GenericSystem (no hardware)
        mujoco      - MuJoCo physics simulation
        topic_based - topic-based ROS2 control (e.g. for external simulators) -->
-  <xacro:arg name="hardware_type" default="mock"/>
+  <xacro:arg name="hardware_type" default="topic_based"/>
   <xacro:property name="hw_type" value="$(arg hardware_type)"/>
 
   <!-- ros2_control related parameters (used for real/mock modes) -->
