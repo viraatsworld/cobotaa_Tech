@@ -45,6 +45,6 @@ collision_spheres:
     cobotta_pro_J6:
         - "center": [0.001, 0.003, -0.044]
           "radius": 0.06775
-    schmalz_ecbpmi_body_link:
-        - "center": [0.0, 0.014, -0.011]
-          "radius": 0.05785
+    # schmalz_ecbpmi_body_link:
+    #     - "center": [0.0, 0.014, -0.011]
+    #       "radius": 0.05785

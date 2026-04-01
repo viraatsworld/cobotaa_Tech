@@ -21,7 +21,10 @@ arm_controller:
       - cobotta_pro_joint_6
     command_interfaces:
       - position
+      - velocity
+      - acceleration
     state_interfaces:
       - position
       - velocity
+      - effort
     allow_nonzero_velocity_at_trajectory_end: true

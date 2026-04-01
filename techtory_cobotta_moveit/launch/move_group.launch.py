@@ -17,11 +17,13 @@ def generate_launch_description():
     ).robot_description_semantic(
             file_path=str(moveit_pkg_share / "config" / "techtory_demo_description.srdf"
                           )
-    ).planning_pipelines(pipelines=["ompl", "pilz_industrial_motion_planner"]
+    ).planning_pipelines(pipelines=["ompl", "pilz_industrial_motion_planner", "isaac_ros_cumotion"]
                          
       ).trajectory_execution(
             file_path=str(moveit_pkg_share / "config" / "moveit_controllers.yaml")
         ).robot_description_kinematics(
             file_path=str(moveit_pkg_share / "config" / "kinematics.yaml")
+        ).joint_limits(
+            file_path=str(moveit_pkg_share / "config" / "joint_limits.yaml")
         ).to_moveit_configs()
     return generate_move_group_launch(moveit_config)
