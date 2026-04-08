@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="techtory_demo_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="$(find techtory_cell_description)/urdf/techtory_cell.xaco" />
+  <xacro:include filename="$(find techtory_cell_description)/urdf/techtory_cell.xacro" />
   <xacro:arg name="model" default="cvrb0609"/>
   <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_macro.xacro"/>
   <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/cobotta_hardware.ros2_control.xacro"/>
@@ -86,5 +86,15 @@
   <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:techtory_cell>
+
+  <!-- virtual end-effector link for cobotta_proJ6 -->
+<link name="cobotta_pro_tool0" />
+<joint name="cobotta_pro_tool0_joint" type="fixed">
+  <parent link="$(arg cvrb_prefix)J6" />
+  <child link="cobotta_pro_tool0" />
+  <origin xyz="0 0 0" rpy="0 0 0" />
+</joint>
+  <!-- virtual end-effector link for cobotta_proJ6 -->
+  
 
 </robot>

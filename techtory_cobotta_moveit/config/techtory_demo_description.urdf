@@ -15,74 +15,11 @@
 
     Author DENSO WAVE INCORPORATED
   -->
-  <!--
-    NOTE the macro defined in this file is NOT part of the public API of this
-          package. Users CANNOT rely on this file being available, or stored in
-          this location. Nor can they rely on the existence of the macro.
-  -->
-  
-  <transmission name="cobotta_pro_trans_1">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_1">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_1">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="cobotta_pro_trans_2">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_2">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_2">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="cobotta_pro_trans_3">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_3">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_3">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="cobotta_pro_trans_4">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_4">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_4">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="cobotta_pro_trans_5">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_5">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_5">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="cobotta_pro_trans_6">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="cobotta_pro_joint_6">
-      <hardwareInterface></hardwareInterface>
-    </joint>
-    <actuator name="cobotta_pro_motor_6">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <!-- Placeholder for ros2_control transmission which don't yet exist -->
   <!-- <link name="world"/>
 		<joint name="$(arg namespace)joint_w" type="fixed">
 			<parent link="world"/>
 			<child link="$(arg namespace)base_link"/>
 		</joint> -->
-      <link name="world"/>
-
   <link name="cobotta_pro_base_link">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -264,6 +201,92 @@
     <limit effort="1" lower="-6.28318530717959" upper="6.28318530717959" velocity="0.596903"/>
     <dynamics damping="0" friction="0"/>
   </joint>
+  <ros2_control name="cobotta_pro_TopicBasedSystem" type="system">
+    <hardware>
+      <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+      <param name="joint_commands_topic">/topic_based_joint_commands</param>
+      <param name="joint_states_topic">/topic_based_joint_states</param>
+    </hardware>
+    <joint name="cobotta_pro_joint_1">
+      <command_interface name="position">
+        <param name="min">-4.712389</param>
+        <param name="max">4.712389</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.310886</param>
+        <param name="max">0.310886</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="cobotta_pro_joint_2">
+      <command_interface name="position">
+        <param name="min">-2.617994</param>
+        <param name="max">2.617994</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.310886</param>
+        <param name="max">0.310886</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="cobotta_pro_joint_3">
+      <command_interface name="position">
+        <param name="min">-2.617994</param>
+        <param name="max">2.617994</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.621773</param>
+        <param name="max">0.621773</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="cobotta_pro_joint_4">
+      <command_interface name="position">
+        <param name="min">-4.712389</param>
+        <param name="max">4.712389</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.049741</param>
+        <param name="max">0.049741</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="cobotta_pro_joint_5">
+      <command_interface name="position">
+        <param name="min">-2.617994</param>
+        <param name="max">2.617994</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.690860</param>
+        <param name="max">0.690860</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="cobotta_pro_joint_6">
+      <command_interface name="position">
+        <param name="min">-6.283185</param>
+        <param name="max">6.283185</param>
+      </command_interface>
+      <command_interface name="acceleration">
+        <param name="min">-0.690860</param>
+        <param name="max">0.690860</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+  <link name="world"/>
   <!-- base_plate link to cobotta link -->
   <joint name="joint_w" type="fixed">
     <origin rpy="0 0 1.5708" xyz="0 0 0"/>
@@ -324,16 +347,25 @@
     <child link="robot_base_plate_link"/>
     <origin rpy="0 0 0" xyz="0 -0.3 0.93"/>
   </joint>
+    <!-- virtual end-effector link for cobotta_proJ6 -->
+  <link name="tool_tip0"/>
+  <joint name="tool_tip0_virtual_joint" type="fixed">
+    <parent link="cobotta_pro_J6"/>
+    <child link="tool_tip0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <ros2_control name="FakeSystem" type="system">
     <hardware>
-      <!-- By default, set up controllers for simulation. This won't work on real hardware -->
-      <!-- <plugin>mock_components/GenericSystem</plugin> -->
       <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
-      <param name="joint_commands_topic">/topic_based_joint_commands</param>
-      <param name="joint_states_topic">/topic_based_joint_states</param>
+      <param name="joint_command_topic">/topic_based_joint_commands</param>
+      <param name="joint_state_topic">/topic_based_joint_states</param>
     </hardware>
     <joint name="cobotta_pro_joint_1">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.310886</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">-0.942</param>
       </state_interface>
@@ -341,6 +373,10 @@
     </joint>
     <joint name="cobotta_pro_joint_2">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.310886</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">0</param>
       </state_interface>
@@ -348,6 +384,10 @@
     </joint>
     <joint name="cobotta_pro_joint_3">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.621773</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">-1.571</param>
       </state_interface>
@@ -355,6 +395,10 @@
     </joint>
     <joint name="cobotta_pro_joint_4">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.049741</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">-3.031</param>
       </state_interface>
@@ -362,6 +406,10 @@
     </joint>
     <joint name="cobotta_pro_joint_5">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.690860</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">1.543</param>
       </state_interface>
@@ -369,6 +417,10 @@
     </joint>
     <joint name="cobotta_pro_joint_6">
       <command_interface name="position"/>
+      <command_interface name="acceleration">
+        <param name="min">0</param>
+        <param name="max">0.690860</param>
+      </command_interface>
       <state_interface name="position">
         <param name="initial_value">0.102</param>
       </state_interface>
