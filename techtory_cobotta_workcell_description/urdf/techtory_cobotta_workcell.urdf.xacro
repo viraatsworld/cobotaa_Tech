@@ -51,7 +51,7 @@
         namespace="$(arg namespace)"
         transmission_hw_interface="$(arg transmission_hw_interface)"
         sim="$(arg sim)"
-        use_mock_hardware="${hw_type == 'mock' or '$(arg use_mock_hardware)' == 'true'}"
+        use_mock_hardware="false"
         ip_address="$(arg ip_address)"
         verbose="$(arg verbose)"
         send_format="$(arg send_format)"
@@ -65,12 +65,14 @@
     <xacro:cobotta_mujoco_ros2_control namespace="$(arg namespace)"/>
   </xacro:if>
 
+
+
   <!-- topic_based hardware plugin -->
   <xacro:if value="${hw_type == 'topic_based'}">
     <xacro:cobotta_topic_based_ros2_control namespace="$(arg namespace)"/>
   </xacro:if>
 
-    <!-- topic_based hardware plugin -->
+    <!-- mock hardware plugin -->
   <xacro:if value="${hw_type == 'mock'}">
     <xacro:cobotta_mock_ros2_control namespace="$(arg namespace)"/>
   </xacro:if>

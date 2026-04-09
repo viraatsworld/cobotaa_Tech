@@ -118,7 +118,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "sim",
-            default_value="false",
+            default_value="true",
             description="Start robot with fake hardware mirroring command to its states.",
         )
     )
@@ -143,13 +143,6 @@ def generate_launch_description():
             description="Prefix used for robot links in workcell xacro.",
         )
     )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "hardware_type",
-            default_value="real",
-            description="Hardware backend type: real, mock, mujoco, topic_based",
-        )
-    )
 
     denso_robot_model = LaunchConfiguration("model")
     ip_address = LaunchConfiguration("ip_address")
@@ -169,7 +162,6 @@ def generate_launch_description():
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
     verbose = LaunchConfiguration("verbose")
     cvrb_prefix = LaunchConfiguration("cvrb_prefix")
-    hardware_type = LaunchConfiguration("hardware_type")
 
     denso_robot_core_pkg = get_package_share_directory("denso_robot_core")
     denso_robot_control_parameters = {
@@ -198,9 +190,6 @@ def generate_launch_description():
                 " ",
                 "cvrb_prefix:=",
                 cvrb_prefix,
-                " ",
-                "hardware_type:=",
-                hardware_type,
                 " ",
                 "ip_address:=",
                 ip_address,
@@ -327,6 +316,7 @@ def generate_launch_description():
                     robot_description_planning,
                     robot_description_semantic,
                     moveit_config.planning_pipelines,
+
                     ],
     )
 
