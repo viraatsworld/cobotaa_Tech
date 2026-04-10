@@ -1,0 +1,5 @@
+bt_operator:
+  ros__parameters:
+    current_bt_xml_filename: techtory_cobotta_system.xml
+    default_plugin_lib_names: [keep_running_until_success]
+    customized_plugin_lib_names:

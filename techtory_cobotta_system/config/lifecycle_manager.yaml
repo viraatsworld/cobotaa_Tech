@@ -1,0 +1,5 @@
+lifecycle_manager:
+  ros__parameters:
+    autostart: true
+    node_names: [bt_operator, ]
+    bond_timeout: 0.0
