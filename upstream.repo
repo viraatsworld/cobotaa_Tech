@@ -1,17 +1,17 @@
 repositories:
-  controls/topic_based_ros2_control:
+  plugins/controls/topic_based_ros2_control:
     type: git
     url: https://github.com/PickNikRobotics/topic_based_ros2_control.git
     version: main
-  controls/mujoco_ros2_control:
+  plugins/controls/mujoco_ros2_control:
     type: git
     url: https://github.com/ipa-vsp/mujoco_ros2_control.git
     version: fix/large-stl-conversion
-  robot/denso_robot_ros2:
+  plugins/robot/denso_robot_ros2:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
     version: master
-  plugin/isaac_ros_cumotion:
+  plugins/moveit/isaac_ros_cumotion:
     type: git
     url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
     version: main

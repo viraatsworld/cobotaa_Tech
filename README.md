@@ -66,7 +66,7 @@ Before starting, ensure you have the following installed and configured:
   cd ~/colcon_techtory_ws/src
   git clone https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
   cd ~/colcon_techtory_ws
-  colcon build
+  colcon build --symlink-install --packages-up-to techtory_cobotta_bringup
   ```
     - Make sure there is `cobotta.xrdf` file already defined inside the folder `isaac-ros-cumotion/isaac_ros_cumotion_robot_description/xrdf/`
 - **Topic based Ros2 Control** - Clone and build the [topic_based_ros2_control](https://github.com/PickNikRobotics/topic_based_ros2_control/tree/main) repository.
