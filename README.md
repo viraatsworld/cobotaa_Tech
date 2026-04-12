@@ -7,10 +7,10 @@ To create the Isaac Sim environment, run the following command:
 ```bash
 mkdir -p colcon_tectory_ws/src 
 cd colcon_tectory_ws
-python3.11 -m venv .myvirtualenv
-source .myvirtualenv/bin/activate
-pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
-pip install -U torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cu130
+pip install isaacsim[all,extscache]==6.0.0 --extra-index-url https://pypi.nvidia.com
 ```
 
 ## Getting started
