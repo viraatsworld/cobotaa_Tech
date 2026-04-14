@@ -18,7 +18,7 @@ repositories:
   application/bt_based_application_framework:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/bt_based_application_framework.git
-    version: ros2
+    version: vsp/fix/pipeline
   application/BehaviorTree.CPP:
     type: git
     url: https://github.com/ipa-rwu/BehaviorTree.CPP.git

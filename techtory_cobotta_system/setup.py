@@ -20,6 +20,10 @@ setup(
             os.path.join("share", package_name, "config"),
             glob(os.path.join("config", "*.yaml")),
         ),
+        (
+            os.path.join("share", package_name, "trees"),
+            glob(os.path.join("trees", "*.xml")),
+        ),
 
     ],
     install_requires=['setuptools'],

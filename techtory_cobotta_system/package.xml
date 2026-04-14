@@ -9,7 +9,12 @@
 
   <depend>nav2_lifecycle_manager</depend>
   <depend>man2_bt_operator</depend>
+  <depend>man2_bt_core</depend>
+  <depend>man2_bt_bringup</depend>
   <depend>man2_bt_skill_clients</depend>
+  <depend>moveit_skills</depend>
+  <depend>techtory_cobotta_moveit</depend>
+  <exec_depend>moveit_configs_utils</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

@@ -1,113 +1,150 @@
-from launch import LaunchDescription
-from launch_ros.actions import Node
+import os
+
 from ament_index_python.packages import get_package_share_directory
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (
-    LaunchConfiguration,
-    PythonExpression,
-    PathJoinSubstitution,
-    TextSubstitution,
+
+from launch import LaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+    SetEnvironmentVariable,
 )
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node
+from launch_ros.descriptions import ParameterFile
+
+from moveit_configs_utils import MoveItConfigsBuilder
+
+
+def launch_setup(context, *args, **kwargs):
+    use_sim_time = LaunchConfiguration("use_sim_time")
+    autostart = LaunchConfiguration("autostart")
+    bt_operator_params_file = LaunchConfiguration("bt_operator_params_file")
+    lifecycle_manager_params_file = LaunchConfiguration("lifecycle_manager_params_file")
+    current_bt_xml_path = LaunchConfiguration("current_bt_xml_path")
+
+    robot_name = LaunchConfiguration("robot_name")
+    robot_moveit_config_pkg = LaunchConfiguration("robot_moveit_config_pkg")
+    robot_description_file_path = LaunchConfiguration("robot_description_file_path")
+
+    moveit_config = (
+        MoveItConfigsBuilder(
+            robot_name.perform(context),
+            package_name=robot_moveit_config_pkg.perform(context),
+        )
+        .robot_description(file_path=robot_description_file_path.perform(context))
+        .planning_pipelines(pipelines=["ompl", "pilz_industrial_motion_planner"])
+        .to_moveit_configs()
+    )
+
+    # *** ROS 2 nodes ***
+
+    launch_bt_core = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("man2_bt_bringup"),
+                    "launch",
+                    "bringup_bt_core.launch.py",
+                ]
+            )
+        ),
+        launch_arguments={
+            "bt_operator_parameter_file": bt_operator_params_file,
+            "autostart": autostart,
+            "use_sim_time": use_sim_time,
+        }.items(),
+    )
+
+    moveit_config_server = Node(
+        package="moveit_skills",
+        executable="moveit_config_server",
+        output="screen",
+        name="moveit_config_server",
+        parameters=[
+            {
+                "robot_name": robot_name,  # robot_description: config/{robot_name}.urdf.xacro
+                "moveit_config_pkg": robot_moveit_config_pkg,
+            }
+        ],
+    )
+
+    moveit_skill_server_node = Node(
+        package="moveit_skills",
+        executable="moveit_skill_server_node",
+        name="moveit_skill_server",
+        output="screen",
+        parameters=[
+            {"use_sim_time": use_sim_time},
+            ParameterFile(bt_operator_params_file.perform(context), allow_substs=True),
+        ],
+        # prefix=["xterm -e gdb -ex run --args"],
+    )
+
+    return [
+        launch_bt_core,
+        moveit_config_server,
+        moveit_skill_server_node,
+    ]
 
 
 def generate_launch_description():
-    ld = LaunchDescription()
     techtory_cobotta_system_share = get_package_share_directory("techtory_cobotta_system")
-    rviz_config_path = PathJoinSubstitution(
-        [
-            techtory_cobotta_system_share,
-            "config",
-            "techtory_cobotta_system.rviz",
-        ]
-    )
 
-    # *** PARAMETERS ***
-    autostart_arg = DeclareLaunchArgument(
-        "autostart", default_value=TextSubstitution(text="true")
-    )
-    ld.add_action(autostart_arg)
-    node_names_arg = DeclareLaunchArgument(
-        "node_names",
-        default_value=TextSubstitution(text="[bt_operator]"),
-    )
-    ld.add_action(node_names_arg)
-    bond_timeout_arg = DeclareLaunchArgument(
-        "bond_timeout", default_value=TextSubstitution(text="0.0")
-    )
-    ld.add_action(bond_timeout_arg)
-    current_bt_xml_name_arg = DeclareLaunchArgument(
-        "current_bt_xml_name",
-        default_value=TextSubstitution(text="techtory_cobotta_system.xml"),
-    )
-    ld.add_action(current_bt_xml_name_arg)
-    default_plugin_lib_names_arg = DeclareLaunchArgument(
-        "default_plugin_lib_names",
-        default_value=TextSubstitution(
-            text="[keep_running_until_success, sequence_start_from]"
+    declared_arguments = [
+        SetEnvironmentVariable("RCUTILS_LOGGING_BUFFERED_STREAM", "1"),
+        DeclareLaunchArgument(
+            "use_sim_time",
+            default_value="true",
+            description="Use simulation (Gazebo) clock if true",
         ),
-    )
-    ld.add_action(default_plugin_lib_names_arg)
-    main_bt_groot_port_arg = DeclareLaunchArgument(
-        "main_bt_groot_port",
-        default_value=TextSubstitution(text="1667"),
-        description="Groot2 TCP port for main bt_operator.",
-    )
-    ld.add_action(main_bt_groot_port_arg)
-    # *** ROS 2 nodes ***
-    lifecycle_manager = Node(
-        package="nav2_lifecycle_manager",
-        executable="lifecycle_manager",
-        output="screen",
-        name="lifecycle_manager",
-        parameters=[
-            {
-                "autostart": LaunchConfiguration("autostart"),
-                "node_names": LaunchConfiguration("node_names"),
-                "bond_timeout": LaunchConfiguration("bond_timeout"),
-            }
-        ],
-    )
-    bt_operator = Node(
-        package="man2_bt_operator",
-        executable="bt_operator",
-        output="screen",
-        name="bt_operator",
-        remappings=[
-            (
-                "start_application/_action/feedback",
-                "start_application/_action/feedback",
+        DeclareLaunchArgument(
+            "autostart",
+            default_value="true",
+            description="Automatically startup the lifecycle nodes",
+        ),
+        DeclareLaunchArgument(
+            "bt_operator_params_file",
+            default_value=os.path.join(
+                techtory_cobotta_system_share, "config", "bt_operator.yaml"
             ),
-            ("start_application/_action/status", "start_application/_action/status"),
-            (
-                "start_application/_action/cancel_goal",
-                "start_application/_action/cancel_goal",
+            description="Full path to the bt_operator and skill server parameters file",
+        ),
+        DeclareLaunchArgument(
+            "lifecycle_manager_params_file",
+            default_value=os.path.join(
+                techtory_cobotta_system_share, "config", "lifecycle_manager.yaml"
             ),
-            (
-                "start_application/_action/get_result",
-                "start_application/_action/get_result",
+            description="Full path to the lifecycle manager parameters file",
+        ),
+        DeclareLaunchArgument(
+            "current_bt_xml_path",
+            default_value=os.path.join(
+                techtory_cobotta_system_share,
+                "trees",
+                "techtory_cobotta_system.xml",
             ),
-            (
-                "start_application/_action/send_goal",
-                "start_application/_action/send_goal",
-            ),
-        ],
-        parameters=[
-            {
-                "current_bt_xml_filename": LaunchConfiguration("current_bt_xml_name"),
-                "default_plugin_lib_names": LaunchConfiguration(
-                    "default_plugin_lib_names"
-                ),
-                "connect_to_groot2": True,
-                "groot_server_port": LaunchConfiguration("main_bt_groot_port"),
-            }
-        ],
-    )
+            description="Full path to the behavior tree xml file to execute",
+        ),
+        DeclareLaunchArgument(
+            "robot_name",
+            default_value="techtory_demo_description",
+            description="Robot name as defined in the moveit config package",
+        ),
+        DeclareLaunchArgument(
+            "robot_moveit_config_pkg",
+            default_value="techtory_cobotta_moveit",
+            description="Name of the robot's moveit config package",
+        ),
+        DeclareLaunchArgument(
+            "robot_description_file_path",
+            default_value="config/techtory_demo_description.urdf.xacro",
+            description="Relative path to the robot description xacro inside the moveit config package",
+        ),
+    ]
 
-    # *** ROS 2 subsystems (include launch files)***
-
-    # *** Add actions ***
-    ld.add_action(lifecycle_manager)
-    ld.add_action(bt_operator)
-
-    return ld
+    return LaunchDescription(
+        declared_arguments + [OpaqueFunction(function=launch_setup)]
+    )

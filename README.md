@@ -25,6 +25,7 @@ This package provides a URDF description of a techtory cell with a Cobotta robot
     source /opt/ros/jazzy/setup.bash
     rosdep update
     rosdep install --from-paths src -iry
+    colcon build --symlink-install --packages-up-to techtory_cobotta_bringup techtory_cobotta_system
     ```
 
 ## Visualize in RViz
@@ -39,19 +40,19 @@ Launch the Cobotta workcell in MuJoCo with RViz visualization:
 
 ```bash
 source install/setup.bash
-ros2 launch techtory_cobotta_workcell_description mujoco.launch.py
+ros2 launch techtory_cobotta_bringup techtory_cobotta_mj_bringup.launch.py 
 ```
 
-To run without RViz:
+BT Application:
 
 ```bash
-ros2 launch techtory_cobotta_workcell_description mujoco.launch.py launch_rviz:=false
+ros2 launch techtory_cobotta_system techtory_cobotta_system.launch.py 
 ```
 
-To run headless (no GUI):
+Send Goal: 
 
 ```bash
-ros2 launch techtory_cobotta_workcell_description mujoco.launch.py headless:=true
+ros2 action send_goal /start_application man2_msgs/action/RunApplication "{behavior_tree_filename: '/home/adm-vsp/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/trees/techtory_cobotta_system.xml'}"
 ```
 
 ## Installation Guides
