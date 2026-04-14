@@ -15,6 +15,7 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>techtory_cobotta_workcell_description</exec_depend>
   <exec_depend>techtory_cobotta_system</exec_depend>
+  <exec_depend>techtory_cobotta_moveit</exec_depend>
   <exec_depend>denso_robot_control</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>xacro</exec_depend>

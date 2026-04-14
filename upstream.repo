@@ -11,10 +11,10 @@ repositories:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
     version: master
-  plugins/moveit/isaac_ros_cumotion:
-    type: git
-    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
-    version: main
+  # plugins/moveit/isaac_ros_cumotion:
+  #   type: git
+  #   url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
+  #   version: main
   application/bt_based_application_framework:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/bt_based_application_framework.git

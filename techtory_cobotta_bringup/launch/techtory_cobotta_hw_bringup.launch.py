@@ -179,7 +179,7 @@ def generate_launch_description():
     
     #MOveIt Configurations
     moveit_config = MoveItConfigsBuilder("techtory_demo_description", package_name="techtory_cobotta_moveit"
-    ).planning_pipelines(pipelines=["ompl", "pilz_industrial_motion_planner", "isaac_ros_cumotion"]                
+    ).planning_pipelines(pipelines=["ompl", "pilz_industrial_motion_planner"]
       ).to_moveit_configs()
 
     #use_sim_time = {"use_sim_time": True} 
