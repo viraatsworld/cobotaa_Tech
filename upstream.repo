@@ -1,21 +1,29 @@
 repositories:
-  topic_based_ros2_control:
+  plugins/controls/topic_based_ros2_control:
     type: git
     url: https://github.com/PickNikRobotics/topic_based_ros2_control.git
     version: main
-  mujoco_ros2_control:
+  plugins/controls/mujoco_ros2_control:
     type: git
     url: https://github.com/ipa-vsp/mujoco_ros2_control.git
     version: fix/large-stl-conversion
+  plugins/robot/denso_robot_ros2:
+    type: git
+    url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
+    version: master
+  # plugins/moveit/isaac_ros_cumotion:
+  #   type: git
+  #   url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
+  #   version: main
+  application/bt_based_application_framework:
+    type: git
+    url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/bt_based_application_framework.git
+    version: vsp/fix/pipeline
+  application/BehaviorTree.CPP:
+    type: git
+    url: https://github.com/ipa-rwu/BehaviorTree.CPP.git
+    version: sync_4.9.0
   techtory_cell_description: 
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/techtory_cell_description.git
     version: main
-  denso_robot_ros2:
-    type: git
-    url: git@gitlab.cc-asp.fraunhofer.de:ipa326/denso_nextgen/denso_robot_ros2.git
-    vesion: master
-  # isaac_ros_cumotion:
-  #   type: git
-  #   url: git@github.com:NVIDIA-ISAAC-ROS/isaac_ros_cumotion.git
-  #   version: main

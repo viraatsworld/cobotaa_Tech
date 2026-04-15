@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="main">
+  <BehaviorTree ID="main">
+    <Sequence>
+      <CreatePose x="0.658"
+                  y="0.116"
+                  z="0.513"
+                  roll="-3.114"
+                  pitch="0.156"
+                  yaw="-3.138"
+                  frame_id="cobotta_pro_base_link"
+                  target_posestamp="{goal}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory}"
+                         error_code_id="{error_code_id}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory}"
+                         error_code_id="{error_code_id}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="ComputePathToPose">
+      <input_port name="target_group"
+                  type="std::string">Move group to plan for</input_port>
+      <input_port name="server_name"
+                  default="compute_path_to_pose"
+                  type="std::string">Action&#10;                server name</input_port>
+      <input_port name="server_timeout"
+                  default="1000ms"
+                  type="std::chrono::milliseconds">Action&#10;                server timeout</input_port>
+      <input_port name="target_pose"
+                  type="geometry_msgs::msg::PoseStamped">Target&#10;                end-effector pose</input_port>
+      <input_port name="planning_pipeline"
+                  type="std::string">Optional planning&#10;                pipeline name</input_port>
+      <input_port name="planner_id"
+                  type="std::string">Optional planner identifier</input_port>
+      <input_port name="ik_frame"
+                  type="std::string">Optional IK frame override</input_port>
+      <input_port name="path_constraints"
+                  type="moveit_msgs::msg::Constraints">Optional path&#10;                constraints to enforce</input_port>
+      <output_port name="trajectory"
+                   type="moveit_msgs::msg::RobotTrajectory">Generated joint&#10;                trajectory</output_port>
+      <output_port name="error_code_id"
+                   type="int32_t">MoveIt error code (ComputePathResult)</output_port>
+    </Action>
+    <Action ID="CreatePose">
+      <input_port name="x"
+                  type="double">Pose X translation (meters)</input_port>
+      <input_port name="y"
+                  type="double">Pose Y translation (meters)</input_port>
+      <input_port name="z"
+                  type="double">Pose Z translation (meters)</input_port>
+      <input_port name="roll"
+                  type="double">Roll component (radians)</input_port>
+      <input_port name="pitch"
+                  type="double">Pitch component (radians)</input_port>
+      <input_port name="yaw"
+                  type="double">Yaw component (radians)</input_port>
+      <input_port name="frame_id"
+                  default="world"
+                  type="std::string">Frame for the generated&#10;                pose</input_port>
+      <output_port name="target_posestamp"
+                   type="geometry_msgs::msg::PoseStamped">Generated&#10;                pose</output_port>
+    </Action>
+    <Action ID="ExecuteTrajectory">
+      <input_port name="target_group"
+                  type="std::string">Move group executing the trajectory</input_port>
+      <input_port name="server_name"
+                  default="execute_trajectory"
+                  type="std::string">Action&#10;                server name</input_port>
+      <input_port name="server_timeout"
+                  default="1000ms"
+                  type="std::chrono::milliseconds">Action&#10;                server timeout</input_port>
+      <input_port name="trajectory"
+                  type="moveit_msgs::msg::RobotTrajectory">Trajectory to&#10;                execute</input_port>
+      <output_port name="error_code_id"
+                   type="int32_t">Execution result error code</output_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>

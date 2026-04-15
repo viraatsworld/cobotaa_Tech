@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="techtory_cobotta_system">
+    <include path="techtory_cobotta_system.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="ComputePathToState">
+            <input_port name="target_group"
+                        type="std::string">Move group to plan for</input_port>
+            <input_port name="server_name"
+                        default="compute_path_to_state"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="named_state"
+                        type="std::string">Predefined named state for the move
+                group</input_port>
+            <input_port name="planning_pipeline"
+                        default=""
+                        type="std::string">Optional planning
+                pipeline name</input_port>
+            <input_port name="planner_id"
+                        default=""
+                        type="std::string">Optional planner identifier</input_port>
+            <input_port name="path_constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints to enforce</input_port>
+            <input_port name="ik_frame"
+                        default=""
+                        type="std::string">Optional IK frame override</input_port>
+            <output_port name="trajectory"
+                         type="moveit_msgs::msg::RobotTrajectory">Generated joint
+                trajectory</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">MoveIt error code (ComputePathResult)</output_port>
+        </Action>
+
+        <Action ID="ComputePathToPose">
+            <input_port name="target_group"
+                        type="std::string">Move group to plan for</input_port>
+            <input_port name="server_name"
+                        default="compute_path_to_pose"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="target_pose"
+                        type="geometry_msgs::msg::PoseStamped">Target
+                end-effector pose</input_port>
+            <input_port name="planning_pipeline"
+                        default=""
+                        type="std::string">Optional planning
+                pipeline name</input_port>
+            <input_port name="planner_id"
+                        default=""
+                        type="std::string">Optional planner identifier</input_port>
+            <input_port name="ik_frame"
+                        default=""
+                        type="std::string">Optional IK frame override</input_port>
+            <input_port name="path_constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints to enforce</input_port>
+            <output_port name="trajectory"
+                         type="moveit_msgs::msg::RobotTrajectory">Generated joint
+                trajectory</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">MoveIt error code (ComputePathResult)</output_port>
+        </Action>
+
+        <Action ID="ComputePathToPoint">
+            <input_port name="target_group"
+                        type="std::string">Move group to plan for</input_port>
+            <input_port name="server_name"
+                        default="compute_path_to_point"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="target_point"
+                        type="geometry_msgs::msg::PointStamped">Target point to
+                reach</input_port>
+            <input_port name="planning_pipeline"
+                        default=""
+                        type="std::string">Optional planning
+                pipeline name</input_port>
+            <input_port name="planner_id"
+                        default=""
+                        type="std::string">Optional planner identifier</input_port>
+            <input_port name="ik_frame"
+                        default=""
+                        type="std::string">Optional IK frame override</input_port>
+            <input_port name="path_constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints to enforce</input_port>
+            <output_port name="trajectory"
+                         type="moveit_msgs::msg::RobotTrajectory">Generated joint
+                trajectory</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">MoveIt error code (ComputePathResult)</output_port>
+        </Action>
+
+        <Action ID="ExecuteTrajectory">
+            <input_port name="target_group"
+                        type="std::string">Move group executing the trajectory</input_port>
+            <input_port name="server_name"
+                        default="execute_trajectory"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="trajectory"
+                        type="moveit_msgs::msg::RobotTrajectory">Trajectory to
+                execute</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Execution result error code</output_port>
+        </Action>
+
+        <Action ID="GetCurrentIKFramePose">
+            <input_port name="group_name"
+                        type="std::string">Move group name</input_port>
+            <input_port name="server_name"
+                        default="get_current_ik_frame_pose"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="ik_frame"
+                        type="std::string">IK frame to query</input_port>
+            <output_port name="pose"
+                         type="geometry_msgs::msg::Pose">Current IK frame pose</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="PlanGrasp">
+            <input_port name="object_pose"
+                        type="geometry_msgs::msg::PoseStamped">Target object pose
+                (frame_id required)</input_port>
+            <input_port name="object_width"
+                        type="double">Object width (meters); used for grasp
+                clearance</input_port>
+            <input_port name="end_effector"
+                        type="std::string">Grasp config name (matches
+                params.yaml section)</input_port>
+            <input_port name="tool_link"
+                        default=""
+                        type="std::string">Tool link override; defines
+                grasp frame and pre/post offsets</input_port>
+            <input_port name="filter_by_ik"
+                        default="true"
+                        type="bool">Filter grasps by IK (false
+                skips IK filtering)</input_port>
+            <input_port name="grasp_axis"
+                        default="-1"
+                        type="int">Tool-link axis for grasping: 0=X,
+                1=Y, 2=Z</input_port>
+            <input_port name="grasp_direction"
+                        default="-1"
+                        type="int">Direction along grasp_axis:
+                0=UP (+axis), 1=DOWN (-axis)</input_port>
+            <input_port name="grasp_rotation"
+                        default="-1"
+                        type="int">Rotation sampling around
+                grasp_axis: 0=HALF (180deg), 1=FULL (360deg)</input_port>
+            <input_port name="server_name"
+                        default="plan_grasp"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <output_port name="grasp"
+                         type="moveit_msgs::msg::Grasp">Best grasp (highest quality)</output_port>
+            <output_port name="grasp_pose"
+                         type="geometry_msgs::msg::PoseStamped">Pose of the best
+                grasp</output_port>
+            <output_port name="pre_grasp_pose"
+                         type="geometry_msgs::msg::PoseStamped">Pre-grasp pose
+                for tool_link</output_port>
+            <output_port name="post_grasp_pose"
+                         type="geometry_msgs::msg::PoseStamped">Post-grasp
+                pose for tool_link</output_port>
+            <output_port name="error_code"
+                         type="int32_t">MoveIt error code</output_port>
+            <output_port name="message"
+                         type="std::string">Result message</output_port>
+        </Action>
+
+        <Action ID="DetectArucoMarker">
+            <input_port name="marker_id"
+                        type="int">Target marker ID</input_port>
+            <input_port name="server_name"
+                        default="detect_aruco_marker"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="timeout_ms"
+                        default="5000"
+                        type="int">Wait time for detection result
+                (milliseconds)</input_port>
+            <input_port name="sub_topic_name"
+                        default="/markers"
+                        type="std::string">Topic publishing
+                detected markers</input_port>
+            <input_port name="required_pose_num"
+                        default="3"
+                        type="int">Number of detections to
+                average</input_port>
+            <output_port name="marker_pose"
+                         type="geometry_msgs::msg::PoseStamped">Detected marker
+                pose</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="ColorPoseEstimation">
+            <input_port name="color"
+                        type="std::string">Target color identifier</input_port>
+            <input_port name="server_name"
+                        default="color_pose_estimation"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="timeout_ms"
+                        default="5000"
+                        type="int">Wait time for detection result
+                (milliseconds)</input_port>
+            <input_port name="sub_topic_name"
+                        default="/color_pose_estimation/color_pose_array"
+                        type="std::string">Topic
+                publishing detected color poses</input_port>
+            <output_port name="color_pose_cube"
+                         type="geometry_msgs::msg::PoseStamped">Estimated
+                pose of the color-marked cube</output_port>
+            <output_port name="color_pose_cube_holder"
+                         type="geometry_msgs::msg::PoseStamped">Estimated
+                pose of the cube holder</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="LegoPoseEstimator">
+            <input_port name="color"
+                        type="std::string">Target LEGO color identifier</input_port>
+            <input_port name="server_name"
+                        default="lego_pose_estimator"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="timeout"
+                        default="1000"
+                        type="int">Wait time for detection result
+                (milliseconds)</input_port>
+            <input_port name="sub_topic_name"
+                        default="/lego_pose_estimator/lego_pose_array"
+                        type="std::string">Topic
+                publishing detected LEGO poses</input_port>
+            <output_port name="lego_pose"
+                         type="geometry_msgs::msg::PoseStamped">Estimated LEGO pose</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="CheckOjectPresent">
+            <input_port name="server_name"
+                        default="check_object_present"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="sensor_topic_name"
+                        type="std::string">Sensor topic to monitor</input_port>
+            <input_port name="sensor_msg_type"
+                        type="std::string">Expected ROS message type on the
+                sensor topic</input_port>
+            <input_port name="timeout_ms"
+                        type="int">Optional timeout for message reception
+                (milliseconds)</input_port>
+            <input_port name="msg_num"
+                        type="int">Optional number of messages required before
+                evaluation</input_port>
+            <input_port name="sub_rate"
+                        type="int">Optional subscription rate (Hz)</input_port>
+            <output_port name="object_present"
+                         type="bool">True when the object is detected</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="RobotMoving">
+            <input_port name="server_name"
+                        default="robot_moving_command"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="moving"
+                        type="bool">Set true if the robot should be moving</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="SetPathConstraintFromFile">
+            <input_port name="service_name"
+                        default="set_path_constraints"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="file_path"
+                        type="std::string">Absolute path to a path-constraints YAML
+                file</input_port>
+            <output_port name="path_constraints"
+                         type="moveit_msgs::msg::Constraints">Constraints
+                loaded from file</output_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Service error code</output_port>
+        </Action>
+
+        <Action ID="SetPathConstraints">
+            <input_port name="joint_constraints"
+                        type="std::vector&lt;moveit_msgs::msg::JointConstraint&gt;">Semicolon-separated
+                joint constraint specifications</input_port>
+            <output_port name="path_constraints"
+                         type="moveit_msgs::msg::Constraints">Generated path
+                constraints</output_port>
+        </Action>
+
+        <Action ID="PrintROSMsg">
+            <input_port name="msg_string"
+                        default=""
+                        type="std::string">Optional string to print</input_port>
+            <input_port name="msg_trajectory"
+                        type="moveit_msgs::msg::RobotTrajectory">Optional
+                trajectory to print</input_port>
+            <input_port name="msg_posestamped"
+                        type="geometry_msgs::msg::PoseStamped">Optional
+                PoseStamped to print</input_port>
+            <input_port name="msg_pose"
+                        type="geometry_msgs::msg::Pose">Optional Pose to print</input_port>
+        </Action>
+
+        <Action ID="UpdatePose">
+            <input_port name="base_posestamped"
+                        type="geometry_msgs::msg::PoseStamped">Base pose to
+                update</input_port>
+            <input_port name="update_relative_pose"
+                        type="geometry_msgs::msg::Pose">Relative pose
+                delta to apply</input_port>
+            <output_port name="updated_posestamped"
+                         type="geometry_msgs::msg::PoseStamped">Pose
+                after applying the delta</output_port>
+        </Action>
+
+        <Action ID="UpdateOrientationInPose">
+            <input_port name="base_posestamped"
+                        type="geometry_msgs::msg::PoseStamped">Base pose to
+                update</input_port>
+            <input_port name="new_orientation"
+                        type="geometry_msgs::msg::Quaternion">Replacement
+                orientation</input_port>
+            <output_port name="updated_posestamped"
+                         type="geometry_msgs::msg::PoseStamped">Pose
+                after updating orientation</output_port>
+        </Action>
+
+        <Action ID="SplitPose">
+            <input_port name="base_posestamped"
+                        type="geometry_msgs::msg::PoseStamped">Base pose to
+                split</input_port>
+            <input_port name="offset_z"
+                        default="0.0"
+                        type="double">Offset to apply along the Z axis
+                (meters)</input_port>
+            <output_port name="pre_post_pose"
+                         type="geometry_msgs::msg::PoseStamped">Computed
+                pre/post pose</output_port>
+        </Action>
+
+        <Action ID="CreatePose">
+            <input_port name="x"
+                        type="double">Pose X translation (meters)</input_port>
+            <input_port name="y"
+                        type="double">Pose Y translation (meters)</input_port>
+            <input_port name="z"
+                        type="double">Pose Z translation (meters)</input_port>
+            <input_port name="roll"
+                        type="double">Roll component (radians)</input_port>
+            <input_port name="pitch"
+                        type="double">Pitch component (radians)</input_port>
+            <input_port name="yaw"
+                        type="double">Yaw component (radians)</input_port>
+            <input_port name="frame_id"
+                        default="world"
+                        type="std::string">Frame for the generated
+                pose</input_port>
+            <output_port name="target_posestamp"
+                         type="geometry_msgs::msg::PoseStamped">Generated
+                pose</output_port>
+        </Action>
+
+        <Action ID="IOControlGripper">
+            <input_port name="server_name"
+                        default="control_gripper_via_io"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="io_service_server_name"
+                        type="std::string">Service name for IO control</input_port>
+            <input_port name="open"
+                        type="bool">True to open the gripper</input_port>
+            <input_port name="open_high_pin"
+                        type="int">Pin driven high when opening</input_port>
+            <input_port name="close_high_pin"
+                        type="int">Pin driven high when closing</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="GripperCommand">
+            <input_port name="server_name"
+                        default="gripper_command"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="position"
+                        type="double">Target gripper position</input_port>
+            <input_port name="max_effort"
+                        type="double">Maximum gripping effort</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="Robotiq2FGripperCommand">
+            <input_port name="server_name"
+                        default="yaskawa_gripper_command"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="position"
+                        type="float">Target gripper position</input_port>
+            <input_port name="position_tolerance"
+                        type="double">Allowed position tolerance</input_port>
+            <input_port name="max_effort"
+                        type="float">Maximum gripping effort</input_port>
+            <input_port name="use_sim"
+                        type="bool">Use simulation mode if true</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+        <Action ID="ROS2ControlViaOPCUA">
+            <input_port name="server_name"
+                        default="control_via_opcua"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="controller_name"
+                        type="std::string">Controller to command (e.g.
+                forward_position_controller)</input_port>
+            <input_port name="joint_name"
+                        type="std::string">Joint or device to actuate</input_port>
+            <input_port name="mode"
+                        type="std::string">Command mode (position, effort, gpio)</input_port>
+            <input_port name="value"
+                        type="double">Command value</input_port>
+            <input_port name="waitset_timeout"
+                        type="std::chrono::milliseconds">Timeout for IO
+                server interaction</input_port>
+            <output_port name="error_code_id"
+                         type="int32_t">Action result error code</output_port>
+        </Action>
+
+        <Action ID="OmronGPIOIOControl">
+            <input_port name="server_name"
+                        default="omron_gpio_action_control"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="agent_name"
+                        type="std::string">Omron controller agent identifier</input_port>
+            <input_port name="command"
+                        type="std::string">Command string ("1" enable, "0" disable)</input_port>
+            <output_port name="success"
+                         type="bool">True when the request succeeds</output_port>
+        </Action>
+
+        <Action ID="OmronCylinderIOControl">
+            <input_port name="server_name"
+                        default="omron_gpio_action_control"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="agent_name"
+                        type="std::string">Omron controller agent handling the
+                cylinder</input_port>
+            <input_port name="command"
+                        type="std::string">Cylinder command ("1" extend, "0" retract)</input_port>
+            <output_port name="success"
+                         type="bool">True when the cylinder command succeeds</output_port>
+        </Action>
+
+        <Action ID="ControlJointsPositions">
+            <input_port name="server_name"
+                        default="follow_joint_trajectory"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="5000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="joint_names"
+                        type="std::vector&lt;std::string&gt;">Joint names to
+                command</input_port>
+            <input_port name="joint_traj"
+                        type="trajectory_msgs::msg::JointTrajectory">Joint
+                trajectory goal</input_port>
+            <output_port name="error_code"
+                         type="int32_t">FollowJointTrajectory result error code</output_port>
+        </Action>
+
+        <Action ID="SetPhidgetsDigitalOutputIO">
+            <input_port name="service_name"
+                        default="set_digital_output"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="port_index"
+                        type="int">Digital output index</input_port>
+            <input_port name="on"
+                        type="bool">True to set the output high</input_port>
+            <output_port name="success"
+                         type="bool">True when the write succeeds</output_port>
+        </Action>
+
+        <Action ID="SolveIKService">
+            <input_port name="server_name"
+                        default="/get_ik"
+                        type="std::string">Service server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="group_name"
+                        type="std::string">Move group to solve IK for</input_port>
+            <input_port name="ik_link_name"
+                        type="std::string">End-effector link name</input_port>
+            <input_port name="solver"
+                        default="KDL"
+                        type="std::string">IK solver implementation</input_port>
+            <input_port name="posestamped"
+                        type="geometry_msgs::msg::PoseStamped">Target pose</input_port>
+            <input_port name="constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints</input_port>
+            <input_port name="init_seed"
+                        type="sensor_msgs::msg::JointState">Optional initial joint
+                seed</input_port>
+            <input_port name="solver_timeout"
+                        type="std::chrono::milliseconds">Optional solver
+                timeout override</input_port>
+            <input_port name="use_current_state"
+                        default="false"
+                        type="bool">Use the current robot
+                state as the start</input_port>
+            <output_port name="joint_states"
+                         type="sensor_msgs::msg::JointState">Solved joint
+                configuration</output_port>
+            <output_port name="message"
+                         type="std::string">Status message from the solver</output_port>
+        </Action>
+
+        <Action ID="SampleViewPoseStamps">
+            <input_port name="service_name"
+                        default="sample_view_points"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="target_link"
+                        type="std::string">Frame containing the ROI</input_port>
+            <input_port name="camera_frame"
+                        type="std::string">Camera optical frame for generated
+                viewpoints</input_port>
+            <input_port name="roi_edge"
+                        type="geometry_msgs::msg::PoseStamped">ROI edge center pose</input_port>
+            <input_port name="roi_x_m"
+                        default="0.0"
+                        type="double">Rectangle long side length
+                (meters)</input_port>
+            <input_port name="roi_y_m"
+                        default="0.0"
+                        type="double">Rectangle short side length
+                (meters)</input_port>
+            <input_port name="heights"
+                        type="std::vector&lt;double&gt;">Optional offsets along ROI
+                normal (meters)</input_port>
+            <input_port name="n_yaw"
+                        default="1"
+                        type="int">Number of yaw samples (unused
+                placeholder)</input_port>
+            <input_port name="enforce_frustum"
+                        default="false"
+                        type="bool">Filter results to the
+                camera frustum</input_port>
+            <input_port name="use_camera_info_topic"
+                        default="false"
+                        type="bool">Fetch intrinsics
+                from a CameraInfo topic</input_port>
+            <input_port name="camera_info_topic"
+                        default=""
+                        type="std::string">CameraInfo topic to
+                wait on</input_port>
+            <input_port name="camera_info_wait_s"
+                        default="0.5"
+                        type="double">Wait duration for
+                CameraInfo (seconds)</input_port>
+            <input_port name="camera_intrinsics"
+                        type="man2_msgs::msg::CameraIntrinsics">Inline
+                camera intrinsics (optional)</input_port>
+            <input_port name="min_px_per_meter"
+                        default="0.0"
+                        type="double">Pixels per meter
+                requirement (0 = disabled)</input_port>
+            <input_port name="gsd_m_per_px"
+                        default="0.0"
+                        type="double">Ground-sample distance
+                target (0 = disabled)</input_port>
+            <input_port name="margin_px"
+                        default="0.0"
+                        type="double">Margin to keep inside image
+                borders (pixels)</input_port>
+            <input_port name="tile_overlap"
+                        default="0.0"
+                        type="double">Fractional overlap between
+                lattice tiles</input_port>
+            <input_port name="tile_max_views"
+                        default="0"
+                        type="uint32_t">Maximum number of lattice
+                views (0 = unlimited)</input_port>
+            <input_port name="min_range"
+                        default="0.0"
+                        type="double">Minimum range along optical +Z
+                (meters)</input_port>
+            <input_port name="max_range"
+                        default="0.0"
+                        type="double">Maximum range along optical +Z
+                (meters)</input_port>
+            <input_port name="min_view_height_m"
+                        default="0.0"
+                        type="double">Minimum camera height
+                along ROI normal (0 = disabled)</input_port>
+            <input_port name="max_view_height_m"
+                        default="0.0"
+                        type="double">Maximum camera height
+                along ROI normal (0 = disabled)</input_port>
+            <input_port name="max_pitch_deg"
+                        default="0.0"
+                        type="double">Maximum allowed pitch
+                (degrees)</input_port>
+            <input_port name="max_roll_deg"
+                        default="0.0"
+                        type="double">Maximum allowed roll
+                (degrees)</input_port>
+            <input_port name="visited"
+                        type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Visited
+                viewpoints to filter</input_port>
+            <input_port name="current_view"
+                        type="geometry_msgs::msg::PoseStamped">Current viewpoint
+                (optional)</input_port>
+            <input_port name="max_views"
+                        default="0"
+                        type="uint32_t">Maximum viewpoints to return (0
+                = unlimited)</input_port>
+            <input_port name="sort_by_distance"
+                        default="false"
+                        type="bool">Sort viewpoints by
+                distance to current view</input_port>
+            <input_port name="seed"
+                        default="0"
+                        type="uint32_t">Randomization seed (0 =
+                deterministic)</input_port>
+            <output_port name="success"
+                         type="bool">True when sampling succeeded</output_port>
+            <output_port name="message"
+                         type="std::string">Status message</output_port>
+            <output_port name="viewpoints"
+                         type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Sampled
+                camera poses</output_port>
+        </Action>
+
+        <Action ID="PlanToJointState">
+            <input_port name="server_name"
+                        default="plan_to_joint_state_from_start"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="target_group"
+                        type="std::string">Move group that the trajectory
+                targets</input_port>
+            <input_port name="planning_pipeline"
+                        type="std::string">Optional planning pipeline name</input_port>
+            <input_port name="planner_id"
+                        type="std::string">Optional planner identifier</input_port>
+            <input_port name="start_joint_state"
+                        type="sensor_msgs::msg::JointState">Optional start
+                joint state</input_port>
+            <input_port name="goal_joint_state"
+                        type="sensor_msgs::msg::JointState">Goal joint state</input_port>
+            <input_port name="waypoint_joint_states"
+                        type="std::vector&lt;sensor_msgs::msg::JointState&gt;">Optional
+                intermediate waypoints</input_port>
+            <input_port name="path_constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints</input_port>
+            <input_port name="use_current_state"
+                        default="false"
+                        type="bool">Use current state as
+                start if true</input_port>
+            <input_port name="goal_joint_tolerance"
+                        default="0.001"
+                        type="double">Tolerance for
+                reaching the goal joint state</input_port>
+            <output_port name="trajectory"
+                         type="moveit_msgs::msg::RobotTrajectory">Planned
+                trajectory</output_port>
+        </Action>
+
+        <Action ID="PlanToPose">
+            <input_port name="server_name"
+                        default="plan_to_pose_from_start"
+                        type="std::string">Action
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Action
+                server timeout</input_port>
+            <input_port name="target_group"
+                        type="std::string">Move group that the trajectory
+                targets</input_port>
+            <input_port name="planning_pipeline"
+                        type="std::string">Optional planning pipeline name</input_port>
+            <input_port name="planner_id"
+                        type="std::string">Optional planner identifier</input_port>
+            <input_port name="ik_frame"
+                        type="std::string">IK reference frame (empty = tip link)</input_port>
+            <input_port name="start_joint_state"
+                        type="sensor_msgs::msg::JointState">Optional start
+                joint state</input_port>
+            <input_port name="goal_pose"
+                        type="geometry_msgs::msg::PoseStamped">Goal pose</input_port>
+            <input_port name="waypoint_poses"
+                        type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Optional
+                intermediate pose waypoints (last waypoint becomes the final goal)</input_port>
+            <input_port name="path_constraints"
+                        type="moveit_msgs::msg::Constraints">Optional path
+                constraints</input_port>
+            <input_port name="use_current_state"
+                        default="false"
+                        type="bool">Use current state as
+                start if true</input_port>
+            <input_port name="goal_position_tolerance"
+                        default="0.0"
+                        type="double">Position
+                tolerance for IK validation (0 = use default)</input_port>
+            <input_port name="goal_orientation_tolerance"
+                        default="0.0"
+                        type="double">Orientation
+                tolerance for IK validation (0 = use default)</input_port>
+            <output_port name="trajectory"
+                         type="moveit_msgs::msg::RobotTrajectory">Planned
+                trajectory</output_port>
+        </Action>
+
+        <Action ID="AttachObject">
+            <input_port name="service_name"
+                        default="attach_object"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="object_name"
+                        type="std::string">Unique identifier of the object to
+                attach</input_port>
+            <input_port name="attach_to_link"
+                        type="std::string">Robot link to attach the object to</input_port>
+            <input_port name="object_pose"
+                        type="geometry_msgs::msg::PoseStamped">Object pose in the
+                world frame</input_port>
+            <input_port name="geom_type"
+                        default="box"
+                        type="std::string">Geometry type (box or
+                cylinder)</input_port>
+            <input_port name="cyl_radius"
+                        type="double">Cylinder radius (meters)</input_port>
+            <input_port name="cyl_height"
+                        type="double">Cylinder height (meters)</input_port>
+            <input_port name="box_x"
+                        type="double">Alternative box X dimension (meters)</input_port>
+            <input_port name="box_y"
+                        type="double">Alternative box Y dimension (meters)</input_port>
+            <input_port name="box_z"
+                        type="double">Alternative box Z dimension (meters)</input_port>
+            <input_port name="allow_touch_links"
+                        type="std::vector&lt;std::string&gt;">Legacy alias
+                for
+                touch_links — links allowed to contact the object</input_port>
+            <input_port name="weight"
+                        type="double">Object mass (kilograms)</input_port>
+            <input_port name="detach_if_exists"
+                        default="true"
+                        type="bool">Detach existing object if
+                already attached</input_port>
+            <input_port name="detach_pose"
+                        type="geometry_msgs::msg::PoseStamped">Optional placement
+                pose when detaching</input_port>
+            <output_port name="message"
+                         type="std::string">Status message</output_port>
+        </Action>
+
+        <Action ID="ComputePlacementEEFPose">
+            <input_port name="service_name"
+                        default="compute_placement_eef_pose"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="place_pose"
+                        type="geometry_msgs::msg::PoseStamped">Surface pose for
+                placement (frame_id required)</input_port>
+            <input_port name="object_pose"
+                        type="geometry_msgs::msg::PoseStamped">Object pose used for
+                placement orientation (optional when use_object_pose=false)</input_port>
+            <input_port name="use_object_pose"
+                        default="false"
+                        type="bool">If false, skip object_pose and keep current
+                EEF orientation for placement</input_port>
+            <input_port name="object_height"
+                        type="double">Object height (meters)</input_port>
+            <input_port name="end_effector"
+                        type="std::string">Grasp config name (params.yaml
+                section)</input_port>
+            <input_port name="tool_link"
+                        type="std::string">Tool link override; defines grasp frame
+                offsets</input_port>
+            <input_port name="grasp_axis"
+                        default="0"
+                        type="int">Tool-link axis for placement: 0=X,
+                1=Y, 2=Z</input_port>
+            <input_port name="grasp_direction"
+                        default="1"
+                        type="int">Direction along grasp_axis:
+                0=UP (+axis), 1=DOWN (-axis)</input_port>
+            <input_port name="grasp_rotation"
+                        default="-1"
+                        type="int">Rotation sampling around the
+                axis:
+                0=HALF (180deg), 1=FULL (360deg), -1=Use defaults</input_port>
+            <output_port name="object_pose_out"
+                         type="geometry_msgs::msg::PoseStamped">Computed
+                object pose after offset</output_port>
+            <output_port name="pre_place_pose"
+                         type="geometry_msgs::msg::PoseStamped">Pre-place pose
+                for end effector</output_port>
+            <output_port name="place_pose_eef"
+                         type="geometry_msgs::msg::PoseStamped">Placement pose
+                for end effector</output_port>
+            <output_port name="post_place_pose"
+                         type="geometry_msgs::msg::PoseStamped">Post-place
+                pose for end effector</output_port>
+            <output_port name="error_code"
+                         type="int32_t">MoveIt error code</output_port>
+            <output_port name="message"
+                         type="std::string">Result message</output_port>
+        </Action>
+        <Action ID="DecideRecovery">
+            <input_port name="server_name"
+                        default="/decide_recovery"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="recovery_budget_in"
+                        default="1"
+                        type="int">Current recovery budget</input_port>
+            <output_port name="decision"
+                         type="std::string">Recovery decision label (DECISION_*
+                constant)</output_port>
+            <output_port name="message"
+                         type="std::string">Decision message from runner</output_port>
+            <output_port name="checkpoint_uid"
+                         type="int">Checkpoint UID output</output_port>
+            <output_port name="recovery_budget_out"
+                         type="int">Updated recovery budget</output_port>
+        </Action>
+        <Action ID="SamplePlaceablePosition">
+            <input_port name="service_name"
+                        default="sample_placeable_position"
+                        type="std::string">Service
+                server name</input_port>
+            <input_port name="server_timeout"
+                        default="1000ms"
+                        type="std::chrono::milliseconds">Service
+                call timeout</input_port>
+            <input_port name="roi_edge"
+                        type="geometry_msgs::msg::PoseStamped">ROI edge center pose</input_port>
+            <input_port name="roi_x_m"
+                        default="0.0"
+                        type="double">Rectangle long side length
+                (meters)</input_port>
+            <input_port name="roi_y_m"
+                        default="0.0"
+                        type="double">Rectangle short side length
+                (meters)</input_port>
+            <input_port name="object_width"
+                        type="double">Width (X dimension) of object for
+                collision avoidance</input_port>
+            <input_port name="allow_sampling"
+                        default="false"
+                        type="bool">If true, perform grid
+                sampling;
+                if false, return center only</input_port>
+            <input_port name="max_samples"
+                        default="1"
+                        type="int">Maximum number of samples to
+                return (0=all)</input_port>
+            <input_port name="randomize_subset"
+                        default="false"
+                        type="bool">Randomize sample
+                selection when capping</input_port>
+            <output_port name="success"
+                         type="bool">Whether sampling succeeded</output_port>
+            <output_port name="message"
+                         type="std::string">Status message</output_port>
+            <output_port name="pose"
+                         type="geometry_msgs::msg::PoseStamped">First sampled
+                placement pose</output_port>
+        </Action>
+
+    </TreeNodesModel>
+</root>

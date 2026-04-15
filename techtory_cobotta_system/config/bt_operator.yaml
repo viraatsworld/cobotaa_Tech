@@ -1,0 +1,66 @@
+/bt_operator:
+  ros__parameters:
+    # default_bt_xml_filename: "simple_tree.xml"
+    default_plugin_lib_names: # created in pkg: man2_behavior_tree
+      - util_plugin_print_value # executable name; Name in BT: PrintStringValue
+    bt_loop_duration: 10 # milliseconds
+    server_timeout: 100 # milliseconds timeout for waiting for response from serve
+    customized_plugin_lib_names:
+      man2_bt_skill_clients: # ROS pkg name
+        # moveit skills
+        - compute_path_to_state_client # executable name; Name in BT: ComputePathToState
+        - compute_path_to_pose_client # executable name; Name in BT: ComputePathToPose
+        - compute_path_to_point_client # executable name; Name in BT: ComputePathToPoint
+        - execute_trajectory_client # executable name; Name in BT: ExecuteTrajectory
+        - set_path_constraints # executable name; Name in BT: SetPathConstraints
+        - get_current_ik_frame_pose_client # executable name; Name in BT: GetCurrentIKFramePose
+        # util functions
+        - update_pose # executable name; Name in BT: UpdatePose
+        - update_orientation_in_pose # executable name; Name in BT: UpdateOrientationInPose
+        - print_ros_msg # executable name; Name in BT: PrintROSMsg
+        - create_pose # executable name; Name in BT:: CreatePose
+
+#        Lifecycle node manager       #
+#######################################
+/lifecycle_manager:
+  ros__parameters:
+    node_names: ['bt_operator', 'moveit_config_server', 'moveit_skill_server'] # define lifecycle node start sequence
+
+#        Skills       #
+#######################
+moveit_skill_server_moveit_cpp_node:
+  ros__parameters:
+    step_size: 0.005
+    min_fraction: 0.50
+    planning_time: 1.0
+    moveit_controller_manager: "moveit_simple_controller_manager/MoveItSimpleControllerManager"
+    moveit_simple_controller_manager:
+      controller_names: ["denso_joint_trajectory_controller"]
+      denso_joint_trajectory_controller:
+        type: FollowJointTrajectory
+        action_ns: follow_joint_trajectory
+        default: true
+        joints:
+          - cobotta_pro_joint_1
+          - cobotta_pro_joint_2
+          - cobotta_pro_joint_3
+          - cobotta_pro_joint_4
+          - cobotta_pro_joint_5
+          - cobotta_pro_joint_6
+    planning_scene_monitor_options:
+      name: "planning_scene_monitor"
+      robot_description: "robot_description"
+      joint_state_topic: "/joint_states"
+      attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+      publish_planning_scene_topic: "/moveit_cpp/publish_planning_scene"
+      monitored_planning_scene_topic: "/moveit_cpp/monitored_planning_scene"
+      wait_for_initial_state_timeout: 10.0
+    planning_pipelines:
+      pipeline_names: ["ompl", "pilz_industrial_motion_planner"]
+    plan_request_params:
+      planning_attempts: 3
+      planning_pipeline: "pilz_industrial_motion_planner"
+      planner_id: "PTP"
+      range: 0.0
+      max_velocity_scaling_factor: 0.2
+      max_acceleration_scaling_factor: 0.2
