@@ -16,19 +16,6 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
-# Step 1: Copy the script to the build directory with the correct name (no .py)
-configure_file(
-  config/techtory_spawn_planning_scene.py
-  ${CMAKE_CURRENT_BINARY_DIR}/techtory_spawn_planning_scene
-  COPYONLY
-)
-
-# Step 2: Install the renamed file from the build directory
-install(PROGRAMS
-  ${CMAKE_CURRENT_BINARY_DIR}/techtory_spawn_planning_scene
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

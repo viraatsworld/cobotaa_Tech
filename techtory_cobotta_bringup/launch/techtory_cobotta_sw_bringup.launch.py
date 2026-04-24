@@ -271,7 +271,7 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='static_transform_publisher',
         output='log',
-        arguments=['--frame-id', 'world', '--child-frame-id', 'robot_base_link'],
+        arguments=['--frame-id', 'world', '--child-frame-id', 'cobotta_pro_tool0'],
     )
 
     control_node = Node(
@@ -285,12 +285,6 @@ def generate_launch_description():
         ],
         output={"stdout": "screen", "stderr": "screen"},
     )
-
-    techtory_planning_scene_node = Node(
-    package=robot_controller_pkg,
-    executable="techtory_spawn_planning_scene",
-    output="screen",
-)
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -350,7 +344,6 @@ def generate_launch_description():
             world2robot_tf_node,
             rviz_node,
             move_group_node,
-            techtory_planning_scene_node,
 
         ]
     )
