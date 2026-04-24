@@ -82,7 +82,7 @@
   <joint name="world_to_base" type="fixed">
     <parent link="$(arg parent)" />
     <child link="cobotta_pro_base_link" />
-    <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+    <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
   </joint>
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
