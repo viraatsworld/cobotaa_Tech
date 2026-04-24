@@ -77,13 +77,25 @@
     <xacro:cobotta_mock_ros2_control namespace="$(arg namespace)"/>
   </xacro:if>
 
-<link name="world" />
+  <link name="$(arg parent)" />
+  <!-- base_plate link to cobotta link -->
+  <joint name="$(arg prefix)joint_w" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 1.5708"/>
+    <parent link="robot_base_plate_link"/>
+    <child link="$(arg cvrb_prefix)base_link"/>
+  </joint>
 
+<<<<<<< HEAD
   <joint name="world_to_base" type="fixed">
     <parent link="$(arg parent)" />
     <child link="cobotta_pro_base_link" />
     <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
   </joint>
+=======
+  <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:techtory_cell>
+>>>>>>> parent of 639befc (removed cell_link from the urdf)
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
 <link name="cobotta_pro_tool0" />
