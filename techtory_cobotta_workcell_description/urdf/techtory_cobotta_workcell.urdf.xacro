@@ -85,11 +85,7 @@
     <child link="$(arg cvrb_prefix)base_link"/>
   </joint>
 
-  <joint name="world_to_base" type="fixed">
-    <parent link="$(arg parent)" />
-    <child link="cobotta_pro_base_link" />
-    <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
-  </joint>
+
   <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:techtory_cell>
