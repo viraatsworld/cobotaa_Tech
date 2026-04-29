@@ -107,9 +107,9 @@
   <!-- virtual end-effector link for cobotta_proJ6 -->
 <link name="cobotta_pro_tool0" />
 <joint name="cobotta_pro_tool0_joint" type="fixed">
-  <parent link="$(arg cvrb_prefix)J6" />
+  <parent link="$(arg gripper_prefix)base_link" />
   <child link="cobotta_pro_tool0" />
-  <origin xyz="0 0 0" rpy="0 0 0" />
+  <origin xyz="0 0 0.25" rpy="0 0 0" />
 </joint>
   <!-- virtual end-effector link for cobotta_proJ6 -->
   
