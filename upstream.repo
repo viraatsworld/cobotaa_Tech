@@ -27,3 +27,7 @@ repositories:
     type: git
     url: git@gitlab.cc-asp.fraunhofer.de:ipa326/demonstrator/arena2036/techtory_cell_description.git
     version: main
+  onrobot-ros2: 
+    type: git
+    url: git@gitlab.cc-asp.fraunhofer.de:bak-vs/onrobot-ros2.git
+    version: main

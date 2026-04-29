@@ -4,9 +4,14 @@
   <xacro:arg name="model" default="cvrb0609"/>
   <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_macro.xacro"/>
   <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/cobotta_hardware.ros2_control.xacro"/>
+    <!-- Gripper Xacro -->
+  <xacro:include filename="$(find onrobot_rg_description)/urdf/onrobot_rg6_model_macro.xacro" />
+
 
   <xacro:arg name="parent" default="world" />
   <xacro:arg name="prefix" default="" />
+  <xacro:arg name="gripper_prefix" default="rg6_" />
+
   <xacro:arg name="isaac_control" default="false" />
 
   <!-- parameters -->
@@ -89,6 +94,15 @@
   <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:techtory_cell>
+
+  <xacro:onrobot_rg6 prefix="rg6_"/>
+
+  <!-- Fixed joint from cobottaJ6 to rg6_baselink -->
+  <joint name="$(arg prefix)joint_rg6" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="$(arg cvrb_prefix)J6"/>
+    <child link="$(arg gripper_prefix)base_link"/>
+  </joint>
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
 <link name="cobotta_pro_tool0" />
