@@ -29,5 +29,5 @@ repositories:
     version: main
   onrobot-ros2: 
     type: git
-    url: git@gitlab.cc-asp.fraunhofer.de:bak-vs/onrobot-ros2.git
+    url: git@github.com:ABC-iRobotics/onrobot-ros2.git
     version: main
