@@ -143,6 +143,13 @@ def generate_launch_description():
             description="Prefix used for robot links in workcell xacro.",
         )
     )
+    declared_arguments.append(
+    DeclareLaunchArgument(
+        "gripper_controller",
+        default_value="onrobot_rg6",
+        description="Gripper controller to spawn.",
+    )
+)
 
     denso_robot_model = LaunchConfiguration("model")
     ip_address = LaunchConfiguration("ip_address")
@@ -162,6 +169,7 @@ def generate_launch_description():
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
     verbose = LaunchConfiguration("verbose")
     cvrb_prefix = LaunchConfiguration("cvrb_prefix")
+    gripper_controller = LaunchConfiguration("gripper_controller")
 
     denso_robot_core_pkg = get_package_share_directory("denso_robot_core")
     denso_robot_control_parameters = {
@@ -294,6 +302,12 @@ def generate_launch_description():
         
     )
 
+    gripper_controller_spawner = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=[gripper_controller, "--controller-manager", "/controller_manager"],
+    )
+
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -341,6 +355,7 @@ def generate_launch_description():
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             robot_controller_spawner,
+            gripper_controller_spawner,
             world2robot_tf_node,
             rviz_node,
             move_group_node,

@@ -3,6 +3,7 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 moveit_simple_controller_manager:
   controller_names:
     - denso_joint_trajectory_controller
+    - onrobot_rg6
 
   denso_joint_trajectory_controller:
     action_ns: follow_joint_trajectory
@@ -15,3 +16,10 @@ moveit_simple_controller_manager:
       - cobotta_pro_joint_4
       - cobotta_pro_joint_5
       - cobotta_pro_joint_6
+
+  onrobot_rg6:
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: true
+    joints:
+      - rg6_finger_joint

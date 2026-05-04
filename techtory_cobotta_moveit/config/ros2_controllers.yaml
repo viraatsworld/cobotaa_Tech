@@ -10,6 +10,12 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
+    onrobot_rg6:
+      # Position Controllers
+      joint_position_controller:
+        type: parallel_gripper_controllers/GripperActionController
+        pid: {p: 1.0, i: 0.5, d: 1.0}
+
 arm_controller:
   ros__parameters:
     joints:
@@ -28,3 +34,11 @@ arm_controller:
       - velocity
       - effort
     allow_nonzero_velocity_at_trajectory_end: true
+
+onrobot_rg6:
+  ros__parameters:
+    joint: finger_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position

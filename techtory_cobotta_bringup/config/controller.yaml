@@ -8,6 +8,10 @@ controller_manager:
     denso_joint_trajectory_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
+    onrobot_rg6:
+      type: parallel_gripper_controllers/GripperActionController
+      
+
 denso_joint_trajectory_controller:
   ros__parameters:
     joints:
@@ -30,3 +34,10 @@ denso_joint_trajectory_controller:
       stopped_velocity_tolerance: 0.0
       goal_time: 0.0
 
+onrobot_rg6:
+  ros__parameters:
+    joint: rg6_finger_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
