@@ -12,7 +12,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 install(
-  DIRECTORY launch scripts spawners assests
+  DIRECTORY launch scripts spawners assets
   DESTINATION share/${PROJECT_NAME}
 )
 

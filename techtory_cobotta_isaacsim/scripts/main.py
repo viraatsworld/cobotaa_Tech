@@ -1,39 +1,37 @@
-from omni.isaac.kit import SimulationApp
+# MUST be first — before ANY omni/pxr import
+import os, sys
+from isaacsim import SimulationApp
 
-CONFIG = {
-    "headless": False
-}
+# Ensure the package root is on sys.path so sibling packages like `spawners` can be imported.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-simulation_app = SimulationApp(CONFIG)
+simulation_app = SimulationApp({
+    "headless": False,
+    "width": 1440,
+    "height": 900,
+})
 
+# Only import omni/pxr AFTER SimulationApp is created
+import omni.usd
 from pxr import Usd
 
-# Get stage AFTER app starts
-import omni.usd
+# Get or create stage
+omni.usd.get_context().new_stage()
 stage = omni.usd.get_context().get_stage()
 
-# ----------------------------
-# Import your spawners
-# ----------------------------
+# Spawner imports also AFTER SimulationApp
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
-from spawners.spawn_techtory_cell import add_table
-
+from spawners.spawn_techtory_cell import add_techtory_cell
 
 def build_world(stage: Usd.Stage):
-    """Compose full scene from modular USD spawners"""
-    
     add_world(stage)
-    add_table(stage, "/World/Table")
-    add_robot(stage, "/World/Robot")
-
+    add_techtory_cell(stage, "/World/TechtoryCell")
+    add_robot(stage, "/World/Cobotta")
     print("✅ World fully composed")
 
-
-# Build scene
 build_world(stage)
 
-# Keep simulation running
 while simulation_app.is_running():
     simulation_app.update()
 

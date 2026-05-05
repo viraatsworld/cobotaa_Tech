@@ -1,6 +1,7 @@
-from pxr import Usd
+import os
 
-def add_world(stage: Usd.Stage):
+def add_world(stage):
+    from pxr import Usd
     """Creates base world settings"""
 
     default_prim_path = "/World"
