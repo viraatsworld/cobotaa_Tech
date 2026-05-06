@@ -33,6 +33,7 @@ world = World(stage_units_in_meters=1.0)
 stage = world.scene.stage
 
 robot_spawn_position = np.array([-0.275, -0.24, 0.95])
+robot_rotation_deg = np.array([0.0, 0.0, 90.0])
 
 def build_world():
     # Add static environment
@@ -40,7 +41,7 @@ def build_world():
     add_techtory_cell(stage, "/World/TechtoryCell") # You can toggle this freely now
     
     # Add robot
-    cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position)
+    cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)
     
     # 2. Add the robot to the World scene so Isaac Sim tracks its physics
     world.scene.add(cobotta)
