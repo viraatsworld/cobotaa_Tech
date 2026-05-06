@@ -1,13 +1,23 @@
 import os
 
 def add_world(stage):
-    from pxr import Usd, UsdLux, UsdGeom, Gf, UsdShade, Sdf
+    from pxr import Usd, UsdLux, UsdGeom, Gf, UsdShade, Sdf, UsdPhysics, PhysxSchema
     """Creates base world settings with environment, lights, and flat grid"""
 
     default_prim_path = "/World"
 
     if not stage.GetPrimAtPath(default_prim_path):
         stage.DefinePrim(default_prim_path, "Xform")
+
+    
+    #Add physics scene (THIS IS MISSING)
+    physics_scene_path = "/World/PhysicsScene"
+    scene = UsdPhysics.Scene.Define(stage, physics_scene_path)
+    scene.CreateGravityDirectionAttr().Set((0.0, 0.0, -1.0))
+    scene.CreateGravityMagnitudeAttr().Set(9.81)
+
+    # Enable PhysX
+    physx_scene = PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath(physics_scene_path))
 
     # Add dome light for environment lighting
     dome_light_path = "/World/DomeLight"
@@ -79,5 +89,5 @@ def add_world(stage):
     xform_api.SetTranslate(Gf.Vec3d(3.8, -11.6, 15.0))
     xform_api2.SetTranslate(Gf.Vec3d(-3.8, 11.6, 15.0))
 
-
+    UsdPhysics.CollisionAPI.Apply(ground_plane.GetPrim())
     print("Base world created with environment, lights, and blue flat grid")
