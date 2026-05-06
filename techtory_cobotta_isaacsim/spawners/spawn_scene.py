@@ -10,14 +10,14 @@ def add_world(stage):
         stage.DefinePrim(default_prim_path, "Xform")
 
     
-    #Add physics scene (THIS IS MISSING)
-    physics_scene_path = "/World/PhysicsScene"
-    scene = UsdPhysics.Scene.Define(stage, physics_scene_path)
-    scene.CreateGravityDirectionAttr().Set((0.0, 0.0, -1.0))
-    scene.CreateGravityMagnitudeAttr().Set(9.81)
+    #Add physics scene (THIS IS MISSING)(Remove physics , cause isaacsim already have in world)
+    # physics_scene_path = "/World/PhysicsScene"
+    # scene = UsdPhysics.Scene.Define(stage, physics_scene_path)
+    # scene.CreateGravityDirectionAttr().Set((0.0, 0.0, -1.0))
+    # scene.CreateGravityMagnitudeAttr().Set(9.81)
 
-    # Enable PhysX
-    physx_scene = PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath(physics_scene_path))
+    # # Enable PhysX
+    # physx_scene = PhysxSchema.PhysxSceneAPI.Apply(stage.GetPrimAtPath(physics_scene_path))
 
     # Add dome light for environment lighting
     dome_light_path = "/World/DomeLight"
