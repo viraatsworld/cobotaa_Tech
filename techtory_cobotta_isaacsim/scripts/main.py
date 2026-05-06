@@ -1,8 +1,6 @@
-# MUST be first — before ANY omni/pxr import
 import os, sys
 from isaacsim import SimulationApp
 
-# Ensure the package root is on sys.path so sibling packages like `spawners` can be imported.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 simulation_app = SimulationApp({
@@ -11,23 +9,37 @@ simulation_app = SimulationApp({
     "height": 900,
 })
 
-# Only import omni/pxr AFTER SimulationApp is created
 import omni.usd
+import omni.kit.app
 from pxr import Usd
+import numpy as np
 
-# Get or create stage
+# Enable extensions BEFORE touching the stage
+ext_manager = omni.kit.app.get_app().get_extension_manager()
+ext_manager.set_extension_enabled_immediate("omni.graph.bundle.action", True)
+ext_manager.set_extension_enabled_immediate("omni.graph.nodes", True)
+ext_manager.set_extension_enabled_immediate("omni.isaac.core_nodes", True)
+ext_manager.set_extension_enabled_immediate("isaacsim.ros2.bridge", True)
+
+# Let the app tick once so extensions finish initializing
+simulation_app.update()
+
+# NOW open a new stage — after everything is stable
 omni.usd.get_context().new_stage()
+simulation_app.update()  # tick again after stage open
+
 stage = omni.usd.get_context().get_stage()
 
-# Spawner imports also AFTER SimulationApp
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
 from spawners.spawn_techtory_cell import add_techtory_cell
 
+robot_spawn_position = np.array([-0.275, -0.24, 0.95])
+
 def build_world(stage: Usd.Stage):
     add_world(stage)
     add_techtory_cell(stage, "/World/TechtoryCell")
-    add_robot(stage, "/World/Cobotta")
+    add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position)
     print("✅ World fully composed")
 
 build_world(stage)

@@ -13,7 +13,7 @@ def generate_launch_description():
             isaac_script
         ],
         additional_env={
-            'ROS_DISTRO': os.environ.get('ROS_DISTRO', 'humble'),
+            'ROS_DISTRO': os.environ.get('ROS_DISTRO', 'jazzy'),
             'AMENT_PREFIX_PATH': os.environ.get('AMENT_PREFIX_PATH', ''),
             'COLCON_PREFIX_PATH': os.environ.get('COLCON_PREFIX_PATH', ''),
             'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
