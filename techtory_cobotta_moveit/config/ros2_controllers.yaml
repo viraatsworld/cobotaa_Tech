@@ -13,7 +13,8 @@ controller_manager:
     onrobot_rg6:
       # Position Controllers
       joint_position_controller:
-        type: parallel_gripper_controllers/GripperActionController
+        type: parallel_gripper_action_controller/GripperActionController
+
         pid: {p: 1.0, i: 0.5, d: 1.0}
 
 arm_controller:
@@ -42,3 +43,4 @@ onrobot_rg6:
       - position
     state_interfaces:
       - position
+      - velocity

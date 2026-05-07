@@ -3,7 +3,7 @@
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
     <Sequence>
-      <CreatePose x="0.658"
+      <CreatePose x="0.458"
                   y="0.116"
                   z="0.513"
                   roll="-3.114"

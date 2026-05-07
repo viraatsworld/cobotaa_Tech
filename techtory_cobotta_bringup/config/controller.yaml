@@ -9,7 +9,7 @@ controller_manager:
       type: joint_trajectory_controller/JointTrajectoryController
 
     onrobot_rg6:
-      type: parallel_gripper_controllers/GripperActionController
+      type: parallel_gripper_action_controller/GripperActionController
       
 
 denso_joint_trajectory_controller:
@@ -41,3 +41,4 @@ onrobot_rg6:
       - position
     state_interfaces:
       - position
+      - velocity

@@ -26,7 +26,7 @@ simulation_app.update()
 from omni.isaac.core import World
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
-from spawners.spawn_techtory_cell import add_techtory_cell
+from spawners.spawn_objects import add_techtory_cell, add_shelf
 
 # 1. Initialize the World (This automatically creates the stage and Physics Scene)
 world = World(stage_units_in_meters=1.0)
@@ -39,7 +39,7 @@ def build_world():
     # Add static environment
     add_world(stage)
     add_techtory_cell(stage, "/World/TechtoryCell") # You can toggle this freely now
-    
+    add_shelf(stage, "/World/Shelf")
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)
     
