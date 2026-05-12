@@ -1,14 +1,19 @@
 import os
 def add_techtory_cell(stage, prim_path: str):
-    from pxr import Usd, Sdf
+    from pxr import Sdf
     from ament_index_python import get_package_share_directory
     pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
     WORKCELL_USD_PATH = os.path.join(pkg_path, 'assets', 'workcells', 'techtory_cell.usd')
 
-    cell_prim = stage.DefinePrim(prim_path, "Xform")
-    cell_prim.GetReferences().AddReference(WORKCELL_USD_PATH)
+    # Load as a sublayer so the camera/ActionGraph prims keep their ORIGINAL
+    # absolute prim paths. AddReference re-roots prims under prim_path, which
+    # breaks ROS2CameraHelper nodes whose `inputs:renderProductPath` strings
+    # were authored against the original absolute paths.
+    root_layer = stage.GetRootLayer()
+    if WORKCELL_USD_PATH not in root_layer.subLayerPaths:
+        root_layer.subLayerPaths.append(WORKCELL_USD_PATH)
 
-    print(f"Workcell added at {prim_path}")
+    print(f"Workcell sublayered from {WORKCELL_USD_PATH}")
 
 def add_shelf(stage, prim_path: str):
     from pxr import Usd, Sdf, UsdGeom, Gf

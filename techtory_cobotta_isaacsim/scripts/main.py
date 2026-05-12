@@ -38,7 +38,7 @@ robot_rotation_deg = np.array([0.0, 0.0, 90.0])
 def build_world():
     # Add static environment
     add_world(stage)
-    add_techtory_cell(stage, "/World/TechtoryCell") # You can toggle this freely now
+    add_techtory_cell(stage, "/World/TechtoryCell")  # prim_path unused (sublayer load)
     add_shelf(stage, "/World/Shelf")
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)

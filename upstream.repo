@@ -29,5 +29,5 @@ repositories:
     version: main
   onrobot-ros2: 
     type: git
-    url: git@github.com:ABC-iRobotics/onrobot-ros2.git
+    url: https://github.com/ABC-iRobotics/onrobot-ros2.git
     version: main

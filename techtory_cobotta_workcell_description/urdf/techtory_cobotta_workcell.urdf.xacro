@@ -90,6 +90,13 @@
     <child link="$(arg cvrb_prefix)base_link"/>
   </joint>
 
+  <!-- RealSense Cameras -->
+  <joint name="camera1_joint" type="fixed">
+      <origin rpy="0 -2.35619 -2.35619" xyz="-0.65 0.65 2.0"/>
+      <parent link="cell_link"/>
+      <child link="camera1_link"/>
+  </joint>
+  <link name="camera1_link"/>
 
   <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
