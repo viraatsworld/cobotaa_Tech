@@ -54,7 +54,7 @@ print("World fully composed")
 world.reset() 
 
 # 4. NOW you can safely set joint positions (Physics is initialized!)
-joint_positions = np.array([-0.942, 0.0, -1.571, -3.031, 1.543, 0.102])
+joint_positions = np.array([0.0, 0.349066, 1.309, 0.0, 1.48353, 0.0])
 # Tell Isaac Sim to only apply these to indices 0 through 5
 arm_joint_indices = np.array([0, 1, 2, 3, 4, 5])
 # Apply positions safely
