@@ -15,6 +15,18 @@ def add_techtory_cell(stage, prim_path: str):
 
     print(f"Workcell sublayered from {WORKCELL_USD_PATH}")
 
+    # The shipped techtory_cell.usd still has a stale RealSense reference and
+    # a leftover /Graph/ROS_Camera authored against a now-broken prim path.
+    # Deactivate them so they stop firing "No valid sensor paths" every tick.
+    for stale_path in (
+        "/World/techtory_demo_description/cell_link/camera1_link",
+        "/Graph/ROS_Camera",
+    ):
+        p = stage.GetPrimAtPath(stale_path)
+        if p and p.IsValid():
+            p.SetActive(False)
+            print(f"Deactivated stale prim {stale_path}")
+
 def add_shelf(stage, prim_path: str):
     from pxr import Usd, Sdf, UsdGeom, Gf
     from ament_index_python import get_package_share_directory
