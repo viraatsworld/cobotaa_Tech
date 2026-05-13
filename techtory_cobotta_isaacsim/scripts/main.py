@@ -52,8 +52,8 @@ def build_world():
         camera_prim_path=camera_prim_path,
         graph_path="/World/ROS_Camera1",
         rgb_topic="/camera1/rgb",
-        pcl_topic="/camera1/pcl",
-        frame_id="camera1_link",
+        pcl_topic="/camera1/points",
+        frame_id="camera1_optical_frame",
         resolution=(640, 480),
     )
 
