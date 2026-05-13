@@ -90,6 +90,22 @@
     <child link="$(arg cvrb_prefix)base_link"/>
   </joint>
 
+  <!-- RealSense Cameras -->
+  <!-- Isaac Sim spawn: position [-0.65, 0.65, 2.0], rotation_deg [0, 45, -45] (XYZ Euler, Z-up) -->
+  <joint name="camera1_joint" type="fixed">
+      <origin rpy="0 0.785398 -0.785398" xyz="-0.65 0.65 2.0"/>
+      <parent link="cell_link"/>
+      <child link="camera1_link"/>
+  </joint>
+  <link name="camera1_link"/>
+
+  <!-- ROS optical frame: +Z forward, +X right, +Y down (rotates camera_link by -90° X, -90° Z) -->
+  <joint name="camera1_optical_joint" type="fixed">
+      <origin rpy="-1.5708 0 -1.5708" xyz="0 0 0"/>
+      <parent link="camera1_link"/>
+      <child link="camera1_optical_frame"/>
+  </joint>
+  <link name="camera1_optical_frame"/>
 
   <xacro:techtory_cell parent="$(arg parent)" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />

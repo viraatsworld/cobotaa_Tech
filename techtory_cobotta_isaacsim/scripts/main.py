@@ -27,6 +27,7 @@ from omni.isaac.core import World
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
 from spawners.spawn_objects import add_techtory_cell, add_shelf
+from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
 # 1. Initialize the World (This automatically creates the stage and Physics Scene)
 world = World(stage_units_in_meters=1.0)
@@ -38,8 +39,24 @@ robot_rotation_deg = np.array([0.0, 0.0, 90.0])
 def build_world():
     # Add static environment
     add_world(stage)
-    add_techtory_cell(stage, "/World/TechtoryCell") # You can toggle this freely now
+    add_techtory_cell(stage, "/World/TechtoryCell")  # prim_path unused (sublayer load)
     add_shelf(stage, "/World/Shelf")
+    # Add RealSense rsd455 camera + ROS2 publishers (rgb + point cloud)
+    camera_prim_path = add_realsense_camera(
+        stage,
+        prim_path="/World/Camera1",
+        spawn_position=np.array([-0.65, 0.65, 2.0]),
+        spawn_rotation_deg=np.array([0.0, 45.0, -45.0]),
+    )
+    attach_ros2_camera_graph(
+        camera_prim_path=camera_prim_path,
+        graph_path="/World/ROS_Camera1",
+        rgb_topic="/camera1/rgb",
+        pcl_topic="/camera1/points",
+        frame_id="camera1_optical_frame",
+        resolution=(640, 480),
+    )
+
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)
     
@@ -54,7 +71,7 @@ print("World fully composed")
 world.reset() 
 
 # 4. NOW you can safely set joint positions (Physics is initialized!)
-joint_positions = np.array([-0.942, 0.0, -1.571, -3.031, 1.543, 0.102])
+joint_positions = np.array([0.0, 0.349066, 1.309, 0.0, 1.48353, 0.0])
 # Tell Isaac Sim to only apply these to indices 0 through 5
 arm_joint_indices = np.array([0, 1, 2, 3, 4, 5])
 # Apply positions safely

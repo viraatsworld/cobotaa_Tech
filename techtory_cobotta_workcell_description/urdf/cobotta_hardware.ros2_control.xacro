@@ -83,7 +83,9 @@
             <param name="min">-0.310886</param>
             <param name="max">0.310886</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
@@ -96,7 +98,9 @@
           <param name="min">-0.310886</param>
           <param name="max">0.310886</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.349066</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
@@ -110,7 +114,9 @@
           <param name="min">-0.621773</param>
           <param name="max">0.621773</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">1.309</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
@@ -123,7 +129,9 @@
           <param name="min">-0.049741</param>
           <param name="max">0.049741</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
@@ -136,7 +144,9 @@
           <param name="min">-0.690860</param>
           <param name="max">0.690860</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">1.48353</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
@@ -149,7 +159,9 @@
           <param name="min">-0.690860</param>
           <param name="max">0.690860</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <state_interface name="effort"/>
       </joint>
