@@ -4,6 +4,7 @@
   <xacro:arg name="model" default="cvrb0609"/>
   <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_macro.xacro"/>
   <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/cobotta_hardware.ros2_control.xacro"/>
+  <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
     <!-- Gripper Xacro -->
   <xacro:include filename="$(find onrobot_rg_description)/urdf/onrobot_rg6_model_macro.xacro" />
 
@@ -121,13 +122,16 @@
   </joint>
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
-<link name="cobotta_pro_tool0" />
-<joint name="cobotta_pro_tool0_joint" type="fixed">
-  <parent link="$(arg gripper_prefix)base_link" />
-  <child link="cobotta_pro_tool0" />
-  <origin xyz="0 0 0.25" rpy="0 0 0" />
-</joint>
-  <!-- virtual end-effector link for cobotta_proJ6 -->
-  
+  <link name="cobotta_pro_tool0" />
+  <joint name="cobotta_pro_tool0_joint" type="fixed">
+    <parent link="$(arg gripper_prefix)base_link" />
+    <child link="cobotta_pro_tool0" />
+    <origin xyz="0 0 0.25" rpy="0 0 0" />
+  </joint>
+    <!-- virtual end-effector link for cobotta_proJ6 -->
+
+  <xacro:shelf prefix="shelf1_" parent="world">
+    <origin xyz="0.61 0.27 0.9" rpy="0 0 1.5708"/>
+  </xacro:shelf>
 
 </robot>

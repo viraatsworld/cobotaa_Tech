@@ -1,3 +1,5 @@
+octomap_frame: "world"
+octomap_resolution: 0.1
 sensors:
   - default_sensor
   - kinect_depthimage

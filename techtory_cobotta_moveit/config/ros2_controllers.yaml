@@ -6,6 +6,8 @@ controller_manager:
     arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
+    denso_joint_group_position_controller:
+      type: position_controllers/JointGroupPositionController
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -35,6 +37,17 @@ arm_controller:
       - velocity
       - effort
     allow_nonzero_velocity_at_trajectory_end: true
+
+denso_joint_group_position_controller:
+  ros__parameters:
+    joints:
+      - cobotta_pro_joint_1
+      - cobotta_pro_joint_2
+      - cobotta_pro_joint_3
+      - cobotta_pro_joint_4
+      - cobotta_pro_joint_5
+      - cobotta_pro_joint_6
+    interface_name: position
 
 onrobot_rg6:
   ros__parameters:

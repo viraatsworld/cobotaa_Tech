@@ -101,7 +101,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "robot_controller",
-            default_value="denso_joint_trajectory_controller",
+            default_value= "denso_joint_group_position_controller", #"denso_joint_trajectory_controller",
             description="Robot controller to spawn.",
         )
     )
@@ -298,7 +298,7 @@ def generate_launch_description():
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
-        parameters=[robot_description],
+        parameters=[robot_description, {"use_sim_time": sim}],
         
     )
 
@@ -358,7 +358,6 @@ def generate_launch_description():
             gripper_controller_spawner,
             world2robot_tf_node,
             rviz_node,
-            move_group_node,
-
+            # move_group_node,
         ]
     )
