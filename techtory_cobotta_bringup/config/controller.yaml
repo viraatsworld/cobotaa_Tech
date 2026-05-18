@@ -8,7 +8,7 @@ controller_manager:
     denso_joint_trajectory_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
-    denso_joint_group_position_controller:                                                                                                                                                                                
+    denso_joint_group_position_controller:
       type: position_controllers/JointGroupPositionController
 
     onrobot_rg6:

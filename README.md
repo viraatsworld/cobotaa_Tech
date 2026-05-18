@@ -25,7 +25,7 @@ This package provides a URDF description of a techtory cell with a Cobotta robot
     source /opt/ros/jazzy/setup.bash
     rosdep update
     rosdep install --from-paths src -iry
-    colcon build --symlink-install --packages-up-to techtory_cobotta_bringup techtory_cobotta_system techtory_cobotta_hybrid_planning onrobot_rg_description techtory_cobotta_isaacsim
+    colcon build --symlink-install --packages-up-to techtory_cobotta_bringup techtory_cobotta_system techtory_hybrid_planning onrobot_rg_description techtory_cobotta_isaacsim
     ```
 
 ## Visualize in RViz

@@ -1,0 +1,13 @@
+# Hybrid Planning Manager configuration.
+#
+# The PlannerLogic plugin is the brain of the manager: it reacts to events
+# (initial request, global trajectory available, local feedback, etc.) and
+# decides what the global/local planners should do next.
+#
+# Available stock plugins in moveit_hybrid_planning:
+#   - moveit_hybrid_planning/SinglePlanExecution
+#       Plans once with the global planner and executes the result.
+#   - moveit_hybrid_planning/ReplanInvalidatedTrajectory
+#       Re-invokes the global planner whenever the local planner reports the
+#       reference trajectory has become invalid (collision in scene, etc.).
+planner_logic_plugin_name: "moveit_hybrid_planning/ReplanInvalidatedTrajectory"
