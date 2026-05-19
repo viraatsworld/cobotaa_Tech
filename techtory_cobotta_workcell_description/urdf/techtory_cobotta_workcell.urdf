@@ -565,7 +565,7 @@
     <parent link="rg6_base_link"/>
     <child link="rg6_left_outer_knuckle"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="1000" lower="-0.628319" upper="0.628319" velocity="2.0"/>
+    <limit effort="1000" lower="-0.628319" upper="0.628319" velocity="2.0" acceleration="1.0"/>
   </joint>
   <joint name="rg6_left_inner_knuckle_joint" type="revolute">
     <origin rpy="0 0 0.0" xyz="0 -0.01272 0.159500"/>

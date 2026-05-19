@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: techtory_cobotta_workcell_description
+    relative_path: urdf/techtory_cobotta_workcell.urdf.xacro
+  srdf:
+    relative_path: config/techtory_demo_description.srdf
+  package_settings:
+    author_name: Viraat Saaran
+    author_email: viraat.saaran@ipa.fraunhoder.de
+    generated_timestamp: 1772724077
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

@@ -21,6 +21,15 @@
         <joint name="cobotta_pro_joint_5" value="1.1426"/>
         <joint name="cobotta_pro_joint_6" value="0"/>
     </group_state>
+    <group name="gripper">
+        <joint name="rg6_finger_joint"/>
+    </group>
+    <group_state name="gripper_open" group="gripper">
+        <joint name="rg6_finger_joint" value="-0.63"/>
+    </group_state>
+    <group_state name="gripper_closed" group="gripper">
+        <joint name="rg6_finger_joint" value="0.62"/>
+    </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
       <end_effector name="cobotta_pro_eef"
                 parent_link="cobotta_pro_tool0"

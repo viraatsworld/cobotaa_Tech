@@ -18,8 +18,8 @@ moveit_simple_controller_manager:
       - cobotta_pro_joint_6
 
   onrobot_rg6:
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
+    action_ns: gripper_cmd
+    type: ParallelGripperCommand
     default: true
     joints:
       - rg6_finger_joint

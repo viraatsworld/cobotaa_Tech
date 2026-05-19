@@ -170,6 +170,10 @@
         <param name="min">-0.628319</param>
         <param name="max">0.628319</param>
       </command_interface>
+      <command_interface name="acceleration">
+            <param name="min">-0.310886</param>
+            <param name="max">0.310886</param>
+      </command_interface>
 
       <state_interface name="position"/>
       <state_interface name="velocity"/>

@@ -1,0 +1,62 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit
+-- Install configuration: ""
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/package_run_dependencies/techtory_cobotta_moveit
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/parent_prefix_path/techtory_cobotta_moveit
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/ament_prefix_path.sh
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/ament_prefix_path.dsv
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/path.sh
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/path.dsv
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.bash
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.sh
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.zsh
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.dsv
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/package.dsv
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/packages/techtory_cobotta_moveit
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/cmake/techtory_cobotta_moveitConfig.cmake
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/cmake/techtory_cobotta_moveitConfig-version.cmake
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/package.xml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/move_group.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/spawn_controllers.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/rsp.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/setup_assistant.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/demo.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/moveit_rviz.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/warehouse_db.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/static_virtual_joint_tfs.launch.py
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/moveit.rviz
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/initial_positions.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/pilz_cartesian_limits.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.ros2_control.xacro
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_base.usd
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_physics.usd
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_sensor.usd
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_robot.usd
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/techtory_demo_description.usd
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/kinematics.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/moveit_controllers.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.urdf.xacro
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/isaac_ros_cumotion_planning.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/joint_limits.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/ros2_controllers.yaml
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.srdf
+-- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/.setup_assistant

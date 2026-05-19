@@ -1,0 +1,68 @@
+[0.011s] Invoking command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/anm-vi/Techtory/src/techtory_cobotta_moveit -DCMAKE_INSTALL_PREFIX=/home/anm-vi/Techtory/src/install/techtory_cobotta_moveit
+[0.056s] -- The C compiler identification is GNU 13.3.0
+[0.098s] -- The CXX compiler identification is GNU 13.3.0
+[0.111s] -- Detecting C compiler ABI info
+[0.179s] -- Detecting C compiler ABI info - done
+[0.186s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.187s] -- Detecting C compile features
+[0.187s] -- Detecting C compile features - done
+[0.194s] -- Detecting CXX compiler ABI info
+[0.269s] -- Detecting CXX compiler ABI info - done
+[0.276s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.276s] -- Detecting CXX compile features
+[0.276s] -- Detecting CXX compile features - done
+[0.281s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.425s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[0.614s] -- Configuring done (0.6s)
+[0.615s] -- Generating done (0.0s)
+[0.616s] -- Build files have been written to: /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit
+[0.621s] Invoked command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/anm-vi/Techtory/src/techtory_cobotta_moveit -DCMAKE_INSTALL_PREFIX=/home/anm-vi/Techtory/src/install/techtory_cobotta_moveit
+[0.622s] Invoking command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit -- -j52 -l52
+[0.654s] Invoked command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit -- -j52 -l52
+[0.662s] Invoking command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit
+[0.667s] -- Install configuration: ""
+[0.667s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/package_run_dependencies/techtory_cobotta_moveit
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/parent_prefix_path/techtory_cobotta_moveit
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/ament_prefix_path.sh
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/ament_prefix_path.dsv
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/path.sh
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/environment/path.dsv
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.bash
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.sh
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.zsh
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/local_setup.dsv
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/package.dsv
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/ament_index/resource_index/packages/techtory_cobotta_moveit
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/cmake/techtory_cobotta_moveitConfig.cmake
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/cmake/techtory_cobotta_moveitConfig-version.cmake
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/package.xml
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/move_group.launch.py
+[0.668s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/spawn_controllers.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/rsp.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/setup_assistant.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/demo.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/moveit_rviz.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/warehouse_db.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/launch/static_virtual_joint_tfs.launch.py
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/moveit.rviz
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/initial_positions.yaml
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/pilz_cartesian_limits.yaml
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.ros2_control.xacro
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration
+[0.669s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_base.usd
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_physics.usd
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_sensor.usd
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/configuration/techtory_demo_description_robot.usd
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description/techtory_demo_description.usd
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/kinematics.yaml
+[0.684s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/moveit_controllers.yaml
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.urdf.xacro
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/isaac_ros_cumotion_planning.yaml
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/joint_limits.yaml
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/ros2_controllers.yaml
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/config/techtory_demo_description.srdf
+[0.685s] -- Installing: /home/anm-vi/Techtory/src/install/techtory_cobotta_moveit/share/techtory_cobotta_moveit/.setup_assistant
+[0.686s] Invoked command in '/home/anm-vi/Techtory/src/build/techtory_cobotta_moveit' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/anm-vi/Techtory/install/onrobot_rg_modbus_tcp:/home/anm-vi/Techtory/install/onrobot_rg_control:/home/anm-vi/Techtory/install/techtory_cobotta_system:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/anm-vi/Techtory/src/build/techtory_cobotta_moveit

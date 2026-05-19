@@ -1,0 +1,14 @@
+planning_plugins:
+  - isaac_ros_cumotion_moveit/CumotionPlanner
+request_adapters:
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+  - default_planning_request_adapters/ResolveConstraintFrames
+start_state_max_bounds_error: 0.1
+num_steps: 32
+cartesian_limits:
+  max_trans_vel: 1.0
+  max_trans_acc: 2.25
+  max_trans_dec: -5.0
+  max_rot_vel: 1.57

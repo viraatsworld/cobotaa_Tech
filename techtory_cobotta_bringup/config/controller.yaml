@@ -36,9 +36,18 @@ denso_joint_trajectory_controller:
 
 onrobot_rg6:
   ros__parameters:
+    type: parallel_gripper_action_controller/GripperActionController
     joint: rg6_finger_joint
+    allow_stalling: true   
     command_interfaces:
       - position
     state_interfaces:
       - position
       - velocity
+    state_publish_rate: 500
+    action_monitor_rate: 20.0
+    allow_partial_joints_goal: false
+    open_loop_control: true
+    constraints:
+      stopped_velocity_tolerance: 0.0
+      goal_time: 0.0
