@@ -2,31 +2,56 @@
 <root BTCPP_format="4"
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
-    <Sequence>
-      <CreatePose x="0.458"
-                  y="0.116"
-                  z="0.513"
-                  roll="-3.114"
-                  pitch="0.156"
-                  yaw="-3.138"
-                  frame_id="cobotta_pro_base_link"
-                  target_posestamp="{goal}"/>
-      <ComputePathToPose target_group="arm"
-                         server_name="compute_path_to_pose"
-                         server_timeout="2000ms"
-                         target_pose="{goal}"
-                         planning_pipeline="pilz_industrial_motion_planner"
-                         planner_id="PTP"
-                         ik_frame="cobotta_pro_tool0"
-                         path_constraints=""
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
-      <ExecuteTrajectory target_group="arm"
-                         server_name="execute_trajectory"
-                         server_timeout="100000ms"
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
-    </Sequence>
+    <KeepRunningUntilFailure>
+      <Sequence>
+        <CreatePose x="0.458"
+                    y="0.0"
+                    z="0.413"
+                    roll="-3.114"
+                    pitch="0.156"
+                    yaw="-3.138"
+                    frame_id="cobotta_pro_base_link"
+                    target_posestamp="{goal}"/>
+        <ComputePathToPose target_group="arm"
+                          server_name="compute_path_to_pose"
+                          server_timeout="2000ms"
+                          target_pose="{goal}"
+                          planning_pipeline="pilz_industrial_motion_planner"
+                          planner_id="PTP"
+                          ik_frame="cobotta_pro_tool0"
+                          path_constraints=""
+                          trajectory="{trajectory}"
+                          error_code_id="{error_code_id}"/>
+        <ExecuteTrajectory target_group="arm"
+                          server_name="execute_trajectory"
+                          server_timeout="100000ms"
+                          trajectory="{trajectory}"
+                          error_code_id="{error_code_id}"/>
+        <CreatePose x="0.358"
+                    y="0.116"
+                    z="0.413"
+                    roll="-3.114"
+                    pitch="0.156"
+                    yaw="-3.138"
+                    frame_id="cobotta_pro_base_link"
+                    target_posestamp="{goal}"/>
+        <ComputePathToPose target_group="arm"
+                          server_name="compute_path_to_pose"
+                          server_timeout="2000ms"
+                          target_pose="{goal}"
+                          planning_pipeline="pilz_industrial_motion_planner"
+                          planner_id="PTP"
+                          ik_frame="cobotta_pro_tool0"
+                          path_constraints=""
+                          trajectory="{trajectory}"
+                          error_code_id="{error_code_id}"/>
+        <ExecuteTrajectory target_group="arm"
+                          server_name="execute_trajectory"
+                          server_timeout="100000ms"
+                          trajectory="{trajectory}"
+                          error_code_id="{error_code_id}"/>
+      </Sequence>
+    </KeepRunningUntilFailure>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->

@@ -6,6 +6,15 @@
 #
 # These keys mirror the standard moveit_cpp parameters.
 
+use_sim_time: true
+qos_overrides:
+  /clock:
+    subscription:
+      reliability: best_effort
+      history: keep_last
+      depth: 10
+      durability: volatile
+
 # Name of the GlobalPlannerInterface plugin loaded by the Global Planner node.
 # This MUST live on the global_planner node (not the manager), because the
 # GlobalPlannerComponent declares the parameter on itself.

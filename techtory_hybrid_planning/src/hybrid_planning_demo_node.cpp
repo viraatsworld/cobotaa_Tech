@@ -1,242 +1,267 @@
-// Demo client for the MoveIt 2 Hybrid Planning architecture.
+// Hybrid Planning demo client for the Techtory Cobotta cell.
 //
-// Sends a two-waypoint MotionSequenceRequest goal (pose-space) to the
-// HybridPlanner action server exposed by the Hybrid Planning Manager. Each
-// waypoint is a target pose for the end-effector link expressed in the
-// cobotta arm base frame.
+// Follows the structure of the upstream moveit2_tutorials hybrid_planner
+// example: build a RobotModel, define a Cartesian goal, solve IK to obtain a
+// joint-space target, wrap it as a MotionSequenceRequest and dispatch it to
+// the HybridPlanner action server exposed by the manager.
 
 #include <chrono>
-#include <cmath>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/action/hybrid_planner.hpp>
-#include <moveit_msgs/msg/constraints.hpp>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_sequence_item.hpp>
-#include <moveit_msgs/msg/motion_sequence_request.hpp>
-#include <moveit_msgs/msg/orientation_constraint.hpp>
-#include <moveit_msgs/msg/position_constraint.hpp>
-#include <shape_msgs/msg/solid_primitive.hpp>
+
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using HybridPlanner = moveit_msgs::action::HybridPlanner;
-using HybridPlannerGoalHandle = rclcpp_action::ClientGoalHandle<HybridPlanner>;
 
 namespace
 {
-moveit_msgs::msg::Constraints makePoseGoal(
-  const std::string & ee_link, const std::string & frame_id,
-  double x, double y, double z,
-  double roll, double pitch, double yaw,
-  double position_tol, double orientation_tol)
+geometry_msgs::msg::PoseStamped makePose(const std::string& frame_id, double x, double y, double z,
+                                         double roll, double pitch, double yaw)
 {
-  moveit_msgs::msg::Constraints goal;
-  goal.name = "pose_goal";
+  geometry_msgs::msg::PoseStamped pose;
+  pose.header.frame_id = frame_id;
+  pose.pose.position.x = x;
+  pose.pose.position.y = y;
+  pose.pose.position.z = z;
 
-  // Position: a small sphere around the target point.
-  moveit_msgs::msg::PositionConstraint pc;
-  pc.header.frame_id = frame_id;
-  pc.link_name = ee_link;
-  shape_msgs::msg::SolidPrimitive sphere;
-  sphere.type = shape_msgs::msg::SolidPrimitive::SPHERE;
-  sphere.dimensions = {position_tol};
-  pc.constraint_region.primitives.push_back(sphere);
-
-  geometry_msgs::msg::Pose region_pose;
-  region_pose.position.x = x;
-  region_pose.position.y = y;
-  region_pose.position.z = z;
-  region_pose.orientation.w = 1.0;
-  pc.constraint_region.primitive_poses.push_back(region_pose);
-  pc.weight = 1.0;
-  goal.position_constraints.push_back(pc);
-
-  // Orientation: convert RPY -> quaternion.
   tf2::Quaternion q;
   q.setRPY(roll, pitch, yaw);
-  moveit_msgs::msg::OrientationConstraint oc;
-  oc.header.frame_id = frame_id;
-  oc.link_name = ee_link;
-  oc.orientation.x = q.x();
-  oc.orientation.y = q.y();
-  oc.orientation.z = q.z();
-  oc.orientation.w = q.w();
-  oc.absolute_x_axis_tolerance = orientation_tol;
-  oc.absolute_y_axis_tolerance = orientation_tol;
-  oc.absolute_z_axis_tolerance = orientation_tol;
-  oc.weight = 1.0;
-  goal.orientation_constraints.push_back(oc);
-
-  return goal;
+  pose.pose.orientation = tf2::toMsg(q);
+  return pose;
 }
 }  // namespace
 
-class HybridPlanningDemo : public rclcpp::Node
+int main(int argc, char** argv)
 {
-public:
-  explicit HybridPlanningDemo(const rclcpp::NodeOptions & options)
-  : Node("hybrid_planning_demo_node", options)
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<rclcpp::Node>(
+      "hybrid_planning_demo_node",
+      rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
+  auto logger = node->get_logger();
+
+  const std::string planning_group =
+      node->get_parameter_or<std::string>("planning_group", "arm");
+  const std::string action_name = node->get_parameter_or<std::string>(
+      "hybrid_planning_action", "/run_hybrid_planning");
+  const std::string planning_frame =
+      node->get_parameter_or<std::string>("planning_frame", "world");
+  const std::string tip_link =
+      node->get_parameter_or<std::string>("tip_link", "cobotta_pro_tool0");
+  const double wait_for_server_timeout =
+      node->get_parameter_or<double>("wait_for_server_timeout", 120.0);
+
+  // Spin the node in the background so that the planning scene monitor /
+  // robot model loader can service its callbacks while we set things up.
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread spin_thread([&executor]() { executor.spin(); });
+
+  // ---------------------------------------------------------------------------
+  // Action client targeting the Hybrid Planning Manager.
+  // ---------------------------------------------------------------------------
+  auto hybrid_planning_client =
+      rclcpp_action::create_client<HybridPlanner>(node, action_name);
+
+  RCLCPP_INFO(logger, "Waiting up to %.0fs for action server '%s'...",
+              wait_for_server_timeout, action_name.c_str());
+  if (!hybrid_planning_client->wait_for_action_server(
+          std::chrono::duration<double>(wait_for_server_timeout)))
   {
-    planning_group_ = this->declare_parameter<std::string>("planning_group", "arm");
-    action_name_ = this->declare_parameter<std::string>("hybrid_planning_action", "/run_hybrid_planning");
-    wait_timeout_sec_ = this->declare_parameter<double>("wait_for_server_timeout", 180.0);
+    RCLCPP_ERROR(logger, "Hybrid Planner action server '%s' not available.",
+                 action_name.c_str());
+    rclcpp::shutdown();
+    spin_thread.join();
+    return 1;
+  }
+  RCLCPP_INFO(logger, "Action server available.");
 
-    base_frame_ = this->declare_parameter<std::string>("base_frame", "cobotta_pro_base_link");
-    ee_link_ = this->declare_parameter<std::string>("ee_link", "cobotta_pro_tool0");
-    position_tolerance_ = this->declare_parameter<double>("position_tolerance", 0.01);
-    orientation_tolerance_ = this->declare_parameter<double>("orientation_tolerance", 0.05);
-
-    // Two Cartesian waypoints expressed in `base_frame`. Each is
-    // [x, y, z, roll, pitch, yaw]. Defaults match the demo poses the user
-    // requested.
-    waypoint_a_ = this->declare_parameter<std::vector<double>>(
-      "waypoint_a", {0.240, 0.12, 0.5, -3.142, 0.0, 3.142});
-    waypoint_b_ = this->declare_parameter<std::vector<double>>(
-      "waypoint_b", {0.540, 0.12, 0.5, -3.142, 0.0, 3.142});
-
-    action_client_ = rclcpp_action::create_client<HybridPlanner>(this, action_name_);
-
-    timer_ = this->create_wall_timer(
-      std::chrono::seconds(2),
-      [this]() {
-        timer_->cancel();
-        sendGoal();
-      });
+  // ---------------------------------------------------------------------------
+  // Robot model & IK to resolve the Cartesian goal into joint constraints.
+  // ---------------------------------------------------------------------------
+  robot_model_loader::RobotModelLoader robot_model_loader(node, "robot_description");
+  const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
+  if (!robot_model)
+  {
+    RCLCPP_ERROR(logger, "Failed to load robot model from /robot_description.");
+    rclcpp::shutdown();
+    spin_thread.join();
+    return 1;
   }
 
-private:
-  moveit_msgs::msg::MotionSequenceItem makeItem(const std::vector<double> & waypoint) const
+  const moveit::core::JointModelGroup* joint_model_group =
+      robot_model->getJointModelGroup(planning_group);
+  if (!joint_model_group)
   {
-    moveit_msgs::msg::MotionPlanRequest plan_request;
-    plan_request.group_name = planning_group_;
-    plan_request.pipeline_id = "ompl";
-    plan_request.planner_id = "RRTConnect";
-    plan_request.allowed_planning_time = 2.0;
-    plan_request.num_planning_attempts = 5;
-    plan_request.max_velocity_scaling_factor = 0.5;
-    plan_request.max_acceleration_scaling_factor = 0.5;
-
-    plan_request.goal_constraints.push_back(
-      makePoseGoal(
-        ee_link_, base_frame_,
-        waypoint[0], waypoint[1], waypoint[2],
-        waypoint[3], waypoint[4], waypoint[5],
-        position_tolerance_, orientation_tolerance_));
-
-    moveit_msgs::msg::MotionSequenceItem item;
-    item.req = plan_request;
-    // blend_radius must be 0 for the final item; we keep it 0 for both since
-    // we want each waypoint reached precisely.
-    item.blend_radius = 0.0;
-    return item;
+    RCLCPP_ERROR(logger, "Planning group '%s' not found in SRDF.",
+                 planning_group.c_str());
+    rclcpp::shutdown();
+    spin_thread.join();
+    return 1;
   }
 
-  void sendGoal()
+  // Define the Cartesian goal pose.
+  geometry_msgs::msg::PoseStamped desired_pose =
+      makePose(planning_frame, 0.563, 0.120, 0.3, -3.114, 0.156, -3.138);
+
+  RCLCPP_INFO(logger,
+              "Target pose (frame=%s): xyz=[%.3f, %.3f, %.3f] rpy=[%.3f, %.3f, %.3f]",
+              planning_frame.c_str(), desired_pose.pose.position.x,
+              desired_pose.pose.position.y, desired_pose.pose.position.z, -3.114,
+              0.156, -3.138);
+
+  // Build a PlanningSceneMonitor so IK can reject configurations that would
+  // collide with the workcell (cell_link, table, etc.) or self-collide. The
+  // monitor subscribes to /joint_states so we also seed IK with the robot's
+  // current pose instead of the default zero configuration — that biases
+  // KDL towards a feasible nearby solution.
+  auto psm = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node, "robot_description");
+  psm->startStateMonitor("/joint_states");
+  psm->startSceneMonitor("/planning_scene");
+  if (!psm->waitForCurrentRobotState(node->now(), 5.0))
   {
-    RCLCPP_INFO(get_logger(),
-                "Waiting up to %.0fs for HybridPlanner action server '%s' (composable components can take ~60s to come up)...",
-                wait_timeout_sec_, action_name_.c_str());
+    RCLCPP_WARN(logger,
+                "Timed out waiting for current robot state; IK will use the "
+                "default seed.");
+  }
 
-    const auto deadline = std::chrono::steady_clock::now() +
-                          std::chrono::duration<double>(wait_timeout_sec_);
-    while (rclcpp::ok() && std::chrono::steady_clock::now() < deadline) {
-      if (action_client_->wait_for_action_server(std::chrono::seconds(5))) {
-        break;
-      }
-      RCLCPP_INFO(get_logger(), "... still waiting for '%s'", action_name_.c_str());
-    }
-    if (!action_client_->action_server_is_ready()) {
-      RCLCPP_ERROR(get_logger(),
-                   "HybridPlanner action server '%s' not available after %.0fs, shutting down.",
-                   action_name_.c_str(), wait_timeout_sec_);
-      rclcpp::shutdown();
-      return;
-    }
+  moveit::core::RobotState goal_state(robot_model);
+  {
+    planning_scene_monitor::LockedPlanningSceneRO scene(psm);
+    goal_state = scene->getCurrentState();
+  }
 
-    if (waypoint_a_.size() != 6 || waypoint_b_.size() != 6) {
-      RCLCPP_ERROR(get_logger(),
-                   "waypoint_a/waypoint_b must each have 6 entries [x,y,z,roll,pitch,yaw], got %zu and %zu",
-                   waypoint_a_.size(), waypoint_b_.size());
-      rclcpp::shutdown();
-      return;
-    }
-
-    moveit_msgs::msg::MotionSequenceRequest sequence_request;
-    sequence_request.items.push_back(makeItem(waypoint_a_));
-    sequence_request.items.push_back(makeItem(waypoint_b_));
-
-    HybridPlanner::Goal goal_msg;
-    goal_msg.planning_group = planning_group_;
-    goal_msg.motion_sequence = sequence_request;
-
-    auto send_goal_options = rclcpp_action::Client<HybridPlanner>::SendGoalOptions();
-    send_goal_options.goal_response_callback =
-      [this](const HybridPlannerGoalHandle::SharedPtr & gh) {
-        if (!gh) {
-          RCLCPP_ERROR(get_logger(), "Goal was rejected by the Hybrid Planning Manager.");
-        } else {
-          RCLCPP_INFO(get_logger(), "Goal accepted; hybrid planning in progress...");
-        }
+  // Validity callback used by setFromIK to discard colliding IK solutions.
+  auto is_state_valid =
+      [&psm, &logger](moveit::core::RobotState* state,
+                      const moveit::core::JointModelGroup* group,
+                      const double* joint_group_positions) {
+        state->setJointGroupPositions(group, joint_group_positions);
+        state->update();
+        planning_scene_monitor::LockedPlanningSceneRO scene(psm);
+        collision_detection::CollisionRequest req;
+        req.group_name = group->getName();
+        collision_detection::CollisionResult res;
+        scene->checkCollision(req, res, *state, scene->getAllowedCollisionMatrix());
+        if (res.collision)
+          RCLCPP_DEBUG(logger, "IK candidate rejected: collision detected.");
+        return !res.collision;
       };
-    send_goal_options.feedback_callback =
-      [this](HybridPlannerGoalHandle::SharedPtr,
-             const std::shared_ptr<const HybridPlanner::Feedback> feedback) {
-        RCLCPP_INFO(get_logger(), "Feedback: %s", feedback->feedback.c_str());
+
+  // Retry IK with random seeds; setFromIK only randomizes from the second
+  // attempt onward, so we explicitly randomize between calls.
+  constexpr int kIkAttempts = 25;
+  constexpr double kIkTimeout = 0.2;
+  bool ik_success = false;
+  for (int attempt = 0; attempt < kIkAttempts; ++attempt)
+  {
+    if (goal_state.setFromIK(joint_model_group, desired_pose.pose, tip_link,
+                             kIkTimeout, is_state_valid))
+    {
+      ik_success = true;
+      RCLCPP_INFO(logger, "IK solved (collision-free) on attempt %d.", attempt + 1);
+      break;
+    }
+    goal_state.setToRandomPositions(joint_model_group);
+  }
+
+  if (!ik_success)
+  {
+    RCLCPP_ERROR(logger,
+                 "Inverse kinematics failed to find a collision-free solution "
+                 "for the requested Cartesian goal after %d attempts.",
+                 kIkAttempts);
+    rclcpp::shutdown();
+    spin_thread.join();
+    return 1;
+  }
+
+  moveit_msgs::msg::Constraints joint_goal =
+      kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
+
+  // ---------------------------------------------------------------------------
+  // Formulate the HybridPlanner action goal.
+  // ---------------------------------------------------------------------------
+  HybridPlanner::Goal goal_action_request;
+  goal_action_request.planning_group = planning_group;
+
+  moveit_msgs::msg::MotionSequenceItem sequence_item;
+  sequence_item.req.group_name = planning_group;
+  sequence_item.req.pipeline_id = "ompl";
+  sequence_item.req.planner_id = "RRTConnect";
+  sequence_item.req.allowed_planning_time = 5.0;
+  sequence_item.req.max_velocity_scaling_factor = 0.1;
+  sequence_item.req.max_acceleration_scaling_factor = 0.1;
+  sequence_item.req.goal_constraints.push_back(joint_goal);
+  // blend_radius is only meaningful for multi-segment sequences; 0.0 = stop
+  // at the waypoint.
+  sequence_item.blend_radius = 0.0;
+
+  goal_action_request.motion_sequence.items.push_back(sequence_item);
+
+  // ---------------------------------------------------------------------------
+  // Send the goal.
+  // ---------------------------------------------------------------------------
+  std::promise<rclcpp_action::ResultCode> result_promise;
+  auto result_future = result_promise.get_future();
+
+  auto send_goal_options = rclcpp_action::Client<HybridPlanner>::SendGoalOptions();
+  send_goal_options.goal_response_callback =
+      [&logger](const rclcpp_action::ClientGoalHandle<HybridPlanner>::SharedPtr& handle) {
+        if (!handle)
+          RCLCPP_ERROR(logger, "Hybrid Planning goal was rejected by the server.");
+        else
+          RCLCPP_INFO(logger, "Hybrid Planning goal accepted by the server.");
       };
-    send_goal_options.result_callback =
-      [this](const HybridPlannerGoalHandle::WrappedResult & result) {
-        switch (result.code) {
+  send_goal_options.feedback_callback =
+      [&logger](rclcpp_action::ClientGoalHandle<HybridPlanner>::SharedPtr,
+                const std::shared_ptr<const HybridPlanner::Feedback> feedback) {
+        RCLCPP_INFO(logger, "Hybrid Planner feedback: %s",
+                    feedback->feedback.c_str());
+      };
+  send_goal_options.result_callback =
+      [&logger, &result_promise](
+          const rclcpp_action::ClientGoalHandle<HybridPlanner>::WrappedResult& result) {
+        switch (result.code)
+        {
           case rclcpp_action::ResultCode::SUCCEEDED:
-            RCLCPP_INFO(get_logger(), "Hybrid planning finished, error_code=%d",
-                        result.result->error_code.val);
+            RCLCPP_INFO(logger, "Hybrid Planning goal succeeded.");
             break;
           case rclcpp_action::ResultCode::ABORTED:
-            RCLCPP_ERROR(get_logger(), "Hybrid planning aborted: %s",
+            RCLCPP_ERROR(logger, "Hybrid Planning goal aborted: %s",
                          result.result->error_message.c_str());
             break;
           case rclcpp_action::ResultCode::CANCELED:
-            RCLCPP_WARN(get_logger(), "Hybrid planning canceled.");
+            RCLCPP_ERROR(logger, "Hybrid Planning goal was canceled.");
             break;
           default:
-            RCLCPP_ERROR(get_logger(), "Unknown result code.");
+            RCLCPP_ERROR(logger, "Hybrid Planning goal returned unknown code.");
             break;
         }
-        rclcpp::shutdown();
+        result_promise.set_value(result.code);
       };
 
-    RCLCPP_INFO(get_logger(),
-                "Sending HybridPlanner goal: 2 pose waypoints for link '%s' in frame '%s' (group '%s')",
-                ee_link_.c_str(), base_frame_.c_str(), planning_group_.c_str());
-    action_client_->async_send_goal(goal_msg, send_goal_options);
-  }
+  RCLCPP_INFO(logger, "Sending Hybrid Planning goal...");
+  hybrid_planning_client->async_send_goal(goal_action_request, send_goal_options);
 
-  std::string planning_group_;
-  std::string action_name_;
-  std::string base_frame_;
-  std::string ee_link_;
-  double wait_timeout_sec_{180.0};
-  double position_tolerance_{0.01};
-  double orientation_tolerance_{0.05};
-  std::vector<double> waypoint_a_;
-  std::vector<double> waypoint_b_;
-  rclcpp_action::Client<HybridPlanner>::SharedPtr action_client_;
-  rclcpp::TimerBase::SharedPtr timer_;
-};
+  result_future.wait();
 
-int main(int argc, char ** argv)
-{
-  rclcpp::init(argc, argv);
-  // Don't enable automatically_declare_parameters_from_overrides — this node
-  // declares each parameter explicitly with a default, and the auto-declare
-  // would clash with those declarations when launch passes overrides.
-  rclcpp::NodeOptions options;
-  auto node = std::make_shared<HybridPlanningDemo>(options);
-  rclcpp::spin(node);
   rclcpp::shutdown();
+  spin_thread.join();
   return 0;
 }

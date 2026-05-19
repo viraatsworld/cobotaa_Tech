@@ -11,6 +11,15 @@
 #   * LocalConstraintSolver  - turns the current reference sample into a
 #                               command for the robot. Default:
 #                               ForwardTrajectory (just forwards the sample).
+use_sim_time: true
+qos_overrides:
+  /clock:
+    subscription:
+      reliability: best_effort
+      history: keep_last
+      depth: 10
+      durability: volatile
+
 trajectory_operator_plugin_name: "moveit_hybrid_planning/SimpleSampler"
 local_constraint_solver_plugin_name: "moveit_hybrid_planning/ForwardTrajectory"
 
