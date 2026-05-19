@@ -56,4 +56,31 @@ def add_shelf(stage, prim_path: str):
     rotate_op.Set(Gf.Vec3d(float(spawn_rotation_deg[0]), float(spawn_rotation_deg[1]), float(spawn_rotation_deg[2])))
     print(f"Shelf added at {prim_path}")
 
+def add_soda_can(stage, prim_path: str):
+    from pxr import Usd, Sdf, UsdGeom, Gf
+    from ament_index_python import get_package_share_directory
+    import numpy as np
+    pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
+    SODA_CAN_USD_PATH = os.path.join(pkg_path, 'assets', 'objects', 'soda_can.usd')
+
+    soda_can_prim = stage.DefinePrim(prim_path, "Xform")
+    soda_can_prim.GetReferences().AddReference(SODA_CAN_USD_PATH)
+
+    # Update location
+    prim = stage.GetPrimAtPath(prim_path)
+    xform = UsdGeom.Xformable(prim)
+    xform.ClearXformOpOrder()
+
+
+    #postions
+    spawn_position=np.array([0.04318, -0.04822, 0.43525])
+    spawn_rotation_deg=np.array([0.0, 0.0, 0.0])
     
+    #translation
+    translate_op = xform.AddTranslateOp()
+    translate_op.Set(Gf.Vec3d(float(spawn_position[0]), float(spawn_position[1]), float(spawn_position[2])))
+
+    #rotation
+    rotate_op = xform.AddRotateXYZOp()
+    rotate_op.Set(Gf.Vec3d(float(spawn_rotation_deg[0]), float(spawn_rotation_deg[1]), float(spawn_rotation_deg[2])))
+    print(f"Soda can added at {prim_path}")

@@ -5,7 +5,7 @@ import os
 
 def generate_launch_description():
     pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
-    isaac_script = os.path.join(pkg_path, 'scripts', 'rename_joint_script.py')
+    isaac_script = os.path.join(pkg_path, 'scripts', 'main.py')
 
     isaac_sim_process = ExecuteProcess(
         cmd=[

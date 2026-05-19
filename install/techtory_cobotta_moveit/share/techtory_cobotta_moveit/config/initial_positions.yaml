@@ -1,9 +1,0 @@
-# Default initial positions for techtory_demo_description's ros2_control fake system
-
-initial_positions:
-  cobotta_pro_joint_1: -0.942
-  cobotta_pro_joint_2: 0
-  cobotta_pro_joint_3: -1.571
-  cobotta_pro_joint_4: -3.031
-  cobotta_pro_joint_5:  1.543
-  cobotta_pro_joint_6: 0.102
