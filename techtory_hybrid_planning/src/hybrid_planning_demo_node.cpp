@@ -59,7 +59,7 @@ int main(int argc, char** argv)
   const std::string action_name = node->get_parameter_or<std::string>(
       "hybrid_planning_action", "/run_hybrid_planning");
   const std::string planning_frame =
-      node->get_parameter_or<std::string>("planning_frame", "world");
+      node->get_parameter_or<std::string>("planning_frame", "cobotta_pro_base_link");
   const std::string tip_link =
       node->get_parameter_or<std::string>("tip_link", "cobotta_pro_tool0");
   const double wait_for_server_timeout =
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 
   // Define the Cartesian goal pose.
   geometry_msgs::msg::PoseStamped desired_pose =
-      makePose(planning_frame, 0.563, 0.120, 0.3, -3.114, 0.156, -3.138);
+      makePose(planning_frame, 0.458, 0.0, 0.413, 3.14, -0.000, 0);
 
   RCLCPP_INFO(logger,
               "Target pose (frame=%s): xyz=[%.3f, %.3f, %.3f] rpy=[%.3f, %.3f, %.3f]",
@@ -147,19 +147,36 @@ int main(int argc, char** argv)
   }
 
   // Validity callback used by setFromIK to discard colliding IK solutions.
+  // We also count how often it runs and which links collide, so we can tell
+  // "IK never converges" apart from "IK converges but every solution collides".
+  std::size_t validity_calls = 0;
+  std::size_t validity_collisions = 0;
+  std::string last_collision_pair;
   auto is_state_valid =
-      [&psm, &logger](moveit::core::RobotState* state,
-                      const moveit::core::JointModelGroup* group,
-                      const double* joint_group_positions) {
+      [&psm, &logger, &validity_calls, &validity_collisions, &last_collision_pair](
+          moveit::core::RobotState* state, const moveit::core::JointModelGroup* group,
+          const double* joint_group_positions) {
+        ++validity_calls;
         state->setJointGroupPositions(group, joint_group_positions);
         state->update();
         planning_scene_monitor::LockedPlanningSceneRO scene(psm);
         collision_detection::CollisionRequest req;
         req.group_name = group->getName();
+        req.contacts = true;
+        req.max_contacts = 1;
         collision_detection::CollisionResult res;
         scene->checkCollision(req, res, *state, scene->getAllowedCollisionMatrix());
         if (res.collision)
-          RCLCPP_DEBUG(logger, "IK candidate rejected: collision detected.");
+        {
+          ++validity_collisions;
+          if (!res.contacts.empty())
+          {
+            const auto& kv = *res.contacts.begin();
+            last_collision_pair = kv.first.first + " <-> " + kv.first.second;
+          }
+          RCLCPP_DEBUG(logger, "IK candidate rejected: collision %s.",
+                       last_collision_pair.c_str());
+        }
         return !res.collision;
       };
 
@@ -184,8 +201,24 @@ int main(int argc, char** argv)
   {
     RCLCPP_ERROR(logger,
                  "Inverse kinematics failed to find a collision-free solution "
-                 "for the requested Cartesian goal after %d attempts.",
-                 kIkAttempts);
+                 "for the requested Cartesian goal after %d attempts "
+                 "(validity callback fired %zu times, %zu rejected by collision; "
+                 "last colliding pair: %s).",
+                 kIkAttempts, validity_calls, validity_collisions,
+                 last_collision_pair.empty() ? "<none>" : last_collision_pair.c_str());
+    if (validity_calls == 0)
+    {
+      RCLCPP_ERROR(logger,
+                   "Validity callback never fired — KDL did not converge to any "
+                   "solution. Pose is likely unreachable or outside joint limits.");
+    }
+    else if (validity_calls == validity_collisions)
+    {
+      RCLCPP_ERROR(logger,
+                   "Every IK solution KDL found was rejected by collision. "
+                   "Either relax the pose, allow collisions with the listed link "
+                   "in the SRDF, or check the planning scene.");
+    }
     rclcpp::shutdown();
     spin_thread.join();
     return 1;

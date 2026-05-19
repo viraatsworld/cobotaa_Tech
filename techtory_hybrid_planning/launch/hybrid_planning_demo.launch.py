@@ -26,6 +26,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def _hybrid_container(context, *args, **kwargs):
@@ -43,8 +44,40 @@ def _hybrid_container(context, *args, **kwargs):
     return [mod.generate_hybrid_planning_container()]
 
 
+def _demo_client_moveit_params():
+    description_pkg_share = get_package_share_directory(
+        "techtory_cobotta_workcell_description"
+    )
+    moveit_pkg_share = get_package_share_directory("techtory_cobotta_moveit")
+
+    moveit_config = (
+        MoveItConfigsBuilder(
+            "techtory_demo_description", package_name="techtory_cobotta_moveit"
+        )
+        .robot_description(
+            file_path=os.path.join(
+                description_pkg_share, "urdf", "techtory_cobotta_workcell.urdf.xacro"
+            )
+        )
+        .robot_description_semantic(
+            file_path=os.path.join(
+                moveit_pkg_share, "config", "techtory_demo_description.srdf"
+            )
+        )
+        .robot_description_kinematics(
+            file_path=os.path.join(moveit_pkg_share, "config", "kinematics.yaml")
+        )
+        .joint_limits(
+            file_path=os.path.join(moveit_pkg_share, "config", "joint_limits.yaml")
+        )
+        .to_moveit_configs()
+    )
+    return moveit_config.to_dict()
+
+
 def generate_launch_description():
     run_demo_client = LaunchConfiguration("run_demo_client")
+    demo_client_moveit_params = _demo_client_moveit_params()
 
     bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -68,6 +101,7 @@ def generate_launch_description():
         name="hybrid_planning_demo_node",
         output="screen",
         parameters=[
+            demo_client_moveit_params,
             {
                 "planning_group": "arm",
                 "hybrid_planning_action": "/run_hybrid_planning",
@@ -77,7 +111,7 @@ def generate_launch_description():
                 # takes 50-90s on this workstation, so the client patiently
                 # polls.
                 "wait_for_server_timeout": 180.0,
-            }
+            },
         ],
         condition=IfCondition(run_demo_client),
     )
