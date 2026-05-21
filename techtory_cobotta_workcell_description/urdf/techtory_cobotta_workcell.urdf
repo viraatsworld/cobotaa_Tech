@@ -15,6 +15,24 @@
 
     Author DENSO WAVE INCORPORATED
   -->
+  <!--
+    Shelf macro — 80×100×30 cm (H×W×D)
+
+    Structure (all dimensions in metres):
+      4 legs  : 0.04 × 0.04 × 0.80
+      3 boards: 0.04 × 1.00 × 0.30  (thickness × width × depth)
+
+    Board Z-centres (origin = shelf bottom):
+      top    : 0.78  (top surface at z=0.80)
+      middle : 0.34  (44 cm clear space below top board bottom)
+      bottom : 0.14  (20 cm clear space below middle board bottom)
+
+    Usage:
+      <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
+      <xacro:shelf prefix="shelf1_" parent="world">
+        <origin xyz="1.0 0.0 0.0" rpy="0 0 0"/>
+      </xacro:shelf>
+  -->
   <!-- <link name="world"/>
 		<joint name="$(arg namespace)joint_w" type="fixed">
 			<parent link="world"/>
@@ -216,7 +234,9 @@
         <param name="min">-0.310886</param>
         <param name="max">0.310886</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -229,7 +249,9 @@
         <param name="min">-0.310886</param>
         <param name="max">0.310886</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.349066</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -242,7 +264,9 @@
         <param name="min">-0.621773</param>
         <param name="max">0.621773</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.309</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -255,7 +279,9 @@
         <param name="min">-0.049741</param>
         <param name="max">0.049741</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -268,7 +294,9 @@
         <param name="min">-0.690860</param>
         <param name="max">0.690860</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.48353</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -281,17 +309,17 @@
         <param name="min">-0.690860</param>
         <param name="max">0.690860</param>
       </command_interface>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-
-      <joint name="rg6_finger_joint">
+    <joint name="rg6_finger_joint">
       <command_interface name="position">
         <param name="min">-0.628319</param>
         <param name="max">0.628319</param>
       </command_interface>
-
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
@@ -304,6 +332,21 @@
     <parent link="robot_base_plate_link"/>
     <child link="cobotta_pro_base_link"/>
   </joint>
+  <!-- RealSense Cameras -->
+  <!-- Isaac Sim spawn: position [-0.65, 0.65, 2.0], rotation_deg [0, 45, -45] (XYZ Euler, Z-up) -->
+  <joint name="camera1_joint" type="fixed">
+    <origin rpy="0 0.785398 -0.785398" xyz="-0.65 0.65 2.0"/>
+    <parent link="cell_link"/>
+    <child link="camera1_link"/>
+  </joint>
+  <link name="camera1_link"/>
+  <!-- ROS optical frame: +Z forward, +X right, +Y down (rotates camera_link by -90° X, -90° Z) -->
+  <joint name="camera1_optical_joint" type="fixed">
+    <origin rpy="-1.5708 0 -1.5708" xyz="0 0 0"/>
+    <parent link="camera1_link"/>
+    <child link="camera1_optical_frame"/>
+  </joint>
+  <link name="camera1_optical_frame"/>
   <joint name="world_cell_joint" type="fixed">
     <parent link="world"/>
     <child link="cell_link"/>
@@ -340,7 +383,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://techtory_cell_description/urdf/mesh/robot_base_link.STL" scale="1 1 1"/>
+        <mesh filename="package://techtory_cell_description/urdf/mesh/robot_base_link.STL" scale="0.9 0.9 1.5"/>
       </geometry>
       <material name="">
         <color rgba="0.85098 0.72157 0.72157 1"/>
@@ -349,14 +392,14 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://techtory_cell_description/urdf/mesh/robot_base_link.STL" scale="1 1 1"/>
+        <mesh filename="package://techtory_cell_description/urdf/mesh/robot_base_link.STL" scale="0.9 0.9 1.5"/>
       </geometry>
     </collision>
   </link>
   <joint name="robot_base_plate_link_joint" type="fixed">
     <parent link="cell_link"/>
     <child link="robot_base_plate_link"/>
-    <origin rpy="0 0 0" xyz="-0.275 -0.24 0.94"/>
+    <origin rpy="0 0 0" xyz="0 -0.3 0.93"/>
   </joint>
   <link name="rg6_base_link">
     <inertial>
@@ -608,7 +651,7 @@
     <mimic joint="rg6_finger_joint" multiplier="1" offset="0"/>
   </joint>
   <transmission name="rg6_finger_joint_trans">
-    <type>transmission_interface/SimpleTransmission</type>+
+    <type>transmission_interface/SimpleTransmission</type>
     <joint name="rg6_finger_joint">
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
@@ -617,54 +660,52 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
-  <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <robotNamespace>/onrobot_rg6</robotNamespace>
-      <robotSimType>gazebo_ros2_control/DefaultRobotHWSim</robotSimType>
-    </plugin>
-  </gazebo>
-  <gazebo>
-    <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_left_inner_knuckle_joint">
-      <joint>finger_joint</joint>
-      <mimicJoint>left_inner_knuckle_joint</mimicJoint>
-      <multiplier>1.0</multiplier>
-      <offset>0.0</offset>
-      <maxEffort>5.0</maxEffort>
-      <!-- <hasPID /> -->
-    </plugin>
-    <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_inner_knuckle_joint">
-      <joint>finger_joint</joint>
-      <mimicJoint>right_inner_knuckle_joint</mimicJoint>
-      <multiplier>1.0</multiplier>
-      <offset>0.0</offset>
-      <maxEffort>5.0</maxEffort>
-      <!-- <hasPID /> -->
-    </plugin>
-    <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_left_inner_finger_joint">
-      <joint>finger_joint</joint>
-      <mimicJoint>left_inner_finger_joint</mimicJoint>
-      <multiplier>-1.0</multiplier>
-      <offset>0.0</offset>
-      <maxEffort>5.0</maxEffort>
-      <!-- <hasPID /> -->
-    </plugin>
-    <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_inner_finger_joint">
-      <joint>finger_joint</joint>
-      <mimicJoint>right_inner_finger_joint</mimicJoint>
-      <multiplier>-1.0</multiplier>
-      <offset>0.0</offset>
-      <maxEffort>5.0</maxEffort>
-      <!-- <hasPID /> -->
-    </plugin>
-    <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_outer_knuckle_joint">
-      <joint>finger_joint</joint>
-      <mimicJoint>right_outer_knuckle_joint</mimicJoint>
-      <multiplier>1.0</multiplier>
-      <offset>0.0</offset>
-      <maxEffort>5.0</maxEffort>
-      <!-- <hasPID /> -->
-    </plugin>
-  </gazebo>
+  <!--
+    <gazebo>
+      <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+        <robotNamespace>/onrobot_rg6</robotNamespace>
+        <robotSimType>gazebo_ros2_control/DefaultRobotHWSim</robotSimType>
+      </plugin> 
+    </gazebo>
+
+    <gazebo>
+      <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_left_inner_knuckle_joint">
+        <joint>finger_joint</joint>
+        <mimicJoint>left_inner_knuckle_joint</mimicJoint>
+        <multiplier>1.0</multiplier>
+        <offset>0.0</offset>
+        <maxEffort>5.0</maxEffort>
+      </plugin>
+      <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_inner_knuckle_joint">
+        <joint>finger_joint</joint>
+        <mimicJoint>right_inner_knuckle_joint</mimicJoint>
+        <multiplier>1.0</multiplier>
+        <offset>0.0</offset>
+        <maxEffort>5.0</maxEffort>
+      </plugin>
+      <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_left_inner_finger_joint">
+        <joint>finger_joint</joint>
+        <mimicJoint>left_inner_finger_joint</mimicJoint>
+        <multiplier>-1.0</multiplier>
+        <offset>0.0</offset>
+        <maxEffort>5.0</maxEffort>
+      </plugin>
+      <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_inner_finger_joint">
+        <joint>finger_joint</joint>
+        <mimicJoint>right_inner_finger_joint</mimicJoint>
+        <multiplier>-1.0</multiplier>
+        <offset>0.0</offset>
+        <maxEffort>5.0</maxEffort>
+      </plugin>
+      <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_right_outer_knuckle_joint">
+        <joint>finger_joint</joint>
+        <mimicJoint>right_outer_knuckle_joint</mimicJoint>
+        <multiplier>1.0</multiplier>
+        <offset>0.0</offset>
+        <maxEffort>5.0</maxEffort>
+      </plugin>
+    </gazebo>
+    -->
   <!-- Fixed joint from cobottaJ6 to rg6_baselink -->
   <joint name="joint_rg6" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -679,4 +720,200 @@
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
   </joint>
   <!-- virtual end-effector link for cobotta_proJ6 -->
+  <!-- ── Material ─────────────────────────────────────────────────── -->
+  <material name="shelf1_steel">
+    <color rgba="0.75 0.75 0.78 1.0"/>
+  </material>
+  <!-- ── Base link (anchor at shelf bottom-centre) ────────────────── -->
+  <link name="shelf1_base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+  <joint name="shelf1_base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="shelf1_base_link"/>
+    <origin rpy="0 0 1.5708" xyz="0.61 0.27 0.9"/>
+  </joint>
+  <link name="shelf1_leg_front_left_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_leg_front_left_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_leg_front_left_link"/>
+    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
+    <origin rpy="0 0 0" xyz="0.48 0.13 0.40"/>
+  </joint>
+  <link name="shelf1_leg_front_right_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_leg_front_right_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_leg_front_right_link"/>
+    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
+    <origin rpy="0 0 0" xyz="0.48 -0.13 0.40"/>
+  </joint>
+  <link name="shelf1_leg_back_left_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_leg_back_left_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_leg_back_left_link"/>
+    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
+    <origin rpy="0 0 0" xyz="-0.48 0.13 0.40"/>
+  </joint>
+  <link name="shelf1_leg_back_right_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_leg_back_right_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_leg_back_right_link"/>
+    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
+    <origin rpy="0 0 0" xyz="-0.48 -0.13 0.40"/>
+  </joint>
+  <link name="shelf1_board_top_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_board_top_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_board_top_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.78"/>
+  </joint>
+  <link name="shelf1_board_middle_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_board_middle_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_board_middle_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.34"/>
+  </joint>
+  <link name="shelf1_board_bottom_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+      <material name="shelf1_steel"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="1.00 0.30 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shelf1_board_bottom_joint" type="fixed">
+    <parent link="shelf1_base_link"/>
+    <child link="shelf1_board_bottom_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.14"/>
+  </joint>
 </robot>
