@@ -77,7 +77,27 @@ def _demo_client_moveit_params():
 
 def generate_launch_description():
     run_demo_client = LaunchConfiguration("run_demo_client")
+    robot_controller = LaunchConfiguration("robot_controller")
+    move_group_enable = LaunchConfiguration("move_group_enable")
     demo_client_moveit_params = _demo_client_moveit_params()
+
+    declared_arguments = [
+        DeclareLaunchArgument(
+            "run_demo_client",
+            default_value="true",
+            description="Whether to start the example HybridPlanner client.",
+        ),
+        DeclareLaunchArgument(
+            "robot_controller",
+            default_value="denso_joint_group_position_controller",
+            description="Robot controller to spawn.",
+        ),
+        DeclareLaunchArgument(
+            "move_group_enable",
+            default_value="false",
+            description="Launch the MoveIt move_group node.",
+        ),
+    ]
 
     bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -86,11 +106,15 @@ def generate_launch_description():
                     [
                         FindPackageShare("techtory_cobotta_bringup"),
                         "launch",
-                        "techtory_cobotta_sw_bringup.launch.py",
+                        "techtory_cobotta_mock_bringup.launch.py",
                     ]
                 )
             ]
-        )
+        ),
+        launch_arguments={
+            "robot_controller": robot_controller,
+            "move_group_enable": move_group_enable,
+        }.items(),
     )
 
     hybrid_container = OpaqueFunction(function=_hybrid_container)
@@ -120,12 +144,8 @@ def generate_launch_description():
     delayed_demo_client = TimerAction(period=10.0, actions=[demo_client_node])
 
     return LaunchDescription(
-        [
-            DeclareLaunchArgument(
-                "run_demo_client",
-                default_value="true",
-                description="Whether to start the example HybridPlanner client.",
-            ),
+        declared_arguments
+        + [
             bringup_launch,
             TimerAction(period=4.0, actions=[hybrid_container]),
             delayed_demo_client,

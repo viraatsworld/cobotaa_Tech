@@ -37,14 +37,14 @@
 
   <xacro:arg name="cvrb_prefix" default="cobotta_pro_"/>
 
-  <!-- arm: mujoco and topic_based load kinematics only; hardware plugin added separately -->
-  <xacro:if value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+  <!-- arm: mujoco, topic_based, and mock load kinematics only; hardware plugin added separately -->
+  <xacro:if value="${hw_type == 'mujoco' or hw_type == 'topic_based' or hw_type == 'mock'}">
     <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
     <xacro:denso_robot_arm_kinematics namespace="$(arg namespace)" model="$(arg model)"/>
   </xacro:if>
 
-  <!-- real and mock modes use the denso_robot macro -->
-  <xacro:unless value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+  <!-- real mode uses the denso_robot macro -->
+  <xacro:unless value="${hw_type == 'mujoco' or hw_type == 'topic_based' or hw_type == 'mock'}">
     <!-- When isaac_control=true, only include kinematics — hardware is provided externally (e.g. moveit FakeSystem) -->
     <xacro:if value="$(arg isaac_control)">
       <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
