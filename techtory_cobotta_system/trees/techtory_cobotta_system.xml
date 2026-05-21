@@ -4,12 +4,12 @@
   <BehaviorTree ID="main">
     <KeepRunningUntilFailure>
       <Sequence>
-        <CreatePose x="0.458"
-                    y="0.0"
-                    z="0.413"
-                    roll="3.14"
+        <CreatePose x="0.390"
+                    y="0.120"
+                    z="0.310"
+                    roll="3.142"
                     pitch="0.0"
-                    yaw="0.0"
+                    yaw="3.142"
                     frame_id="cobotta_pro_base_link"
                     target_posestamp="{goal}"/>
         <ComputePathToPose target_group="arm"
@@ -27,12 +27,12 @@
                           server_timeout="100000ms"
                           trajectory="{trajectory}"
                           error_code_id="{error_code_id}"/>
-        <CreatePose x="0.358"
-                    y="0.116"
-                    z="0.413"
+        <CreatePose x="0.45"
+                    y="0.0"
+                    z="0.410"
                     roll="3.14"
                     pitch="0.0"
-                    yaw="0.0"
+                    yaw="3.14"
                     frame_id="cobotta_pro_base_link"
                     target_posestamp="{goal}"/>
         <ComputePathToPose target_group="arm"
