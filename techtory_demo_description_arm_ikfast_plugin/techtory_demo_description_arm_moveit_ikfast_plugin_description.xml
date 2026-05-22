@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<library path="techtory_demo_description_arm_moveit_ikfast_plugin">
+  <class name="techtory_demo_description_arm/IKFastKinematicsPlugin" type="techtory_demo_description_arm::IKFastKinematicsPlugin" base_class_type="kinematics::KinematicsBase">
+    <description>IKFast61 plugin for closed-form kinematics of techtory_demo_description arm</description>
+  </class>
+</library>
