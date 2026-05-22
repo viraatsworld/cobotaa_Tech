@@ -129,12 +129,28 @@ def generate_launch_description():
             {
                 "planning_group": "arm",
                 "hybrid_planning_action": "/run_hybrid_planning",
+                "planning_frame": "cobotta_pro_base_link",
+                "tip_link": "cobotta_pro_tool0",
                 # Each composable component (global, local, manager) loads a
                 # robot model + planning scene monitor + OMPL pipeline before
                 # the manager exposes /run_hybrid_planning. Empirically this
                 # takes 50-90s on this workstation, so the client patiently
                 # polls.
                 "wait_for_server_timeout": 180.0,
+                # Welding-demo-style waypoint list: each name in
+                # `waypoint_names` is expanded via `waypoints.<name>.*` params.
+                "waypoint_names": ["approach"],
+                # type "cartesian": absolute pose in `planning_frame`
+                # (cobotta_pro_base_link). type "cartesian_relative": delta
+                # from previous waypoint's TCP, expressed in planning_frame.
+                "waypoints.approach.type": "cartesian",
+                "waypoints.approach.x": 0.4,
+                "waypoints.approach.y": 0.0,
+                "waypoints.approach.z": 0.4,
+                "waypoints.approach.roll": 3.14,
+                "waypoints.approach.pitch": 0.0,
+                "waypoints.approach.yaw": 3.14,
+                "waypoints.approach.blend_radius": 0.0,
             },
         ],
         condition=IfCondition(run_demo_client),

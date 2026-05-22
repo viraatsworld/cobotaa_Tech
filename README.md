@@ -52,7 +52,7 @@ ros2 launch techtory_cobotta_system techtory_cobotta_system.launch.py
 Send Goal: 
 
 ```bash
-ros2 action send_goal /start_application man2_msgs/action/RunApplication "{behavior_tree_filename: '/home/adm-vsp/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/trees/techtory_cobotta_system.xml'}"
+ros2 action send_goal /start_application man2_msgs/action/RunApplication "{behavior_tree_filename: '/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/trees/techtory_cobotta_system.xml'}"
 ```
 
 ## Installation Guides

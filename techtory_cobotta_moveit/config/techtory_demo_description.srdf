@@ -48,6 +48,13 @@
     <disable_collisions link1="cell_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="rg6_base_link" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_left_outer_knuckle" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_left_inner_knuckle" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_left_inner_finger" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_right_outer_knuckle" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_right_inner_knuckle" reason="Never"/>
+    <disable_collisions link1="cell_link" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_J2" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_J3" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_J4" reason="Never"/>
