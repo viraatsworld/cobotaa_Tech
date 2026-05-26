@@ -37,7 +37,22 @@ ament_target_dependencies(hybrid_planning_demo_node
   tf2_ros
 )
 
-install(TARGETS hybrid_planning_demo_node
+add_executable(hybrid_planning_demo2_node src/hybrid_planning_demo2_node.cpp)
+ament_target_dependencies(hybrid_planning_demo2_node
+  rclcpp
+  rclcpp_action
+  moveit_msgs
+  moveit_core
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  geometry_msgs
+  shape_msgs
+  trajectory_msgs
+  tf2
+  tf2_ros
+)
+
+install(TARGETS hybrid_planning_demo_node hybrid_planning_demo2_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

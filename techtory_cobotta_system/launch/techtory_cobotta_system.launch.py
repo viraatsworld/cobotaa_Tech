@@ -83,10 +83,23 @@ def launch_setup(context, *args, **kwargs):
         # prefix=["xterm -e gdb -ex run --args"],
     )
 
+    launch_hybrid_planning = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("techtory_hybrid_planning"),
+                    "launch",
+                    "hybrid_planning.launch.py",
+                ]
+            )
+        ),
+    )
+
     return [
         launch_bt_core,
         moveit_config_server,
         moveit_skill_server_node,
+        launch_hybrid_planning,
     ]
 
 

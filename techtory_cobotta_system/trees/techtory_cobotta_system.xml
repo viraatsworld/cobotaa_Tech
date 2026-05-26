@@ -4,114 +4,76 @@
   <BehaviorTree ID="main">
     <KeepRunningUntilFailure>
       <Sequence>
-        <CreatePose x="0.390"
-                    y="0.120"
-                    z="0.310"
-                    roll="3.142"
-                    pitch="0.0"
-                    yaw="3.142"
-                    frame_id="cobotta_pro_base_link"
-                    target_posestamp="{goal}"/>
-        <ComputePathToPose target_group="arm"
-                          server_name="compute_path_to_pose"
-                          server_timeout="2000ms"
-                          target_pose="{goal}"
-                          planning_pipeline="pilz_industrial_motion_planner"
-                          planner_id="PTP"
-                          ik_frame="cobotta_pro_tool0"
-                          path_constraints=""
-                          trajectory="{trajectory}"
-                          error_code_id="{error_code_id}"/>
-        <ExecuteTrajectory target_group="arm"
-                          server_name="execute_trajectory"
-                          server_timeout="100000ms"
-                          trajectory="{trajectory}"
-                          error_code_id="{error_code_id}"/>
-        <CreatePose x="0.45"
-                    y="0.0"
-                    z="0.410"
-                    roll="3.14"
-                    pitch="0.0"
-                    yaw="3.14"
-                    frame_id="cobotta_pro_base_link"
-                    target_posestamp="{goal}"/>
-        <ComputePathToPose target_group="arm"
-                          server_name="compute_path_to_pose"
-                          server_timeout="2000ms"
-                          target_pose="{goal}"
-                          planning_pipeline="pilz_industrial_motion_planner"
-                          planner_id="PTP"
-                          ik_frame="cobotta_pro_tool0"
-                          path_constraints=""
-                          trajectory="{trajectory}"
-                          error_code_id="{error_code_id}"/>
-        <ExecuteTrajectory target_group="arm"
-                          server_name="execute_trajectory"
-                          server_timeout="100000ms"
-                          trajectory="{trajectory}"
-                          error_code_id="{error_code_id}"/>
+        <CreateWaypoints names="pose_a;pose_b"
+                         xs="0.450;0.390"
+                         ys="0.000;0.120"
+                         zs="0.410;0.310"
+                         rolls="3.140;3.142"
+                         pitches="0.0;0.0"
+                         yaws="3.140;3.142"
+                         frame_id="cobotta_pro_base_link"
+                         target_posestamps="{waypoints}"/>
+        <GenerateWaypoints waypoints="{waypoints}"
+                           planning_group="arm"
+                           planning_frame="cobotta_pro_base_link"
+                           tip_link="cobotta_pro_tool0"
+                           pipeline_id="ompl"
+                           planner_id="RRTConnect"
+                           allowed_planning_time="5.0"
+                           velocity_scaling="0.1"
+                           acceleration_scaling="0.1"
+                           blend_radius="0.0"
+                           ik_timeout="0.5"
+                           motion_sequence="{motion_sequence}"/>
+        <ExecuteHybridPlan server_name="run_hybrid_planning"
+                           server_timeout="120000ms"
+                           planning_group="arm"
+                           motion_sequence="{motion_sequence}"
+                           error_code_id="{hp_error_code_id}"
+                           error_message="{hp_error_message}"/>
       </Sequence>
     </KeepRunningUntilFailure>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
-    <Action ID="ComputePathToPose">
-      <input_port name="target_group"
-                  type="std::string">Move group to plan for</input_port>
-      <input_port name="server_name"
-                  default="compute_path_to_pose"
-                  type="std::string">Action&#10;                server name</input_port>
-      <input_port name="server_timeout"
-                  default="1000ms"
-                  type="std::chrono::milliseconds">Action&#10;                server timeout</input_port>
-      <input_port name="target_pose"
-                  type="geometry_msgs::msg::PoseStamped">Target&#10;                end-effector pose</input_port>
-      <input_port name="planning_pipeline"
-                  type="std::string">Optional planning&#10;                pipeline name</input_port>
-      <input_port name="planner_id"
-                  type="std::string">Optional planner identifier</input_port>
-      <input_port name="ik_frame"
-                  type="std::string">Optional IK frame override</input_port>
-      <input_port name="path_constraints"
-                  type="moveit_msgs::msg::Constraints">Optional path&#10;                constraints to enforce</input_port>
-      <output_port name="trajectory"
-                   type="moveit_msgs::msg::RobotTrajectory">Generated joint&#10;                trajectory</output_port>
-      <output_port name="error_code_id"
-                   type="int32_t">MoveIt error code (ComputePathResult)</output_port>
+    <Action ID="CreateWaypoints">
+      <input_port name="names" type="std::vector&lt;std::string&gt;">Optional name labels</input_port>
+      <input_port name="xs" type="std::vector&lt;double&gt;">X translations</input_port>
+      <input_port name="ys" type="std::vector&lt;double&gt;">Y translations</input_port>
+      <input_port name="zs" type="std::vector&lt;double&gt;">Z translations</input_port>
+      <input_port name="rolls" type="std::vector&lt;double&gt;">Rolls (rad)</input_port>
+      <input_port name="pitches" type="std::vector&lt;double&gt;">Pitches (rad)</input_port>
+      <input_port name="yaws" type="std::vector&lt;double&gt;">Yaws (rad)</input_port>
+      <input_port name="frame_id" default="world" type="std::string">Frame</input_port>
+      <output_port name="target_posestamps"
+                   type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Generated waypoints</output_port>
     </Action>
-    <Action ID="CreatePose">
-      <input_port name="x"
-                  type="double">Pose X translation (meters)</input_port>
-      <input_port name="y"
-                  type="double">Pose Y translation (meters)</input_port>
-      <input_port name="z"
-                  type="double">Pose Z translation (meters)</input_port>
-      <input_port name="roll"
-                  type="double">Roll component (radians)</input_port>
-      <input_port name="pitch"
-                  type="double">Pitch component (radians)</input_port>
-      <input_port name="yaw"
-                  type="double">Yaw component (radians)</input_port>
-      <input_port name="frame_id"
-                  default="world"
-                  type="std::string">Frame for the generated&#10;                pose</input_port>
-      <output_port name="target_posestamp"
-                   type="geometry_msgs::msg::PoseStamped">Generated&#10;                pose</output_port>
+    <Action ID="GenerateWaypoints">
+      <input_port name="waypoints"
+                  type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Input waypoints</input_port>
+      <input_port name="planning_group" default="arm" type="std::string">MoveIt group</input_port>
+      <input_port name="planning_frame" default="cobotta_pro_base_link" type="std::string">Frame</input_port>
+      <input_port name="tip_link" default="cobotta_pro_tool0" type="std::string">IK tip link</input_port>
+      <input_port name="pipeline_id" default="ompl" type="std::string">Pipeline ID</input_port>
+      <input_port name="planner_id" default="RRTConnect" type="std::string">Planner ID</input_port>
+      <input_port name="allowed_planning_time" default="5.0" type="double">Planning time (s)</input_port>
+      <input_port name="velocity_scaling" default="0.1" type="double">Velocity scaling</input_port>
+      <input_port name="acceleration_scaling" default="0.1" type="double">Acceleration scaling</input_port>
+      <input_port name="blend_radius" default="0.0" type="double">Blend radius</input_port>
+      <input_port name="ik_timeout" default="0.5" type="double">IK timeout (s)</input_port>
+      <output_port name="motion_sequence"
+                   type="moveit_msgs::msg::MotionSequenceRequest">Resolved sequence</output_port>
     </Action>
-    <Action ID="ExecuteTrajectory">
-      <input_port name="target_group"
-                  type="std::string">Move group executing the trajectory</input_port>
-      <input_port name="server_name"
-                  default="execute_trajectory"
-                  type="std::string">Action&#10;                server name</input_port>
-      <input_port name="server_timeout"
-                  default="1000ms"
-                  type="std::chrono::milliseconds">Action&#10;                server timeout</input_port>
-      <input_port name="trajectory"
-                  type="moveit_msgs::msg::RobotTrajectory">Trajectory to&#10;                execute</input_port>
-      <output_port name="error_code_id"
-                   type="int32_t">Execution result error code</output_port>
+    <Action ID="ExecuteHybridPlan">
+      <input_port name="server_name" default="run_hybrid_planning" type="std::string">Action server</input_port>
+      <input_port name="server_timeout" default="120000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="planning_group" type="std::string">Planning group</input_port>
+      <input_port name="motion_sequence"
+                  type="moveit_msgs::msg::MotionSequenceRequest">Sequence to execute</input_port>
+      <output_port name="error_code_id" type="int32_t">MoveIt error code</output_port>
+      <output_port name="error_message" type="std::string">Server error message</output_port>
     </Action>
   </TreeNodesModel>
 
