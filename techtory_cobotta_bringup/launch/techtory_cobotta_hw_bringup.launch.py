@@ -151,6 +151,14 @@ def generate_launch_description():
         )
     )
 
+    declared_arguments.append(
+    DeclareLaunchArgument(
+        "gripper_controller",
+        default_value="onrobot_rg6",
+        description="Gripper controller to spawn.",
+    )
+)
+
     denso_robot_model = LaunchConfiguration("model")
     ip_address = LaunchConfiguration("ip_address")
     send_format = LaunchConfiguration("send_format")
@@ -170,6 +178,8 @@ def generate_launch_description():
     verbose = LaunchConfiguration("verbose")
     cvrb_prefix = LaunchConfiguration("cvrb_prefix")
     hardware_type = LaunchConfiguration("hardware_type")
+    gripper_controller = LaunchConfiguration("gripper_controller")
+
 
     denso_robot_core_pkg = get_package_share_directory("denso_robot_core")
     denso_robot_control_parameters = {
@@ -305,6 +315,12 @@ def generate_launch_description():
         
     )
 
+    gripper_controller_spawner = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=[gripper_controller, "--controller-manager", "/controller_manager"],
+    )
+
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -351,7 +367,8 @@ def generate_launch_description():
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             robot_controller_spawner,
-            world2robot_tf_node,
+            #world2robot_tf_node,
+            gripper_controller_spawner,
             rviz_node,
             move_group_node,
 

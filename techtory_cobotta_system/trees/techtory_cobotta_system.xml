@@ -3,12 +3,12 @@
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
     <Sequence>
-      <CreatePose x="0.458"
-                  y="0.116"
-                  z="0.513"
-                  roll="-3.114"
-                  pitch="0.156"
-                  yaw="-3.138"
+      <CreatePose x="0.562"
+                  y="-0.254"
+                  z="0.570"
+                  roll="-3.118"
+                  pitch="1.486"
+                  yaw="1.601" 
                   frame_id="cobotta_pro_base_link"
                   target_posestamp="{goal}"/>
       <ComputePathToPose target_group="arm"

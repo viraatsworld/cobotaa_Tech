@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" main_tree_to_execute="open_gripper">
+  <BehaviorTree ID="open_gripper">
+    <Sequence>
+      <!-- Adjust `position` to match your gripper: 0.0=closed, 1.0=open -->
+      <GripperCommand server_name="/onrobot_rg6/gripper_cmd"
+                      server_timeout="1000ms"
+                      position="1.0"
+                      max_effort="1.0"
+                      error_code_id="{error_code_id}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="close_gripper">
+    <Sequence>
+      <GripperCommand server_name="/onrobot_rg6/gripper_cmd"
+                      server_timeout="1000ms"
+                      position="0.0"
+                      max_effort="1.0"
+                      error_code_id="{error_code_id}"/>
+    </Sequence>
+  </BehaviorTree>
+
+</root>

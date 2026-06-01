@@ -356,7 +356,7 @@ def generate_launch_description():
             joint_state_broadcaster_spawner,
             robot_controller_spawner,
             gripper_controller_spawner,
-            world2robot_tf_node,
+            #world2robot_tf_node,
             rviz_node,
             move_group_node,
 

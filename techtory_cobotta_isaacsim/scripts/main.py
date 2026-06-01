@@ -26,7 +26,7 @@ simulation_app.update()
 from omni.isaac.core import World
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
-from spawners.spawn_objects import add_soda_can, add_techtory_cell, add_shelf
+from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
 # 1. Initialize the World (This automatically creates the stage and Physics Scene)
@@ -41,7 +41,7 @@ def build_world():
     add_world(stage)
     add_techtory_cell(stage, "/World/TechtoryCell")  # prim_path unused (sublayer load)
     add_shelf(stage, "/World/Shelf")
-    add_soda_can(stage, "/World/Shelf/SodaCan")
+    add_hammer(stage, "/World/Shelf/Hammer")
     # Add RealSense rsd455 camera + ROS2 publishers (rgb + point cloud)
     camera_prim_path = add_realsense_camera(
         stage,

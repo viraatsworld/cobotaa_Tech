@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    Shelf macro — 80×100×30 cm (H×W×D)
+
+    Structure (all dimensions in metres):
+      4 legs  : 0.04 × 0.04 × 0.80
+      3 boards: 0.04 × 1.00 × 0.30  (thickness × width × depth)
+
+    Board Z-centres (origin = shelf bottom):
+      top    : 0.78  (top surface at z=0.80)
+      middle : 0.34  (44 cm clear space below top board bottom)
+      bottom : 0.14  (20 cm clear space below middle board bottom)
+
+    Usage:
+      <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
+      <xacro:shelf prefix="shelf1_" parent="world">
+        <origin xyz="1.0 0.0 0.0" rpy="0 0 0"/>
+      </xacro:shelf>
+  -->
+
+  <xacro:macro name="shelf" params="prefix parent *origin">
+
+    <!-- ── Material ─────────────────────────────────────────────────── -->
+    <material name="${prefix}steel">
+      <color rgba="0.75 0.75 0.78 1.0"/>
+    </material>
+
+    <!-- ── Base link (zero-inertia anchor at shelf bottom-centre) ───── -->
+    <link name="${prefix}base_link"/>
+
+    <joint name="${prefix}base_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child  link="${prefix}base_link"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <!-- ── Leg macro ─────────────────────────────────────────────────── -->
+    <!-- leg_x / leg_y : signed corner offsets from shelf centre -->
+    <xacro:macro name="shelf_leg" params="suffix leg_x leg_y">
+      <link name="${prefix}leg_${suffix}_link">
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry><box size="0.04 0.04 0.80"/></geometry>
+          <material name="${prefix}steel"/>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry><box size="0.04 0.04 0.80"/></geometry>
+        </collision>
+      </link>
+      <joint name="${prefix}leg_${suffix}_joint" type="fixed">
+        <parent link="${prefix}base_link"/>
+        <child  link="${prefix}leg_${suffix}_link"/>
+        <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
+        <origin xyz="${leg_x} ${leg_y} 0.40" rpy="0 0 0"/>
+      </joint>
+    </xacro:macro>
+
+    <!-- four corner legs (x = ±0.48 m, y = ±0.13 m) -->
+    <xacro:shelf_leg suffix="front_left"  leg_x=" 0.48" leg_y=" 0.13"/>
+    <xacro:shelf_leg suffix="front_right" leg_x=" 0.48" leg_y="-0.13"/>
+    <xacro:shelf_leg suffix="back_left"   leg_x="-0.48" leg_y=" 0.13"/>
+    <xacro:shelf_leg suffix="back_right"  leg_x="-0.48" leg_y="-0.13"/>
+
+    <!-- ── Board macro ───────────────────────────────────────────────── -->
+    <xacro:macro name="shelf_board" params="suffix board_z">
+      <link name="${prefix}board_${suffix}_link">
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry><box size="1.00 0.30 0.04"/></geometry>
+          <material name="${prefix}steel"/>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry><box size="1.00 0.30 0.04"/></geometry>
+        </collision>
+      </link>
+      <joint name="${prefix}board_${suffix}_joint" type="fixed">
+        <parent link="${prefix}base_link"/>
+        <child  link="${prefix}board_${suffix}_link"/>
+        <origin xyz="0 0 ${board_z}" rpy="0 0 0"/>
+      </joint>
+    </xacro:macro>
+
+    <!-- top board   : centre at z=0.78 (top surface flush with leg tops at z=0.80) -->
+    <!-- middle board: centre at z=0.34 (44 cm clear space below top board)         -->
+    <!-- bottom board: centre at z=0.14 (20 cm clear space below middle board)      -->
+    <xacro:shelf_board suffix="top"    board_z="0.78"/>
+    <xacro:shelf_board suffix="middle" board_z="0.34"/>
+    <xacro:shelf_board suffix="bottom" board_z="0.14"/>
+
+  </xacro:macro>
+
+</robot>

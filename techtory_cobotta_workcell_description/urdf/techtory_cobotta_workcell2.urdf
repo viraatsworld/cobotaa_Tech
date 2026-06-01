@@ -15,24 +15,6 @@
 
     Author DENSO WAVE INCORPORATED
   -->
-  <!--
-    Shelf macro — 80×100×30 cm (H×W×D)
-
-    Structure (all dimensions in metres):
-      4 legs  : 0.04 × 0.04 × 0.80
-      3 boards: 0.04 × 1.00 × 0.30  (thickness × width × depth)
-
-    Board Z-centres (origin = shelf bottom):
-      top    : 0.78  (top surface at z=0.80)
-      middle : 0.34  (44 cm clear space below top board bottom)
-      bottom : 0.14  (20 cm clear space below middle board bottom)
-
-    Usage:
-      <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
-      <xacro:shelf prefix="shelf1_" parent="world">
-        <origin xyz="1.0 0.0 0.0" rpy="0 0 0"/>
-      </xacro:shelf>
-  -->
   <!-- <link name="world"/>
 		<joint name="$(arg namespace)joint_w" type="fixed">
 			<parent link="world"/>
@@ -234,9 +216,7 @@
         <param name="min">-0.310886</param>
         <param name="max">0.310886</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.0</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -249,9 +229,7 @@
         <param name="min">-0.310886</param>
         <param name="max">0.310886</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.349066</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -264,9 +242,7 @@
         <param name="min">-0.621773</param>
         <param name="max">0.621773</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">1.309</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -279,9 +255,7 @@
         <param name="min">-0.049741</param>
         <param name="max">0.049741</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.0</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -294,9 +268,7 @@
         <param name="min">-0.690860</param>
         <param name="max">0.690860</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">1.48353</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -309,21 +281,17 @@
         <param name="min">-0.690860</param>
         <param name="max">0.690860</param>
       </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.0</param>
-      </state_interface>
+      <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-    <joint name="rg6_finger_joint">
+
+      <joint name="rg6_finger_joint">
       <command_interface name="position">
         <param name="min">-0.628319</param>
         <param name="max">0.628319</param>
       </command_interface>
-      <command_interface name="acceleration">
-        <param name="min">-0.310886</param>
-        <param name="max">0.310886</param>
-      </command_interface>
+
       <state_interface name="position"/>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
@@ -336,21 +304,6 @@
     <parent link="robot_base_plate_link"/>
     <child link="cobotta_pro_base_link"/>
   </joint>
-  <!-- RealSense Cameras -->
-  <!-- Isaac Sim spawn: position [-0.65, 0.65, 2.0], rotation_deg [0, 45, -45] (XYZ Euler, Z-up) -->
-  <joint name="camera1_joint" type="fixed">
-    <origin rpy="0 0.785398 -0.785398" xyz="-0.65 0.65 2.0"/>
-    <parent link="cell_link"/>
-    <child link="camera1_link"/>
-  </joint>
-  <link name="camera1_link"/>
-  <!-- ROS optical frame: +Z forward, +X right, +Y down (rotates camera_link by -90° X, -90° Z) -->
-  <joint name="camera1_optical_joint" type="fixed">
-    <origin rpy="-1.5708 0 -1.5708" xyz="0 0 0"/>
-    <parent link="camera1_link"/>
-    <child link="camera1_optical_frame"/>
-  </joint>
-  <link name="camera1_optical_frame"/>
   <joint name="world_cell_joint" type="fixed">
     <parent link="world"/>
     <child link="cell_link"/>
@@ -612,7 +565,7 @@
     <parent link="rg6_base_link"/>
     <child link="rg6_left_outer_knuckle"/>
     <axis xyz="-1 0 0"/>
-    <limit effort="1000" lower="-0.628319" upper="0.628319" velocity="2.0"/>
+    <limit effort="1000" lower="-0.628319" upper="0.628319" velocity="2.0" acceleration="1.0"/>
   </joint>
   <joint name="rg6_left_inner_knuckle_joint" type="revolute">
     <origin rpy="0 0 0.0" xyz="0 -0.01272 0.159500"/>
@@ -655,7 +608,7 @@
     <mimic joint="rg6_finger_joint" multiplier="1" offset="0"/>
   </joint>
   <transmission name="rg6_finger_joint_trans">
-    <type>transmission_interface/SimpleTransmission</type>
+    <type>transmission_interface/SimpleTransmission</type>+
     <joint name="rg6_finger_joint">
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
@@ -717,161 +670,6 @@
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="cobotta_pro_J6"/>
     <child link="rg6_base_link"/>
-  </joint>
-  <!-- ── Material ─────────────────────────────────────────────────── -->
-  <material name="shelf_steel">
-    <color rgba="0.75 0.75 0.78 1.0"/>
-  </material>
-  <!-- ── Base link (zero-inertia anchor at shelf bottom-centre) ───── -->
-  <link name="shelf_base_link"/>
-  <joint name="shelf_base_joint" type="fixed">
-    <parent link="world"/>
-    <child link="shelf_base_link"/>
-    <origin rpy="0 0 1.5708" xyz="0.61 0.27 0.9"/>
-  </joint>
-  <link name="shelf_leg_front_left_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_leg_front_left_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_leg_front_left_link"/>
-    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
-    <origin rpy="0 0 0" xyz="0.48 0.13 0.40"/>
-  </joint>
-  <link name="shelf_leg_front_right_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_leg_front_right_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_leg_front_right_link"/>
-    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
-    <origin rpy="0 0 0" xyz="0.48 -0.13 0.40"/>
-  </joint>
-  <link name="shelf_leg_back_left_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_leg_back_left_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_leg_back_left_link"/>
-    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
-    <origin rpy="0 0 0" xyz="-0.48 0.13 0.40"/>
-  </joint>
-  <link name="shelf_leg_back_right_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="0.04 0.04 0.80"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_leg_back_right_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_leg_back_right_link"/>
-    <!-- centre of 0.80 m leg sits at z=0.40 above shelf origin -->
-    <origin rpy="0 0 0" xyz="-0.48 -0.13 0.40"/>
-  </joint>
-  <link name="shelf_board_top_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_board_top_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_board_top_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0.78"/>
-  </joint>
-  <link name="shelf_board_middle_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_board_middle_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_board_middle_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0.34"/>
-  </joint>
-  <link name="shelf_board_bottom_link">
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-      <material name="shelf_steel"/>
-    </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <box size="1.00 0.30 0.04"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="shelf_board_bottom_joint" type="fixed">
-    <parent link="shelf_base_link"/>
-    <child link="shelf_board_bottom_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0.14"/>
   </joint>
   <!-- virtual end-effector link for cobotta_proJ6 -->
   <link name="cobotta_pro_tool0"/>

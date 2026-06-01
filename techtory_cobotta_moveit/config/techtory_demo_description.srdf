@@ -21,15 +21,15 @@
         <joint name="cobotta_pro_joint_5" value="1.1426"/>
         <joint name="cobotta_pro_joint_6" value="0"/>
     </group_state>
-    <group name="gripper">
+    <!-- <group name="gripper">
         <joint name="rg6_finger_joint"/>
     </group>
     <group_state name="gripper_open" group="gripper">
         <joint name="rg6_finger_joint" value="-0.63"/>
     </group_state>
     <group_state name="gripper_closed" group="gripper">
-        <joint name="rg6_finger_joint" value="0.62"/>
-    </group_state>
+        <joint name="rg6_finger_joint" value="0.6"/>
+    </group_state> -->
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
       <end_effector name="cobotta_pro_eef"
                 parent_link="cobotta_pro_tool0"
@@ -37,24 +37,27 @@
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="tool_tip0" type="fixed" parent_frame="world" child_link="cell_link"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
-    <disable_collisions link1="cell_link" link2="cobotta_pro_J1" reason="Never"/>
+    <!-- <disable_collisions link1="cell_link" link2="cobotta_pro_J1" reason="Never"/>
     <disable_collisions link1="cell_link" link2="cobotta_pro_J4" reason="Default"/>
     <disable_collisions link1="cell_link" link2="cobotta_pro_J5" reason="Default"/>
     <disable_collisions link1="cell_link" link2="cobotta_pro_J6" reason="Default"/>
-    <disable_collisions link1="cell_link" link2="cobotta_pro_base_link" reason="Default"/>
+    <disable_collisions link1="cell_link" link2="cobotta_pro_base_link" reason="Default"/> -->
+
+
     <disable_collisions link1="cell_link" link2="robot_base_plate_link" reason="Adjacent"/>
 
 
+<!-- 
     <disable_collisions link1="cell_link" link2="rg6_left_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_left_inner_knuckle" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_left_inner_finger" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_base_link" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_right_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_right_inner_knuckle" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="rg6_right_inner_finger" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="rg6_right_inner_finger" reason="Adjacent"/> -->
 
 
-    <disable_collisions link1="rg6_base_link" link2="rg6_left_outer_knuckle" reason="Adjacent"/>
+    <!-- <disable_collisions link1="rg6_base_link" link2="rg6_left_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_right_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_left_inner_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_right_inner_knuckle" reason="Adjacent"/>
@@ -64,7 +67,7 @@
     <disable_collisions link1="rg6_right_outer_knuckle" link2="rg6_right_inner_finger" reason="Adjacent"/>
     <disable_collisions link1="rg6_left_inner_finger" link2="rg6_left_inner_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_right_inner_finger" link2="rg6_right_inner_knuckle" reason="Adjacent"/>
-    <disable_collisions link1="cobotta_pro_J6" link2="rg6_base_link" reason="Adjacent"/>
+    <disable_collisions link1="cobotta_pro_J6" link2="rg6_base_link" reason="Adjacent"/> -->
 
 
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_J2" reason="Adjacent"/>
@@ -84,4 +87,31 @@
     <disable_collisions link1="cobotta_pro_J4" link2="cobotta_pro_J6" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J5" link2="cobotta_pro_J6" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_base_link" link2="robot_base_plate_link" reason="Adjacent"/>
+
+
+    <disable_collisions link1="cell_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_top_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_middle_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_bottom_link" reason="Adjacent"/>
+
+
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+
+
+
+
 </robot>

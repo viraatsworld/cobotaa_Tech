@@ -7,10 +7,14 @@
     <!-- Gripper Xacro -->
   <xacro:include filename="$(find onrobot_rg_description)/urdf/onrobot_rg6_model_macro.xacro" />
 
-
+  <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
   <xacro:arg name="parent" default="world" />
   <xacro:arg name="prefix" default="" />
   <xacro:arg name="gripper_prefix" default="rg6_" />
+
+
+
+
 
   <xacro:arg name="isaac_control" default="false" />
 
@@ -119,6 +123,11 @@
     <parent link="$(arg cvrb_prefix)J6"/>
     <child link="$(arg gripper_prefix)base_link"/>
   </joint>
+
+
+  <xacro:shelf prefix="shelf_" parent="$(arg parent)">
+    <origin xyz="0.61 0.27 0.94" rpy="0 0 1.5708"/>
+  </xacro:shelf>
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
 <link name="cobotta_pro_tool0" />
