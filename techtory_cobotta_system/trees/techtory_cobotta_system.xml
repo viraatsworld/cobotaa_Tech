@@ -3,12 +3,37 @@
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
     <Sequence>
-      <CreatePose x="0.562"
-                  y="-0.254"
-                  z="0.570"
-                  roll="-3.118"
-                  pitch="1.486"
-                  yaw="1.601" 
+
+      <CreatePose x="0.460"
+                  y="-0.866"
+                  z="0.400"
+                  roll="-3.135"
+                  pitch="0.822"
+                  yaw="1.563" 
+                  frame_id="cobotta_pro_base_link"
+                  target_posestamp="{goal2}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal2}"
+                         planning_pipeline="ompl"
+                         planner_id=""
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <CreatePose x="0.815"
+                  y="0.147"
+                  z="0.045"
+                  roll="3.135"
+                  pitch="0"
+                  yaw="-3.116"
                   frame_id="cobotta_pro_base_link"
                   target_posestamp="{goal}"/>
       <ComputePathToPose target_group="arm"
@@ -27,6 +52,7 @@
                          trajectory="{trajectory}"
                          error_code_id="{error_code_id}"/>
     </Sequence>
+
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
