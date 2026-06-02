@@ -4,6 +4,7 @@
   <xacro:arg name="model" default="cvrb0609"/>
   <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_macro.xacro"/>
   <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/cobotta_hardware.ros2_control.xacro"/>
+  <xacro:include filename="$(find techtory_cobotta_workcell_description)/urdf/shelf.xacro"/>
     <!-- Gripper Xacro -->
   <xacro:include filename="$(find onrobot_rg_description)/urdf/onrobot_rg6_model_macro.xacro" />
 
@@ -40,14 +41,14 @@
 
   <xacro:arg name="cvrb_prefix" default="cobotta_pro_"/>
 
-  <!-- arm: mujoco and topic_based load kinematics only; hardware plugin added separately -->
-  <xacro:if value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+  <!-- arm: mujoco, topic_based, and mock load kinematics only; hardware plugin added separately -->
+  <xacro:if value="${hw_type == 'mujoco' or hw_type == 'topic_based' or hw_type == 'mock'}">
     <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
     <xacro:denso_robot_arm_kinematics namespace="$(arg namespace)" model="$(arg model)"/>
   </xacro:if>
 
-  <!-- real and mock modes use the denso_robot macro -->
-  <xacro:unless value="${hw_type == 'mujoco' or hw_type == 'topic_based'}">
+  <!-- real mode uses the denso_robot macro -->
+  <xacro:unless value="${hw_type == 'mujoco' or hw_type == 'topic_based' or hw_type == 'mock'}">
     <!-- When isaac_control=true, only include kinematics — hardware is provided externally (e.g. moveit FakeSystem) -->
     <xacro:if value="$(arg isaac_control)">
       <xacro:include filename="$(find denso_robot_descriptions)/robots/$(arg model)/urdf/denso_robot_kinematics.xacro"/>
@@ -130,13 +131,16 @@
   </xacro:shelf>
 
   <!-- virtual end-effector link for cobotta_proJ6 -->
-<link name="cobotta_pro_tool0" />
-<joint name="cobotta_pro_tool0_joint" type="fixed">
-  <parent link="$(arg gripper_prefix)base_link" />
-  <child link="cobotta_pro_tool0" />
-  <origin xyz="0 0 0.25" rpy="0 0 0" />
-</joint>
-  <!-- virtual end-effector link for cobotta_proJ6 -->
-  
+  <link name="cobotta_pro_tool0" />
+  <joint name="cobotta_pro_tool0_joint" type="fixed">
+    <parent link="$(arg gripper_prefix)base_link" />
+    <child link="cobotta_pro_tool0" />
+    <origin xyz="0 0 0.25" rpy="0 0 0" />
+  </joint>
+    <!-- virtual end-effector link for cobotta_proJ6 -->
+
+  <xacro:shelf prefix="shelf1_" parent="world">
+    <origin xyz="0.61 0.27 0.9" rpy="0 0 1.5708"/>
+  </xacro:shelf>
 
 </robot>

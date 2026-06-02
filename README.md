@@ -25,7 +25,7 @@ This package provides a URDF description of a techtory cell with a Cobotta robot
     source /opt/ros/jazzy/setup.bash
     rosdep update
     rosdep install --from-paths src -iry
-    colcon build --symlink-install --packages-up-to techtory_cobotta_bringup techtory_cobotta_system
+    colcon build --symlink-install --packages-up-to techtory_cobotta_bringup techtory_cobotta_system techtory_hybrid_planning onrobot_rg_description techtory_cobotta_isaacsim
     ```
 
 ## Visualize in RViz
@@ -52,7 +52,7 @@ ros2 launch techtory_cobotta_system techtory_cobotta_system.launch.py
 Send Goal: 
 
 ```bash
-ros2 action send_goal /start_application man2_msgs/action/RunApplication "{behavior_tree_filename: '/home/adm-vsp/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/trees/techtory_cobotta_system.xml'}"
+ros2 action send_goal /start_application man2_msgs/action/RunApplication "{behavior_tree_filename: '/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/trees/techtory_cobotta_system.xml'}"
 ```
 
 ## Installation Guides

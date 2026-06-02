@@ -27,8 +27,19 @@
       <color rgba="0.75 0.75 0.78 1.0"/>
     </material>
 
-    <!-- ── Base link (zero-inertia anchor at shelf bottom-centre) ───── -->
-    <link name="${prefix}base_link"/>
+    <!-- ── Dummy Inertia ────────────────────────────────────────────── -->
+    <xacro:macro name="dummy_inertia">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1.0"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      </inertial>
+    </xacro:macro>
+
+    <!-- ── Base link (anchor at shelf bottom-centre) ────────────────── -->
+    <link name="${prefix}base_link">
+      <xacro:dummy_inertia/>
+    </link>
 
     <joint name="${prefix}base_joint" type="fixed">
       <parent link="${parent}"/>
@@ -40,6 +51,7 @@
     <!-- leg_x / leg_y : signed corner offsets from shelf centre -->
     <xacro:macro name="shelf_leg" params="suffix leg_x leg_y">
       <link name="${prefix}leg_${suffix}_link">
+        <xacro:dummy_inertia/>
         <visual>
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry><box size="0.04 0.04 0.80"/></geometry>
@@ -67,6 +79,7 @@
     <!-- ── Board macro ───────────────────────────────────────────────── -->
     <xacro:macro name="shelf_board" params="suffix board_z">
       <link name="${prefix}board_${suffix}_link">
+        <xacro:dummy_inertia/>
         <visual>
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry><box size="1.00 0.30 0.04"/></geometry>

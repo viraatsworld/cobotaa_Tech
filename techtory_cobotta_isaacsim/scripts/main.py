@@ -69,7 +69,57 @@ cobotta_robot = build_world()
 print("World fully composed")
 
 # 3. Reset the world. This is CRITICAL. It starts the timeline and initializes robot articulations.
-world.reset() 
+world.reset()
+
+# Tick-driven ROS2 bridge for the robot — replaces the action graph baked into
+# the workcell USD, which we deactivate below to avoid duplicate publishers.
+import omni.graph.core as og
+from pxr import Usd, UsdPhysics
+
+def _find_articulation_root(stage, search_root: str) -> str:
+    root_prim = stage.GetPrimAtPath(search_root)
+    if not root_prim or not root_prim.IsValid():
+        raise RuntimeError(f"Prim {search_root} does not exist")
+    for prim in Usd.PrimRange(root_prim):
+        if prim.HasAPI(UsdPhysics.ArticulationRootAPI):
+            path = prim.GetPath().pathString
+            print(f"Articulation root discovered at: {path}")
+            return path
+    raise RuntimeError(f"No PhysicsArticulationRootAPI found under {search_root}")
+
+ARTICULATION_PATH = _find_articulation_root(stage, "/World/Cobotta")
+
+og.Controller.edit(
+    {"graph_path": "/ActionGraph_Robot", "evaluator_name": "execution"},
+    {
+        og.Controller.Keys.CREATE_NODES: [
+            ("OnTick", "omni.graph.action.OnPlaybackTick"),
+            ("ReadSimTime", "isaacsim.core.nodes.IsaacReadSimulationTime"),
+            ("PublishJS", "isaacsim.ros2.bridge.ROS2PublishJointState"),
+            ("PublishClock", "isaacsim.ros2.bridge.ROS2PublishClock"),
+            ("SubscribeJS", "isaacsim.ros2.bridge.ROS2SubscribeJointState"),
+            ("ArtCtrl", "isaacsim.core.nodes.IsaacArticulationController"),
+        ],
+        og.Controller.Keys.CONNECT: [
+            ("OnTick.outputs:tick", "PublishJS.inputs:execIn"),
+            ("OnTick.outputs:tick", "PublishClock.inputs:execIn"),
+            ("OnTick.outputs:tick", "SubscribeJS.inputs:execIn"),
+            ("OnTick.outputs:tick", "ArtCtrl.inputs:execIn"),
+            ("ReadSimTime.outputs:simulationTime", "PublishJS.inputs:timeStamp"),
+            ("ReadSimTime.outputs:simulationTime", "PublishClock.inputs:timeStamp"),
+            ("SubscribeJS.outputs:jointNames",      "ArtCtrl.inputs:jointNames"),
+            ("SubscribeJS.outputs:positionCommand", "ArtCtrl.inputs:positionCommand"),
+            ("SubscribeJS.outputs:velocityCommand", "ArtCtrl.inputs:velocityCommand"),
+            ("SubscribeJS.outputs:effortCommand",   "ArtCtrl.inputs:effortCommand"),
+        ],
+        og.Controller.Keys.SET_VALUES: [
+            ("PublishJS.inputs:topicName", "/topic_based_joint_states"),
+            ("PublishJS.inputs:targetPrim", ARTICULATION_PATH),
+            ("SubscribeJS.inputs:topicName", "/topic_based_joint_commands"),
+            ("ArtCtrl.inputs:targetPrim", ARTICULATION_PATH),
+        ],
+    },
+)
 
 # 4. NOW you can safely set joint positions (Physics is initialized!)
 joint_positions = np.array([0.0, 0.349066, 1.309, 0.0, 1.48353, 0.0])

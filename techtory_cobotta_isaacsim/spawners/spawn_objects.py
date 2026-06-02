@@ -21,6 +21,7 @@ def add_techtory_cell(stage, prim_path: str):
     for stale_path in (
         "/World/techtory_demo_description/cell_link/camera1_link",
         "/Graph/ROS_Camera",
+        "/World/Cobotta/techtory_demo_description/ActionGraph",
     ):
         p = stage.GetPrimAtPath(stale_path)
         if p and p.IsValid():

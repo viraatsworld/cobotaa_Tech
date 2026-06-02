@@ -1,0 +1,43 @@
+# Global Planner configuration.
+#
+# The Global Planner runs an action server, receives a MotionPlanRequest from
+# the Hybrid Planning Manager and produces a full robot trajectory using the
+# selected MoveIt planning pipeline (here: OMPL).
+#
+# These keys mirror the standard moveit_cpp parameters.
+
+use_sim_time: true
+qos_overrides:
+  /clock:
+    subscription:
+      reliability: best_effort
+      history: keep_last
+      depth: 10
+      durability: volatile
+
+# Name of the GlobalPlannerInterface plugin loaded by the Global Planner node.
+# This MUST live on the global_planner node (not the manager), because the
+# GlobalPlannerComponent declares the parameter on itself.
+global_planner_name: "moveit_hybrid_planning/MoveItPlanningPipeline"
+
+planning_scene_monitor_options:
+  name: "planning_scene_monitor"
+  robot_description: "robot_description"
+  joint_state_topic: "/joint_states"
+  attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+  publish_planning_scene_topic: "/planning_scene"
+  monitored_planning_scene_topic: "/planning_scene"
+  wait_for_initial_state_timeout: 10.0
+
+planning_pipelines:
+  pipeline_names: ["ompl"]
+
+plan_request_params:
+  planning_attempts: 5
+  planning_pipeline: ompl
+  planner_id: "RRTConnectkConfigDefault"
+  planning_time: 2.0
+  max_velocity_scaling_factor: 0.5
+  max_acceleration_scaling_factor: 0.5
+
+robot_description: "robot_description"

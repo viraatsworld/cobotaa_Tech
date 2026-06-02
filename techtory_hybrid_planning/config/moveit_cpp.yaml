@@ -1,0 +1,31 @@
+# moveit_cpp configuration consumed by the Hybrid Planning demo client.
+#
+# Mirrors the upstream moveit2_tutorials hybrid_planner example
+# (https://github.com/moveit/moveit2_tutorials/tree/main/doc/examples/moveit_cpp).
+# The demo node itself only loads the robot model + IK plugin (via
+# robot_description_kinematics passed in from the launch file), but having a
+# full moveit_cpp config available makes it straightforward to swap the
+# action client for an in-process moveit_cpp pipeline when experimenting.
+
+planning_scene_monitor_options:
+  name: "planning_scene_monitor"
+  robot_description: "robot_description"
+  joint_state_topic: "/joint_states"
+  attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+  publish_planning_scene_topic: "/moveit_cpp/publish_planning_scene"
+  monitored_planning_scene_topic: "/moveit_cpp/monitored_planning_scene"
+  wait_for_initial_state_timeout: 10.0
+
+planning_pipelines:
+  pipeline_names: ["ompl"]
+
+plan_request_params:
+  planning_attempts: 5
+  planning_pipeline: ompl
+  planner_id: "RRTConnectkConfigDefault"
+  max_velocity_scaling_factor: 0.1
+  max_acceleration_scaling_factor: 0.1
+  planning_time: 2.0
+
+# Default planning group. Override per-request via MotionPlanRequest.group_name.
+group_name: "arm"

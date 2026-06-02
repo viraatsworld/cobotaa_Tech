@@ -1,0 +1,61 @@
+# Local Planner configuration.
+#
+# The Local Planner runs at a high rate, samples the reference trajectory
+# produced by the Global Planner, checks it against the current planning scene
+# and outputs commands to a ros2_control controller. It is composed of two
+# plugins:
+#
+#   * TrajectoryOperator     - keeps a reference trajectory, samples it,
+#                               invalidates segments that are no longer
+#                               feasible. Default: SimpleSampler.
+#   * LocalConstraintSolver  - turns the current reference sample into a
+#                               command for the robot. Default:
+#                               ForwardTrajectory (just forwards the sample).
+use_sim_time: true
+qos_overrides:
+  /clock:
+    subscription:
+      reliability: best_effort
+      history: keep_last
+      depth: 10
+      durability: volatile
+
+trajectory_operator_plugin_name: "moveit_hybrid_planning/SimpleSampler"
+local_constraint_solver_plugin_name: "moveit_hybrid_planning/ForwardTrajectory"
+
+# Local planning loop frequency (Hz).
+local_planning_frequency: 100.0
+
+# Topic on which the Global Planner publishes its trajectory (subscribed by
+# the local planner).
+global_solution_topic: "global_trajectory"
+
+# Where the local planner publishes its output. With ForwardTrajectory we can
+# publish either a position stream to a JointGroupPositionController or a
+# JointTrajectory message to a JointTrajectoryController.
+#
+# The cobotta bringup spawns `denso_joint_group_position_controller` by
+# default, which is a position_controllers/JointGroupPositionController that
+# consumes std_msgs/Float64MultiArray on its `/commands` topic. The local
+# planner runs at high frequency, so streaming positions is the natural fit.
+#
+# If you instead want to drive `denso_joint_trajectory_controller`, switch to:
+#   local_solution_topic: "/denso_joint_trajectory_controller/joint_trajectory"
+#   local_solution_topic_type: "trajectory_msgs/JointTrajectory"
+local_solution_topic: "/denso_joint_group_position_controller/commands"
+local_solution_topic_type: "std_msgs/Float64MultiArray"
+publish_joint_positions: true
+publish_joint_velocities: false
+
+# Planning group as defined in the SRDF.
+group_name: "arm"
+
+# Topics that the local planner subscribes to in order to monitor the world.
+monitored_planning_scene: "/planning_scene"
+collision_object_topic: "/collision_object"
+joint_states_topic: "/joint_states"
+
+# ForwardTrajectory parameters. If set to true, the local planner stops the
+# robot when the sampled trajectory point would result in a collision with the
+# current planning scene.
+stop_before_collision: true
