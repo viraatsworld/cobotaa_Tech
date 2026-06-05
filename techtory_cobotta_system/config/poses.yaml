@@ -1,0 +1,53 @@
+frames:
+  pick:
+    group: ''
+    orientation:
+      w: 1.0
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5156018137931824
+      y: 0.0
+      z: 0.09860464930534363
+    style: none
+  pick_approach:
+    group: ''
+    orientation:
+      w: 0.9997831583023071
+      x: 2.4525901309857545e-09
+      y: -0.02082653157413006
+      z: -9.35100441523673e-09
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.641780436038971
+      y: 0.04263097047805786
+      z: 0.3348543047904968
+    style: none
+  place:
+    group: ''
+    orientation:
+      w: 0.6957942843437195
+      x: -0.7182410955429077
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5237066745758057
+      y: -0.42481398582458496
+      z: 0.3850318491458893
+    style: none
+  place_approach:
+    group: ''
+    orientation:
+      w: 0.7049693465232849
+      x: -0.7092377543449402
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4153744876384735
+      y: -0.4571400582790375
+      z: 0.43422943353652954
+    style: none
