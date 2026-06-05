@@ -1,0 +1,47 @@
+# Global Planner configuration (demo3 / MTC variant).
+#
+# Identical to global_planner.yaml except that the GlobalPlannerInterface plugin
+# is the MoveIt Task Constructor welding planner provided by this package
+# (techtory_hybrid_planning/GlobalMTCPlannerComponent) instead of the stock
+# moveit_hybrid_planning/MoveItPlanningPipeline.
+#
+# The plugin reads the incoming MotionPlanRequest in the "welding" layout (two
+# position_constraints + two orientation_constraints in goal_constraints[0],
+# encoding start and goal poses) and produces an approach/weld/retreat
+# trajectory with Pilz LIN.
+
+use_sim_time: true
+qos_overrides:
+  /clock:
+    subscription:
+      reliability: best_effort
+      history: keep_last
+      depth: 10
+      durability: volatile
+
+# Name of the GlobalPlannerInterface plugin loaded by the Global Planner node.
+global_planner_name: "techtory_hybrid_planning/GlobalMTCPlannerComponent"
+
+planning_scene_monitor_options:
+  name: "planning_scene_monitor"
+  robot_description: "robot_description"
+  joint_state_topic: "/joint_states"
+  attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+  publish_planning_scene_topic: "/planning_scene"
+  monitored_planning_scene_topic: "/planning_scene"
+  wait_for_initial_state_timeout: 10.0
+
+planning_pipelines:
+  pipeline_names: ["pilz_industrial_motion_planner"]
+
+plan_request_params:
+  planning_attempts: 5
+  planning_pipeline: pilz_industrial_motion_planner
+  # Pilz planner IDs: PTP (joint), LIN (linear cartesian), CIRC (circular).
+  # The MTC plugin uses LIN internally for the weld segments.
+  planner_id: "LIN"
+  planning_time: 2.0
+  max_velocity_scaling_factor: 0.5
+  max_acceleration_scaling_factor: 0.5
+
+robot_description: "robot_description"

@@ -1,0 +1,9 @@
+<class_libraries>
+  <library path="global_mtc_planner_component">
+    <class name="techtory_hybrid_planning/GlobalMTCPlannerComponent"
+           type="techtory_hybrid_planning::GlobalMTCPlannerComponent"
+           base_class_type="moveit::hybrid_planning::GlobalPlannerInterface">
+      <description>MoveIt Task Constructor based global planner (approach/weld/retreat) for the Techtory Cobotta cell.</description>
+    </class>
+  </library>
+</class_libraries>
