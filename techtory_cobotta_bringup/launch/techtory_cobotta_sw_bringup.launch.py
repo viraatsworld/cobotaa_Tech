@@ -320,11 +320,16 @@ def generate_launch_description():
         arguments=[robot_controller, "--controller-manager", "/controller_manager"],
     )
 
+    rviz_config_file = PathJoinSubstitution(
+        [FindPackageShare("techtory_cobotta_bringup"), "config", "rviz.rviz"]
+    )
+
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
         condition=IfCondition(launch_rviz),
         output="screen",
+        arguments=["-d", rviz_config_file],
         parameters=[robot_description, 
                     robot_description_kinematics,
                     robot_description_planning,
