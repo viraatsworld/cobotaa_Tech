@@ -3,61 +3,29 @@
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
       <Sequence>
-      <CreatePose x="0.562"
-                  y="-0.540"
-                  z="0.500"
-                  roll="3.118"
-                  pitch="0.822"
-                  yaw="1.601"
-                  frame_id="cobotta_pro_base_link"
-                  target_posestamp="{goal}"/>
+      <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick_approach"
+                            frame_id=""
+                            target_posestamp="{goal1}"/>
       <ComputePathToPose target_group="arm"
                          server_name="compute_path_to_pose"
                          server_timeout="2000ms"
-                         target_pose="{goal}"
+                         target_pose="{goal1}"
                          planning_pipeline="pilz_industrial_motion_planner"
                          planner_id="PTP"
                          ik_frame="cobotta_pro_tool0"
                          path_constraints=""
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
       <ExecuteTrajectory target_group="arm"
                          server_name="execute_trajectory"
                          server_timeout="100000ms"
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
-      <CreatePose x="0.460"
-                  y="-0.814"
-                  z="0.500"
-                  roll="3.118"
-                  pitch="0.822"
-                  yaw="1.601"
-                  frame_id="cobotta_pro_base_link"
-                  target_posestamp="{goal}"/>
-      <ComputePathToPose target_group="arm"
-                         server_name="compute_path_to_pose"
-                         server_timeout="2000ms"
-                         target_pose="{goal}"
-                         planning_pipeline="pilz_industrial_motion_planner"
-                         planner_id="PTP"
-                         ik_frame="cobotta_pro_tool0"
-                         path_constraints=""
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
-      <ExecuteTrajectory target_group="arm"
-                         server_name="execute_trajectory"
-                         server_timeout="100000ms"
-                         trajectory="{trajectory}"
-                         error_code_id="{error_code_id}"/>
-                         
-      <CreatePose x="0.562"
-                  y="-0.540"
-                  z="0.500"
-                  roll="3.118"
-                  pitch="0.822"
-                  yaw="1.601"
-                  frame_id="cobotta_pro_base_link"
-                  target_posestamp="{goal2}"/>
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
+        <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick"
+                            frame_id=""
+                            target_posestamp="{goal2}"/>
       <ComputePathToPose target_group="arm"
                          server_name="compute_path_to_pose"
                          server_timeout="2000ms"
@@ -67,13 +35,32 @@
                          ik_frame="cobotta_pro_tool0"
                          path_constraints=""
                          trajectory="{trajectory2}"
-                         error_code_id="{error_code_id2}"/>
+                         error_code_id="{error_code_id_2}"/>
       <ExecuteTrajectory target_group="arm"
                          server_name="execute_trajectory"
                          server_timeout="100000ms"
                          trajectory="{trajectory2}"
-                         error_code_id="{error_code_id2}"/>
-    </Sequence>
+                         error_code_id="{error_code_id_2}"/>
+        <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick_retreat"
+                            frame_id=""
+                            target_posestamp="{goal3}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal3}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
+      </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
@@ -89,6 +76,12 @@
       <input_port name="frame_id" default="world" type="std::string">Frame</input_port>
       <output_port name="target_posestamps"
                    type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Generated waypoints</output_port>
+    </Action>
+    <Action ID="CreatePoseFromYaml">
+      <input_port name="yaml_path" type="std::string">Absolute path to poses.yaml</input_port>
+      <input_port name="pose_name" type="std::string">Name of the pose</input_port>
+      <input_port name="frame_id" default="" type="std::string">Frame ID (optional)</input_port>
+      <output_port name="target_posestamp" type="geometry_msgs::msg::PoseStamped">Generated posestamped</output_port>
     </Action>
     <Action ID="GenerateWaypoints">
       <input_port name="waypoints"

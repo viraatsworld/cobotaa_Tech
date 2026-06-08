@@ -80,7 +80,11 @@ def launch_setup(context, *args, **kwargs):
             {"use_sim_time": use_sim_time},
             ParameterFile(bt_operator_params_file.perform(context), allow_substs=True),
         ],
-        # prefix=["xterm -e gdb -ex run --args"],
+        # prefix=[
+        #     "gdb -batch -ex 'set pagination off' "
+        #     "-ex 'handle SIGPIPE nostop noprint pass' "
+        #     "-ex run -ex 'thread apply all bt' --args"
+        # ],
     )
 
     launch_hybrid_planning = IncludeLaunchDescription(
@@ -99,7 +103,7 @@ def launch_setup(context, *args, **kwargs):
         launch_bt_core,
         moveit_config_server,
         moveit_skill_server_node,
-        launch_hybrid_planning,
+        # launch_hybrid_planning,
     ]
 
 
