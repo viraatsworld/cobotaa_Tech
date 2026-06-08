@@ -1,0 +1,14 @@
+frames:
+  pick_approach:
+    group: ''
+    orientation:
+      w: 0.2835478
+      x: -0.649811
+      y: 0.6466197
+      z: -0.2814769
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.460
+      y: -0.866
+      z: 0.400
+    style: none

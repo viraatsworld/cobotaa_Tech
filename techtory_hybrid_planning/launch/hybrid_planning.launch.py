@@ -32,7 +32,9 @@ def load_yaml(package_name: str, file_path: str):
         return None
 
 
-def generate_hybrid_planning_container():
+def generate_hybrid_planning_container(
+    global_planner_config: str = "config/global_planner.yaml",
+):
     description_pkg_share = get_package_share_directory(
         "techtory_cobotta_workcell_description"
     )
@@ -58,7 +60,7 @@ def generate_hybrid_planning_container():
         .joint_limits(
             file_path=os.path.join(moveit_pkg_share, "config", "joint_limits.yaml")
         )
-        .planning_pipelines(pipelines=["ompl"])
+        .planning_pipelines(pipelines=["pilz_industrial_motion_planner"])
         .trajectory_execution(
             file_path=os.path.join(moveit_pkg_share, "config", "moveit_controllers.yaml")
         )
@@ -70,7 +72,7 @@ def generate_hybrid_planning_container():
     )
 
     global_planner_param = load_yaml(
-        "techtory_hybrid_planning", "config/global_planner.yaml"
+        "techtory_hybrid_planning", global_planner_config
     )
     local_planner_param = load_yaml(
         "techtory_hybrid_planning", "config/local_planner.yaml"

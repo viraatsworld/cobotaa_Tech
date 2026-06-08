@@ -72,8 +72,11 @@ int main(int argc, char** argv)
 
   // Two hard-coded Cartesian goals in `planning_frame`.
   const std::vector<CartesianWaypoint> waypoints = {
-      { "pose_a", 0.450, 0.000, 0.410, 3.140, 0.0, 3.140 },
-      { "pose_b", 0.390, 0.120, 0.310, 3.142, 0.0, 3.142 },
+      { "pose_a", 0.450, 0.100, 0.410, 3.140, 0.0, 3.140 },
+      { "pose_b", 0.450, 0.100, 0.410, 3.140, 0.0, 3.140 },
+      { "pose_c", 0.450, 0.200, 0.410, 3.140, 0.0, 3.140 },
+      { "pose_d", 0.450, 0.300, 0.410, 3.140, 0.0, 3.140 },
+      { "pose_e", 0.450, 0.400, 0.410, 3.140, 0.0, 3.140 },
   };
 
   auto hybrid_planning_client = rclcpp_action::create_client<HybridPlanner>(node, action_name);

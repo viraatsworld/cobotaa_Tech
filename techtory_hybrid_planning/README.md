@@ -107,7 +107,7 @@ The notable customisations for the cobotta:
 * `local_solution_topic: /denso_joint_group_position_controller/commands`
   with type `std_msgs/Float64MultiArray` — this matches the controller
   spawned by `techtory_cobotta_sw_bringup` by default.
-* OMPL is used as the global pipeline (RRTConnect).
+* Pilz industrial motion planner is used as the global pipeline (PTP).
 
 ---
 
@@ -176,6 +176,47 @@ Parameters (override via launch or `--ros-args`):
 | `hybrid_planning_action` | `/run_hybrid_planning` | Action server exposed by the manager. |
 | `joint_names` | the 6 `cobotta_pro_joint_*` joints | Joint goal target. |
 | `target_joint_values` | `[0, -0.5, -1.2, 0, 1.5, 0]` | Joint goal positions. |
+
+---
+
+## 5b. demo3 — MTC welding global planner
+
+`demo3` swaps the stock Global Planner for a **MoveIt Task Constructor**
+plugin shipped by this package
+(`techtory_hybrid_planning/GlobalMTCPlannerComponent`, in
+`src/global_mtc_planner.cpp`). Instead of joint-space goals it demonstrates a
+Cartesian **approach → weld → retreat** task built from a *start* and a *goal*
+pose.
+
+The client (`src/hybrid_planning_demo3_node.cpp`) and the plugin share a
+non-standard "welding" request layout: a single `MotionSequenceItem` whose
+`goal_constraints[0]` carries **two** `position_constraints` and **two**
+`orientation_constraints`:
+
+| Field | Meaning |
+|---|---|
+| `position_constraints[0].target_point_offset` + `orientation_constraints[0]` | start pose (world frame) |
+| `position_constraints[1].target_point_offset` + `orientation_constraints[1]` | goal pose (world frame) |
+
+> Note: `target_point_offset` is normally a *link-frame offset*, not a world
+> position. Here it is repurposed as a private channel between this client and
+> this plugin only; do not feed these requests to stock MoveIt constraint code.
+
+The plugin offsets the start/goal poses by −0.1 m along the TCP z-axis to form
+the approach/retreat waypoints, then plans each segment with Pilz `LIN`.
+
+```bash
+ros2 launch techtory_hybrid_planning hybrid_planning_demo3.launch.py
+```
+
+The two poses are baked into the demo3 node and overridable via the
+`weld_start.{x,y,z,roll,pitch,yaw}` / `weld_goal.{...}` parameters (specified in
+`planning_frame`, default `cobotta_pro_base_link`). The launch file loads
+`config/global_planner_mtc.yaml` (which only overrides `global_planner_name`),
+so demo / demo2 are unaffected.
+
+Requires the `ros-jazzy-moveit-task-constructor-core` and
+`ros-jazzy-moveit-task-constructor-msgs` packages.
 
 ---
 

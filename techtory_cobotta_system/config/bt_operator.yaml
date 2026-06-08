@@ -19,8 +19,7 @@
         - update_orientation_in_pose # executable name; Name in BT: UpdateOrientationInPose
         - print_ros_msg # executable name; Name in BT: PrintROSMsg
         - create_pose # executable name; Name in BT: CreatePose
-        #- create_waypoints # executable name; Name in BT: CreateWaypoints
-        - generate_waypoint # executable name; Name in BT: GenerateWaypoints
+        - generate_waypoints # executable name; Name in BT: GenerateWaypoints
         - execute_hybrid_plan_client # executable name; Name in BT: ExecuteHybridPlan
 
 #        Lifecycle node manager       #
