@@ -2,37 +2,65 @@
 <root BTCPP_format="4"
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
-<KeepRunningUntilFailure>
       <Sequence>
-        <CreateWaypoints names="pose_a;pose_b"
-                         xs="0.450;0.390"
-                         ys="0.000;0.120"
-                         zs="0.410;0.310"
-                         rolls="3.140;3.142"
-                         pitches="0.0;0.0"
-                         yaws="3.140;3.142"
-                         frame_id="cobotta_pro_base_link"
-                         target_posestamp="{waypoints}"/>
-      <GenerateWaypoints waypoints="{waypoints}"
-                           planning_group="arm"
-                           planning_frame="cobotta_pro_base_link"
-                           tip_link="cobotta_pro_tool0"
-                           pipeline_id="ompl"
-                           planner_id="RRTConnect"
-                           allowed_planning_time="5.0"
-                           velocity_scaling="0.1"
-                           acceleration_scaling="0.1"
-                           blend_radius="0.0"
-                           ik_timeout="0.5"
-                           motion_sequence="{motion_sequence}"/>
-        <ExecuteHybridPlan server_name="run_hybrid_planning"
-                           server_timeout="120000ms"
-                           planning_group="arm"
-                           motion_sequence="{motion_sequence}"
-                           error_code_id="{hp_error_code_id}"
-                           error_message="{hp_error_message}"/>
+      <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick_approach"
+                            frame_id=""
+                            target_posestamp="{goal1}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal1}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
+        <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick"
+                            frame_id=""
+                            target_posestamp="{goal2}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal2}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+        <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="pick_retreat"
+                            frame_id=""
+                            target_posestamp="{goal3}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal3}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
       </Sequence>
-    </KeepRunningUntilFailure>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
@@ -48,6 +76,12 @@
       <input_port name="frame_id" default="world" type="std::string">Frame</input_port>
       <output_port name="target_posestamps"
                    type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Generated waypoints</output_port>
+    </Action>
+    <Action ID="CreatePoseFromYaml">
+      <input_port name="yaml_path" type="std::string">Absolute path to poses.yaml</input_port>
+      <input_port name="pose_name" type="std::string">Name of the pose</input_port>
+      <input_port name="frame_id" default="" type="std::string">Frame ID (optional)</input_port>
+      <output_port name="target_posestamp" type="geometry_msgs::msg::PoseStamped">Generated posestamped</output_port>
     </Action>
     <Action ID="GenerateWaypoints">
       <input_port name="waypoints"
