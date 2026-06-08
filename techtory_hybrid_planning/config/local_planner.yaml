@@ -24,7 +24,7 @@ trajectory_operator_plugin_name: "moveit_hybrid_planning/SimpleSampler"
 local_constraint_solver_plugin_name: "moveit_hybrid_planning/ForwardTrajectory"
 
 # Local planning loop frequency (Hz).
-local_planning_frequency: 100.0
+local_planning_frequency: 50.0
 
 # Topic on which the Global Planner publishes its trajectory (subscribed by
 # the local planner).
@@ -59,3 +59,5 @@ joint_states_topic: "/joint_states"
 # robot when the sampled trajectory point would result in a collision with the
 # current planning scene.
 stop_before_collision: true
+velocity_scaling_threshold: 0.01
+acceleration_scaling_threshold: 0.01

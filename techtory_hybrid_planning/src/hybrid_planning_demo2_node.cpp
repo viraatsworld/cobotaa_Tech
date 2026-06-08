@@ -33,8 +33,8 @@ struct CartesianWaypoint
   double x, y, z;
   double roll, pitch, yaw;
   double blend_radius = 0.0;
-  double velocity_scaling = 0.1;
-  double acceleration_scaling = 0.1;
+  double velocity_scaling = 0.01;
+  double acceleration_scaling = 0.01;
   std::string pipeline_id = "ompl";
   std::string planner_id = "RRTConnect";
   double allowed_planning_time = 5.0;

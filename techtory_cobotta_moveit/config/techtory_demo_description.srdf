@@ -52,13 +52,14 @@
 
 
     <disable_collisions link1="cell_link" link2="robot_base_plate_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_board_bottom_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_board_middle_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_board_top_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_leg_back_left_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="cell_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="cobotta_pro_base_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_bottom_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_middle_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_board_top_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="cell_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
     <disable_collisions link1="cell_link" link2="rg6_base_link" reason="Never"/>
     <disable_collisions link1="cell_link" link2="rg6_left_outer_knuckle" reason="Never"/>
     <disable_collisions link1="cell_link" link2="rg6_left_inner_knuckle" reason="Never"/>
@@ -71,51 +72,20 @@
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_J4" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J1" link2="cobotta_pro_base_link" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J1" link2="robot_base_plate_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_board_bottom_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_board_middle_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_board_top_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_leg_back_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J1" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_J2" link2="cobotta_pro_J3" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J2" link2="cobotta_pro_J4" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J2" link2="cobotta_pro_J5" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J2" link2="cobotta_pro_base_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_board_bottom_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_board_middle_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_board_top_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_leg_back_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J2" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_J3" link2="cobotta_pro_J4" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J3" link2="cobotta_pro_J5" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J3" link2="cobotta_pro_J6" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J3" link2="cobotta_pro_base_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_base_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_left_inner_finger" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_left_inner_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_left_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_right_inner_finger" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_right_inner_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="shelf1_board_top_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J3" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_J4" link2="cobotta_pro_J5" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J4" link2="cobotta_pro_J6" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_base_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_left_inner_finger" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_left_inner_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_left_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_right_inner_finger" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_right_inner_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J4" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_J5" link2="cobotta_pro_J6" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J5" link2="rg6_base_link" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J5" link2="rg6_left_inner_finger" reason="Never"/>
@@ -124,8 +94,7 @@
     <disable_collisions link1="cobotta_pro_J5" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J5" link2="rg6_right_inner_knuckle" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J5" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J5" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J5" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_base_link" reason="Adjacent"/>
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_left_inner_finger" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_left_inner_knuckle" reason="Never"/>
@@ -133,68 +102,68 @@
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_right_inner_knuckle" reason="Never"/>
     <disable_collisions link1="cobotta_pro_J6" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J6" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_J6" link2="shelf1_leg_front_right_link" reason="Never"/>
+
     <disable_collisions link1="cobotta_pro_base_link" link2="robot_base_plate_link" reason="Adjacent"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_board_bottom_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_board_middle_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_board_top_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_leg_back_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="cobotta_pro_base_link" link2="shelf1_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_board_bottom_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_board_middle_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_board_top_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_leg_back_left_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_leg_back_right_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_leg_front_left_link" reason="Never"/>
+    <disable_collisions link1="cobotta_pro_base_link" link2="shelf_leg_front_right_link" reason="Never"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_left_inner_finger" reason="Never"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_left_inner_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_left_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_right_inner_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_base_link" link2="rg6_right_outer_knuckle" reason="Adjacent"/>
-    <disable_collisions link1="rg6_base_link" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="rg6_base_link" link2="shelf1_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_base_link" link2="shelf_leg_front_left_link" reason="Never"/>
+    <disable_collisions link1="rg6_base_link" link2="shelf_leg_front_right_link" reason="Never"/>
     <disable_collisions link1="rg6_left_inner_finger" link2="rg6_left_inner_knuckle" reason="Default"/>
     <disable_collisions link1="rg6_left_inner_finger" link2="rg6_left_outer_knuckle" reason="Adjacent"/>
     <disable_collisions link1="rg6_left_inner_finger" link2="rg6_right_inner_knuckle" reason="Never"/>
     <disable_collisions link1="rg6_left_inner_finger" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="rg6_left_inner_finger" link2="shelf1_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_left_inner_finger" link2="shelf_leg_front_right_link" reason="Never"/>
     <disable_collisions link1="rg6_left_inner_knuckle" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="rg6_left_inner_knuckle" link2="rg6_right_inner_knuckle" reason="Never"/>
     <disable_collisions link1="rg6_left_inner_knuckle" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="rg6_left_inner_knuckle" link2="shelf1_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_left_inner_knuckle" link2="shelf_leg_front_right_link" reason="Never"/>
     <disable_collisions link1="rg6_left_outer_knuckle" link2="rg6_right_inner_finger" reason="Never"/>
     <disable_collisions link1="rg6_left_outer_knuckle" link2="rg6_right_inner_knuckle" reason="Never"/>
     <disable_collisions link1="rg6_left_outer_knuckle" link2="rg6_right_outer_knuckle" reason="Never"/>
-    <disable_collisions link1="rg6_left_outer_knuckle" link2="shelf1_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_left_outer_knuckle" link2="shelf_leg_front_right_link" reason="Never"/>
     <disable_collisions link1="rg6_right_inner_finger" link2="rg6_right_inner_knuckle" reason="Default"/>
     <disable_collisions link1="rg6_right_inner_finger" link2="rg6_right_outer_knuckle" reason="Adjacent"/>
-    <disable_collisions link1="rg6_right_inner_finger" link2="shelf1_leg_front_right_link" reason="Never"/>
-    <disable_collisions link1="rg6_right_inner_knuckle" link2="shelf1_leg_front_right_link" reason="Never"/>
-    <disable_collisions link1="rg6_right_outer_knuckle" link2="shelf1_leg_front_right_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_board_bottom_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_board_middle_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_board_top_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_leg_back_left_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_leg_back_right_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_leg_front_left_link" reason="Never"/>
-    <disable_collisions link1="robot_base_plate_link" link2="shelf1_leg_front_right_link" reason="Never"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_board_middle_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_board_top_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_leg_back_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_bottom_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_middle_link" link2="shelf1_board_top_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_middle_link" link2="shelf1_leg_back_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_middle_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_middle_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_middle_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_top_link" link2="shelf1_leg_back_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_top_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_top_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_board_top_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_back_left_link" link2="shelf1_leg_back_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_back_left_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_back_left_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_back_right_link" link2="shelf1_leg_front_left_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_back_right_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
-    <disable_collisions link1="shelf1_leg_front_left_link" link2="shelf1_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="rg6_right_inner_finger" link2="shelf_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_right_inner_knuckle" link2="shelf_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="rg6_right_outer_knuckle" link2="shelf_leg_front_right_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_board_bottom_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_board_middle_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_board_top_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_leg_back_left_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_leg_back_right_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_leg_front_left_link" reason="Never"/>
+    <disable_collisions link1="robot_base_plate_link" link2="shelf_leg_front_right_link" reason="Never"/>
+    
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_board_middle_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_board_top_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_bottom_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_board_top_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_middle_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_back_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_board_top_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_back_left_link" link2="shelf_leg_back_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_back_left_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_back_left_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_back_right_link" link2="shelf_leg_front_left_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_back_right_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
+    <disable_collisions link1="shelf_leg_front_left_link" link2="shelf_leg_front_right_link" reason="Adjacent"/>
 </robot>

@@ -37,7 +37,7 @@ plan_request_params:
   planning_pipeline: ompl
   planner_id: "RRTConnectkConfigDefault"
   planning_time: 2.0
-  max_velocity_scaling_factor: 0.5
-  max_acceleration_scaling_factor: 0.5
+  max_velocity_scaling_factor: 0.01
+  max_acceleration_scaling_factor: 0.01
 
 robot_description: "robot_description"

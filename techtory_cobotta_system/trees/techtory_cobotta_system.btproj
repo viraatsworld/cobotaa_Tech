@@ -4,6 +4,49 @@
     <include path="techtory_cobotta_gripper.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
+
+        <Action ID="CreateWaypoints">
+      <input_port name="names" type="std::vector&lt;std::string&gt;">Optional name labels</input_port>
+      <input_port name="xs" type="std::vector&lt;double&gt;">X translations</input_port>
+      <input_port name="ys" type="std::vector&lt;double&gt;">Y translations</input_port>
+      <input_port name="zs" type="std::vector&lt;double&gt;">Z translations</input_port>
+      <input_port name="rolls" type="std::vector&lt;double&gt;">Rolls (rad)</input_port>
+      <input_port name="pitches" type="std::vector&lt;double&gt;">Pitches (rad)</input_port>
+      <input_port name="yaws" type="std::vector&lt;double&gt;">Yaws (rad)</input_port>
+      <input_port name="frame_id" default="world" type="std::string">Frame</input_port>
+      <output_port name="target_posestamps"
+                   type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Generated waypoints</output_port>
+    </Action>
+
+    <Action ID="GenerateWaypoints">
+      <input_port name="waypoints"
+                  type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Input waypoints</input_port>
+      <input_port name="planning_group" default="arm" type="std::string">MoveIt group</input_port>
+      <input_port name="planning_frame" default="cobotta_pro_base_link" type="std::string">Frame</input_port>
+      <input_port name="tip_link" default="cobotta_pro_tool0" type="std::string">IK tip link</input_port>
+      <input_port name="pipeline_id" default="ompl" type="std::string">Pipeline ID</input_port>
+      <input_port name="planner_id" default="RRTConnect" type="std::string">Planner ID</input_port>
+      <input_port name="allowed_planning_time" default="5.0" type="double">Planning time (s)</input_port>
+      <input_port name="velocity_scaling" default="0.1" type="double">Velocity scaling</input_port>
+      <input_port name="acceleration_scaling" default="0.1" type="double">Acceleration scaling</input_port>
+      <input_port name="blend_radius" default="0.0" type="double">Blend radius</input_port>
+      <input_port name="ik_timeout" default="0.5" type="double">IK timeout (s)</input_port>
+      <output_port name="motion_sequence"
+                   type="moveit_msgs::msg::MotionSequenceRequest">Resolved sequence</output_port>
+    </Action>
+    
+    <Action ID="ExecuteHybridPlan">
+      <input_port name="server_name" default="run_hybrid_planning" type="std::string">Action server</input_port>
+      <input_port name="server_timeout" default="120000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="planning_group" type="std::string">Planning group</input_port>
+      <input_port name="motion_sequence"
+                  type="moveit_msgs::msg::MotionSequenceRequest">Sequence to execute</input_port>
+      <output_port name="error_code_id" type="int32_t">MoveIt error code</output_port>
+      <output_port name="error_message" type="std::string">Server error message</output_port>
+    </Action>
+
+
         <Action ID="ComputePathToState">
             <input_port name="target_group"
                         type="std::string">Move group to plan for</input_port>
@@ -186,7 +229,44 @@
             <output_port name="grasp_pose"
                          type="geometry_msgs::msg::PoseStamped">Pose of the best
                 grasp</output_port>
-            <output_port name="pre_grasp_pose"
+            <output_port name="pre_grasp_pose"    <Action ID="CreateWaypoints">
+      <input_port name="names" type="std::vector&lt;std::string&gt;">Optional name labels</input_port>
+      <input_port name="xs" type="std::vector&lt;double&gt;">X translations</input_port>
+      <input_port name="ys" type="std::vector&lt;double&gt;">Y translations</input_port>
+      <input_port name="zs" type="std::vector&lt;double&gt;">Z translations</input_port>
+      <input_port name="rolls" type="std::vector&lt;double&gt;">Rolls (rad)</input_port>
+      <input_port name="pitches" type="std::vector&lt;double&gt;">Pitches (rad)</input_port>
+      <input_port name="yaws" type="std::vector&lt;double&gt;">Yaws (rad)</input_port>
+      <input_port name="frame_id" default="world" type="std::string">Frame</input_port>
+      <output_port name="target_posestamps"
+                   type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Generated waypoints</output_port>
+    </Action>
+    <Action ID="GenerateWaypoints">
+      <input_port name="waypoints"
+                  type="std::vector&lt;geometry_msgs::msg::PoseStamped&gt;">Input waypoints</input_port>
+      <input_port name="planning_group" default="arm" type="std::string">MoveIt group</input_port>
+      <input_port name="planning_frame" default="cobotta_pro_base_link" type="std::string">Frame</input_port>
+      <input_port name="tip_link" default="cobotta_pro_tool0" type="std::string">IK tip link</input_port>
+      <input_port name="pipeline_id" default="ompl" type="std::string">Pipeline ID</input_port>
+      <input_port name="planner_id" default="RRTConnect" type="std::string">Planner ID</input_port>
+      <input_port name="allowed_planning_time" default="5.0" type="double">Planning time (s)</input_port>
+      <input_port name="velocity_scaling" default="0.1" type="double">Velocity scaling</input_port>
+      <input_port name="acceleration_scaling" default="0.1" type="double">Acceleration scaling</input_port>
+      <input_port name="blend_radius" default="0.0" type="double">Blend radius</input_port>
+      <input_port name="ik_timeout" default="0.5" type="double">IK timeout (s)</input_port>
+      <output_port name="motion_sequence"
+                   type="moveit_msgs::msg::MotionSequenceRequest">Resolved sequence</output_port>
+    </Action>
+    <Action ID="ExecuteHybridPlan">
+      <input_port name="server_name" default="run_hybrid_planning" type="std::string">Action server</input_port>
+      <input_port name="server_timeout" default="120000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="planning_group" type="std::string">Planning group</input_port>
+      <input_port name="motion_sequence"
+                  type="moveit_msgs::msg::MotionSequenceRequest">Sequence to execute</input_port>
+      <output_port name="error_code_id" type="int32_t">MoveIt error code</output_port>
+      <output_port name="error_message" type="std::string">Server error message</output_port>
+    </Action>
                          type="geometry_msgs::msg::PoseStamped">Pre-grasp pose
                 for tool_link</output_port>
             <output_port name="post_grasp_pose"

@@ -104,7 +104,7 @@ def generate_launch_description():
                     [
                         FindPackageShare("techtory_cobotta_bringup"),
                         "launch",
-                        "techtory_cobotta_mock_bringup.launch.py",
+                        "techtory_cobotta_hw_bringup.launch.py",
                     ]
                 )
             ]
