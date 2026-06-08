@@ -80,11 +80,11 @@ def launch_setup(context, *args, **kwargs):
             {"use_sim_time": use_sim_time},
             ParameterFile(bt_operator_params_file.perform(context), allow_substs=True),
         ],
-        prefix=[
-            "gdb -batch -ex 'set pagination off' "
-            "-ex 'handle SIGPIPE nostop noprint pass' "
-            "-ex run -ex 'thread apply all bt' --args"
-        ],
+        # prefix=[
+        #     "gdb -batch -ex 'set pagination off' "
+        #     "-ex 'handle SIGPIPE nostop noprint pass' "
+        #     "-ex run -ex 'thread apply all bt' --args"
+        # ],
     )
 
     launch_hybrid_planning = IncludeLaunchDescription(
