@@ -13,7 +13,7 @@ repositories:
     version: master
   plugins/rqt_frame_editor_plugin:
     type: git
-    url: https://github.com/ipa320/rqt_frame_editor_plugin.git
+    url: https://github.com/ipa-vsp/rqt_frame_editor_plugin.git
     version: jazzy-devel
   # plugins/moveit/isaac_ros_cumotion:
   #   type: git

@@ -135,7 +135,7 @@
   <joint name="cobotta_pro_tool0_joint" type="fixed">
     <parent link="$(arg gripper_prefix)base_link" />
     <child link="cobotta_pro_tool0" />
-    <origin xyz="0 0 0.25" rpy="0 0 0" />
+    <origin xyz="0 0 0.10" rpy="0 0 0" />
   </joint>
   
 </robot>

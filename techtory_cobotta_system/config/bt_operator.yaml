@@ -67,5 +67,5 @@ moveit_skill_server_moveit_cpp_node:
       planning_pipeline: "pilz_industrial_motion_planner"
       planner_id: "PTP"
       range: 0.0
-      max_velocity_scaling_factor: 0.2
-      max_acceleration_scaling_factor: 0.2
+      max_velocity_scaling_factor: 0.5
+      max_acceleration_scaling_factor: 0.5

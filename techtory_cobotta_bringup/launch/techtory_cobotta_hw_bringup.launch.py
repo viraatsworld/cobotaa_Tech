@@ -342,7 +342,7 @@ def generate_launch_description():
         executable="rviz2",
         condition=IfCondition(launch_rviz),
         output="screen",
-        arguments=["-d", rviz_config_file],
+        # arguments=["-d", rviz_config_file],
         parameters=[robot_description, 
                     robot_description_kinematics,
                     robot_description_planning,
