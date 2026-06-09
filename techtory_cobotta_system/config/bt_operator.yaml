@@ -14,6 +14,8 @@
         - execute_trajectory_client # executable name; Name in BT: ExecuteTrajectory
         - set_path_constraints # executable name; Name in BT: SetPathConstraints
         - get_current_ik_frame_pose_client # executable name; Name in BT: GetCurrentIKFramePose
+        # gripper skills
+        - gripper_command_action_client # executable name; Name in BT: GripperCommand
         # util functions
         - update_pose # executable name; Name in BT: UpdatePose
         - update_orientation_in_pose # executable name; Name in BT: UpdateOrientationInPose

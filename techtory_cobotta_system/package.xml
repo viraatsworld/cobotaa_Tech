@@ -15,6 +15,7 @@
   <depend>moveit_skills</depend>
   <depend>techtory_cobotta_moveit</depend>
   <exec_depend>moveit_configs_utils</exec_depend>
+  <exec_depend>schunk_phidget_driver</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

@@ -3,6 +3,13 @@
       main_tree_to_execute="main">
   <BehaviorTree ID="main">
       <Sequence>
+      <!-- Open the gripper before approaching the object.
+           Schunk EGP40 driver: position 1.0 = open, 0.0 = close (binary). -->
+      <GripperCommand server_name="/gripper_command"
+                      server_timeout="5000ms"
+                      position="1.0"
+                      max_effort="1.0"
+                      error_code_id="{gripper_error_code_id}"/>
       <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
                             pose_name="pick_approach"
                             frame_id=""
@@ -41,6 +48,12 @@
                          server_timeout="100000ms"
                          trajectory="{trajectory2}"
                          error_code_id="{error_code_id_2}"/>
+      <!-- Close the gripper at the pick pose to grasp the object. -->
+      <GripperCommand server_name="/gripper_command"
+                      server_timeout="5000ms"
+                      position="0.0"
+                      max_effort="1.0"
+                      error_code_id="{gripper_error_code_id}"/>
         <CreatePoseFromYaml yaml_path="/home/ipa326/ros_ws/arena/colcon_techtory_ws/src/techtory_cobotta_system/config/poses.yaml"
                             pose_name="pick_retreat"
                             frame_id=""
@@ -108,6 +121,14 @@
                   type="moveit_msgs::msg::MotionSequenceRequest">Sequence to execute</input_port>
       <output_port name="error_code_id" type="int32_t">MoveIt error code</output_port>
       <output_port name="error_message" type="std::string">Server error message</output_port>
+    </Action>
+    <Action ID="GripperCommand">
+      <input_port name="server_name" default="/gripper_command" type="std::string">Gripper action server</input_port>
+      <input_port name="server_timeout" default="5000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="position" type="double">Finger position (1.0=open, 0.0=close)</input_port>
+      <input_port name="max_effort" type="double">Gripper max effort</input_port>
+      <output_port name="error_code_id" type="int32_t">Action error code ID</output_port>
     </Action>
   </TreeNodesModel>
 

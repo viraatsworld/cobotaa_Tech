@@ -9,6 +9,7 @@ from launch.actions import (
     OpaqueFunction,
     SetEnvironmentVariable,
 )
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
@@ -24,6 +25,8 @@ def launch_setup(context, *args, **kwargs):
     bt_operator_params_file = LaunchConfiguration("bt_operator_params_file")
     lifecycle_manager_params_file = LaunchConfiguration("lifecycle_manager_params_file")
     current_bt_xml_path = LaunchConfiguration("current_bt_xml_path")
+
+    launch_gripper_driver = LaunchConfiguration("launch_gripper_driver")
 
     robot_name = LaunchConfiguration("robot_name")
     robot_moveit_config_pkg = LaunchConfiguration("robot_moveit_config_pkg")
@@ -99,10 +102,26 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
+    # Schunk EGP40 gripper driver: provides the /gripper_command action server
+    # consumed by the GripperCommand BT skill in the behavior tree.
+    launch_gripper_driver_include = IncludeLaunchDescription(
+        launch_description_source=PythonLaunchDescriptionSource(
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("schunk_phidget_driver"),
+                    "launch",
+                    "schunk_phidget_driver_all.launch.py",
+                ]
+            )
+        ),
+        condition=IfCondition(launch_gripper_driver),
+    )
+
     return [
         launch_bt_core,
         moveit_config_server,
         moveit_skill_server_node,
+        launch_gripper_driver_include,
         # launch_hybrid_planning,
     ]
 
@@ -144,6 +163,11 @@ def generate_launch_description():
                 "techtory_cobotta_system.xml",
             ),
             description="Full path to the behavior tree xml file to execute",
+        ),
+        DeclareLaunchArgument(
+            "launch_gripper_driver",
+            default_value="true",
+            description="Launch the Schunk gripper driver providing the /gripper_command action server",
         ),
         DeclareLaunchArgument(
             "robot_name",
