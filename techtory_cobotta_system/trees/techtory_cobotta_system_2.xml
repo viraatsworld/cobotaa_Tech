@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="main">
+
+  <BehaviorTree ID="main">
+    <Sequence>
+
+      <!-- Close gripper before approaching the placement location -->
+      <GripperCommand server_name="/rg6_controller"
+                      server_timeout="500ms"
+                      position="-0.6"
+                      max_effort="0.1"
+                      error_code_id="{gripper_error_code_id}"/>
+
+      <!-- Move to place approach -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="place_approach"
+                          frame_id=""
+                          target_posestamp="{goal1}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal1}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory1}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <!-- Move to place pose -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="place"
+                          frame_id=""
+                          target_posestamp="{goal2}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal2}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory2}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <!-- Release object -->
+      <GripperCommand server_name="/rg6_controller"
+                      server_timeout="500ms"
+                      position="0.5"
+                      max_effort="0.0"
+                      error_code_id="{gripper_error_code_id}"/>
+
+      <!-- Retreat from place location -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="place_retreat"
+                          frame_id=""
+                          target_posestamp="{goal3}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal3}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory3}"
+                         error_code_id="{error_code_id_2}"/>
+      
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                            pose_name="shelf_approach"
+                            frame_id=""
+                            target_posestamp="{goal3_1}"/>
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal3_1}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory3_1}"
+                         error_code_id="{error_code_id_2}"/>
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory3_1}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <!-- Move to pick approach -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="pick_approach"
+                          frame_id=""
+                          target_posestamp="{goal4}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal4}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory4}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory4}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <!-- Move to pick pose -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="pick"
+                          frame_id=""
+                          target_posestamp="{goal5}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal5}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory5}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory5}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <!-- Grasp object -->
+      <GripperCommand server_name="/rg6_controller"
+                      server_timeout="500ms"
+                      position="-0.5"
+                      max_effort="0.1"
+                      error_code_id="{gripper_error_code_id}"/>
+
+      <!-- Retreat from pick location -->
+      <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+                          pose_name="pick_retreat"
+                          frame_id=""
+                          target_posestamp="{goal6}"/>
+
+      <ComputePathToPose target_group="arm"
+                         server_name="compute_path_to_pose"
+                         server_timeout="2000ms"
+                         target_pose="{goal6}"
+                         planning_pipeline="pilz_industrial_motion_planner"
+                         planner_id="PTP"
+                         ik_frame="cobotta_pro_tool0"
+                         path_constraints=""
+                         trajectory="{trajectory6}"
+                         error_code_id="{error_code_id_2}"/>
+
+      <ExecuteTrajectory target_group="arm"
+                         server_name="execute_trajectory"
+                         server_timeout="100000ms"
+                         trajectory="{trajectory6}"
+                         error_code_id="{error_code_id_2}"/>
+
+    </Sequence>
+  </BehaviorTree>
+
+</root>

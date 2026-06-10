@@ -1,0 +1,92 @@
+frames:
+  pick:
+    group: ''
+    orientation:
+      w: 0.0015893641712069952
+      x: -0.7071049951128766
+      y: -0.7071049951128768
+      z: 0.0015892433321005176
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.789
+      y: -0.21
+      z: -0.0346
+    style: none
+  pick_approach:
+    group: ''
+    orientation:
+      w: 0.0015893641393631697
+      x: -0.7071049809455872
+      y: -0.7071049809455872
+      z: 0.0015892433002591133
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.789
+      y: -0.21
+      z: 0.1246
+    style: none
+  pick_retreat:
+    group: ''
+    orientation:
+      w: 0.0015893641393631697
+      x: -0.7071049809455872
+      y: -0.7071049809455872
+      z: 0.0015892433002591133
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.789
+      y: -0.21
+      z: 0.1246
+    style: none
+  place:
+    group: ''
+    orientation:
+      w: -0.480543851852417
+      x: -0.5188736915588379
+      y: -0.4893758296966553
+      z: 0.5102538466453552
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.43491366505622864
+      y: -0.8937503695487976
+      z: 0.42679622769355774
+    style: none
+  place_approach:
+    group: ''
+    orientation:
+      w: -0.480543851852417
+      x: -0.5188736915588379
+      y: -0.4893758296966553
+      z: 0.5102538466453552
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4349057376384735
+      y: -0.8942521810531616
+      z: 0.4628027379512787
+    style: none
+  place_retreat:
+    group: ''
+    orientation:
+      w: 0.0015893641393631697
+      x: -0.7071049809455872
+      y: -0.7071049809455872
+      z: 0.0015892433002591133
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.789
+      y: -0.21
+      z: 0.1246
+    style: none
+  shelf_approach:
+    group: ''
+    orientation:
+      w: 0.48054386423711076
+      x: 0.5188736835740532
+      y: 0.48937582133984114
+      z: -0.5102538589038936
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4444330930709839
+      y: -0.7335736751556396
+      z: 0.4656098484992981
+    style: none

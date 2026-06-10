@@ -154,7 +154,7 @@ def generate_launch_description():
     declared_arguments.append(
     DeclareLaunchArgument(
         "gripper_controller",
-        default_value="onrobot_rg6",
+        default_value="schunk_egp64",
         description="Gripper controller to spawn.",
     )
 )
@@ -315,11 +315,11 @@ def generate_launch_description():
         
     )
 
-    gripper_controller_spawner = Node(
-    package="controller_manager",
-    executable="spawner",
-    arguments=[gripper_controller, "--controller-manager", "/controller_manager"],
-    )
+    # gripper_controller_spawner = Node(
+    # package="controller_manager",
+    # executable="spawner",
+    # arguments=[gripper_controller, "--controller-manager", "/controller_manager"],
+    # )
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
@@ -351,6 +351,21 @@ def generate_launch_description():
                     ],
     )
 
+    gripper_driver_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                PathJoinSubstitution(
+                    [
+                        FindPackageShare("onrobot_rg_control"),
+                        "launch",
+                        "bringup.launch.py",
+                    ]
+                )
+            ]
+        ),
+        launch_arguments={"gripper": "rg6", "ip": "192.168.1.1"}.items(),
+    )
+
     move_group_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [
@@ -362,7 +377,7 @@ def generate_launch_description():
                     ]
                 )
             ]
-        ), launch_arguments={"use_sim_time": "true"}.items()
+        ), launch_arguments={"use_sim_time": "false"}.items()
     )
 
     return LaunchDescription(
@@ -372,10 +387,8 @@ def generate_launch_description():
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             robot_controller_spawner,
-            #world2robot_tf_node,
-            gripper_controller_spawner,
+            gripper_driver_node,
             rviz_node,
             move_group_node,
-
         ]
     )

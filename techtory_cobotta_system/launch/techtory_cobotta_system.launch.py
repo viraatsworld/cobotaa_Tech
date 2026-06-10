@@ -102,26 +102,10 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
-    # Schunk EGP40 gripper driver: provides the /gripper_command action server
-    # consumed by the GripperCommand BT skill in the behavior tree.
-    launch_gripper_driver_include = IncludeLaunchDescription(
-        launch_description_source=PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("schunk_phidget_driver"),
-                    "launch",
-                    "schunk_phidget_driver_all.launch.py",
-                ]
-            )
-        ),
-        condition=IfCondition(launch_gripper_driver),
-    )
-
     return [
         launch_bt_core,
         moveit_config_server,
         moveit_skill_server_node,
-        launch_gripper_driver_include,
         # launch_hybrid_planning,
     ]
 
