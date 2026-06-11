@@ -1,0 +1,105 @@
+frames:
+  pick:
+    group: ''
+    orientation:
+      w: 0.0022475501821647356
+      x: -0.9999974742558759
+      y: -7.96612623782389e-08
+      z: -2.029781111548777e-07
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.67
+      y: -0.28
+      z: 0.015
+    style: none
+  pick_approach:
+    group: ''
+    orientation:
+      w: 0.002247610438925486
+      x: -0.9999974741204599
+      y: -2.7329143754410934e-10
+      z: -1.2159168800333154e-07
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.67
+      y: -0.28
+      z: 0.15
+    style: none
+  pick_retreat:
+    group: ''
+    orientation:
+      w: 0.0022475520411274433
+      x: -0.9999974742516698
+      y: -6.680029597527781e-08
+      z: -3.1448792160864477e-07
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.67
+      y: -0.28
+      z: 0.1499999962002951
+    style: none
+  place:
+    group: ''
+    orientation:
+      w: -0.4506576955318451
+      x: -0.5482375025749207
+      y: -0.5170286893844604
+      z: 0.47856491804122925
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.438
+      y: -0.8429
+      z: 0.3291
+    style: none
+  place_approach:
+    group: ''
+    orientation:
+      w: 0.24945947527885437
+      x: 0.658735990524292
+      y: 0.6637774705886841
+      z: -0.2514681816101074
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.43800002336502075
+      y: -0.8221
+      z: 0.4465556740760803
+    style: none
+  place_approach_final:
+    group: ''
+    orientation:
+      w: 0.2534433901309967
+      x: 0.9673501253128052
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.438
+      y: -0.8384
+      z: 0.37526243925094604
+    style: none
+  place_retreat:
+    group: ''
+    orientation:
+      w: -0.48054385376192643
+      x: -0.5188736936206517
+      y: -0.48937583164125975
+      z: 0.5102538486729168
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.43804800510406494
+      y: -0.84125816822052
+      z: 0.46372857689857483
+    style: none
+  shelf_approach:
+    group: ''
+    orientation:
+      w: 0.0005899212529579822
+      x: -0.9999998259964425
+      y: -6.395939040524151e-23
+      z: -1.0842019838304694e-19
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.46676918864250183
+      y: -0.4691035747528076
+      z: 0.2606177031993866
+    style: none
