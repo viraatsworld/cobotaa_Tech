@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <include path="subtrees/pick_pipeline.xml"/>
-  <include path="subtrees/place_pipeline.xml"/>
+  <include path="pick_pipeline.xml"/>
+  <include path="place_pipeline.xml"/>
 
   <BehaviorTree ID="pnp_pipeline">
     <Sequence>
