@@ -115,7 +115,7 @@ def generate_launch_description():
     moveit_config = MoveItConfigsBuilder(
         "techtory_demo_description", package_name="techtory_cobotta_moveit"
     ).planning_pipelines(
-        pipelines=["ompl", "pilz_industrial_motion_planner", "isaac_ros_cumotion"]
+        pipelines=["ompl", "pilz_industrial_motion_planner"]
     ).to_moveit_configs()
 
     # Robot description with hardware_type:=mock
