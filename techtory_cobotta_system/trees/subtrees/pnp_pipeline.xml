@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <include path="subtrees/pick_pipeline.xml"/>
+  <include path="subtrees/place_pipeline.xml"/>
+
+  <BehaviorTree ID="pnp_pipeline">
+    <Sequence>
+        <SubTree ID="pick_pipeline"
+                 yaml_path="{yaml_path}"
+                 approach_pose="{pick_approach}"
+                 action_pose="{pick}"
+                 retreat_pose="{pick_retreat}"
+                 gripper_open_pos="{gripper_open_pos}"
+                 gripper_open_effort="{gripper_open_effort}"
+                 gripper_close_pos="{gripper_close_pos}"
+                 gripper_close_effort="{gripper_close_effort}"
+                 _autoremap="true"/>
+        <SubTree ID="execute_motion"
+                 yaml_path="{yaml_path}"
+                 pose_name="{shelf_approach}"
+                 _autoremap="true"/>
+        <SubTree ID="place_pipeline"
+                 yaml_path="{yaml_path}"
+                 approach_pose="{place_approach}"
+                 action_pose="{place}"
+                 retreat_pose="{place_retreat}"
+                 gripper_open_pos="{gripper_open_pos}"
+                 gripper_open_effort="{gripper_open_effort}"
+                 _autoremap="true"/>
+        <SubTree ID="execute_motion"
+                 yaml_path="{yaml_path}"
+                 pose_name="{shelf_approach}"
+                 _autoremap="true"/>
+        <GripperCommand server_name="/rg6_controller"
+                        server_timeout="500ms"
+                        position="{gripper_open_pos}"
+                        max_effort="{gripper_open_effort}"
+                        error_code_id="{gripper_error_code_id}"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="GripperCommand">
+      <input_port name="server_name"
+                  default="/gripper_command"
+                  type="std::string">Gripper action server</input_port>
+      <input_port name="server_timeout"
+                  default="5000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="position"
+                  type="double">Finger position (1.0=open, 0.0=close)</input_port>
+      <input_port name="max_effort"
+                  type="double">Gripper max effort</input_port>
+      <output_port name="error_code_id"
+                   type="int32_t">Action error code ID</output_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>
