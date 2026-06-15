@@ -6,7 +6,7 @@
       <!-- Open the gripper before approaching the object.
            OnRobot RG6: position -0.628 = open, 0.628 = close. -->
       <CreatePoseFromYaml yaml_path="src/techtory_cobotta_system/config/poses.yaml"
-                            pose_name="pick_approach"
+                            pose_name="pick_blue_retreat"
                             frame_id=""
                             target_posestamp="{goal1}"/>
       <ComputePathToPose target_group="arm"
@@ -24,6 +24,13 @@
                          server_timeout="100000ms"
                          trajectory="{trajectory1}"
                          error_code_id="{error_code_id_2}"/>
+
+
+      <GripperCommand server_name="/rg6_controller"
+                      server_timeout="500ms"
+                      position="0.3dd"
+                      max_effort="0.1"
+                      error_code_id="{gripper_error_code_id}"/>
       </Sequence>
   </BehaviorTree>
 

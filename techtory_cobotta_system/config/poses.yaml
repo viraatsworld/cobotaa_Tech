@@ -1,4 +1,82 @@
 frames:
+  pick_blue:
+    group: ''
+    orientation:
+      w: -0.0015893865626860346
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735656
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5663
+      y: 0.07
+      z: 0.02
+    style: none
+  pick_blue_approach:
+    group: ''
+    orientation:
+      w: -0.0015893865626860346
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735656
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5663
+      y: 0.07
+      z: 0.15
+    style: none
+  pick_blue_retreat:
+    group: ''
+    orientation:
+      w: -0.0015893865626860346
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735656
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5663
+      y: 0.07
+      z: 0.15
+    style: none
+  pick_green:
+    group: ''
+    orientation:
+      w: -0.0015893865626860346
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735656
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5063
+      y: -0.34
+      z: 0.02
+    style: none
+  pick_green_approach:
+    group: ''
+    orientation:
+      w: -0.0015893865626860344
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735654
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5063
+      y: -0.34
+      z: 0.15
+    style: none
+  pick_green_retreat:
+    group: ''
+    orientation:
+      w: -0.0015893865626860346
+      x: 0.7071049956159742
+      y: 0.7071049946240184
+      z: -0.0015892146029735656
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.5063
+      y: -0.34
+      z: 0.15
+    style: none
   pick_red:
     group: ''
     orientation:
@@ -37,6 +115,84 @@ frames:
       x: 0.5863114498156925
       y: -0.21
       z: 0.15
+    style: none
+  place_blue:
+    group: ''
+    orientation:
+      w: 0.48054385376192404
+      x: 0.5188736936206538
+      y: 0.48937583164125736
+      z: -0.5102538486729189
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.2213
+      y: -0.8279
+      z: 0.077
+    style: none
+  place_blue_approach:
+    group: ''
+    orientation:
+      w: 0.48054385376192404
+      x: 0.5188736936206538
+      y: 0.48937583164125736
+      z: -0.5102538486729189
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4518960416316986
+      y: -0.6077
+      z: 0.15780000000000002
+    style: none
+  place_blue_approach_2:
+    group: ''
+    orientation:
+      w: 0.480543851852417
+      x: 0.5188736915588379
+      y: 0.4893758296966553
+      z: -0.5102538466453552
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.2213
+      y: -0.8279
+      z: 0.1576
+    style: none
+  place_green:
+    group: ''
+    orientation:
+      w: 0.48054385376192404
+      x: 0.5188736936206538
+      y: 0.48937583164125736
+      z: -0.5102538486729189
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4518
+      y: -0.8109
+      z: 0.793
+    style: none
+  place_green_approach:
+    group: ''
+    orientation:
+      w: 0.480543851852417
+      x: 0.5188736915588379
+      y: 0.4893758296966553
+      z: -0.5102538466453552
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4518
+      y: -0.6121
+      z: 0.8374
+    style: none
+  place_green_approach_2:
+    group: ''
+    orientation:
+      w: 0.480543851852417
+      x: 0.5188736915588379
+      y: 0.4893758296966553
+      z: -0.5102538466453552
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.4518
+      y: -0.8109
+      z: 0.8374
     style: none
   place_red:
     group: ''
