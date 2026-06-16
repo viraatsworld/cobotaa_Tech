@@ -6,11 +6,18 @@
   <BehaviorTree ID="main">
     <!-- <KeepRunningUntilFailure> -->
       <Sequence>
+      <!-- Open the gripper before approaching the object.
+           OnRobot RG6: position -0.628 = open, 0.628 = close. -->
+
+        <GripperCommand server_name="/rg6_controller"
+                      server_timeout="5000ms"
+                      position="-0.6"
+                      max_effort="0.1"
+                      error_code_id="{gripper_error_code_id}"/>
+
         <SubTree ID="pnp_pipeline"
                  yaml_path="src/techtory_cobotta_system/config/poses.yaml"
                  pick_approach="pick_red_approach"
-                 gripper_open_pos="-0.5"
-                 gripper_open_effort="0.1"
                  pick="pick_red"
                  gripper_close_pos="0.5"
                  gripper_close_effort="0.1"
@@ -22,6 +29,12 @@
                  gripper_open_effort="0.1"
                  place_retreat="place_red_retreat"
                  _autoremap="true"/>
+
+                <GripperCommand server_name="/rg6_controller"
+                      server_timeout="5000ms"
+                      position="{gripper_open_pos}"
+                      max_effort="{gripper_open_effort}"
+                      error_code_id="{gripper_error_code_id}"/>
 
         <SubTree ID="pnp_pipeline"
                  yaml_path="src/techtory_cobotta_system/config/poses.yaml"
@@ -36,11 +49,15 @@
                  place_approach="place_green_approach"
                  place_approach2="place_green_approach_2"
                  place="place_green"
-                 gripper_open_pos="-0.6"
-                 gripper_open_effort="0.1"
+                 //todo- gripper open
                  place_retreat="place_green_retreat"
                  _autoremap="true"
                  />
+              <GripperCommand server_name="/rg6_controller"
+                      server_timeout="5000ms"
+                      position="{gripper_open_pos}"
+                      max_effort="{gripper_open_effort}"
+                      error_code_id="{gripper_error_code_id}"/>
         
                 <SubTree ID="pnp_pipeline"
                  yaml_path="src/techtory_cobotta_system/config/poses.yaml"
@@ -60,6 +77,12 @@
                  place_retreat="place_blue_retreat"
                  _autoremap="true"
                  />
+
+                <GripperCommand server_name="/rg6_controller"
+                      server_timeout="5000ms"
+                      position="{gripper_open_pos}"
+                      max_effort="{gripper_open_effort}"
+                      error_code_id="{gripper_error_code_id}"/>
                  
       </Sequence>
     <!-- </KeepRunningUntilFailure> -->
@@ -67,5 +90,20 @@
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel/>
+  <Action ID="GripperCommand">
+      <input_port name="server_name"
+                  default="/gripper_command"
+                  type="std::string">Gripper action server</input_port>
+      <input_port name="server_timeout"
+                  default="5000ms"
+                  type="std::chrono::milliseconds">Server timeout</input_port>
+      <input_port name="position"
+                  type="double">Finger position (1.0=open, 0.0=close)</input_port>
+      <input_port name="max_effort"
+                  type="double">Gripper max effort</input_port>
+      <output_port name="error_code_id"
+                   type="int32_t">Action error code ID</output_port>
+    </Action>
+  </TreeNodesModel>
 
 </root>
