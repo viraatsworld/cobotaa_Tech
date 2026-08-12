@@ -333,7 +333,7 @@
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
-    <joint name="rg6_finger_joint">
+    <joint name="finger_joint">
       <command_interface name="position">
         <param name="min">-0.628319</param>
         <param name="max">0.628319</param>

@@ -7,7 +7,7 @@ from omni.isaac.core.robots import Robot # Corrected import
 
 def add_robot(stage, prim_path: str, spawn_position=np.array([0.0, 0.0, 0.8]), spawn_rotation_deg=np.array([0.0, 0.0, 90.0])):
     pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
-    robot_usd = os.path.join(pkg_path, 'assets', 'robots', 'cvrb0609_onrobot_gripper', 'cobotta_mit_gripper_f.usd')
+    robot_usd = os.path.join(pkg_path, 'assets', 'robots', 'cvrb0609', 'cvrb0609_with_graph2.usd')
 
     # Add the reference
     add_reference_to_stage(usd_path=robot_usd, prim_path=prim_path)

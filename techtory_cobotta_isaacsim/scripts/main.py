@@ -43,20 +43,20 @@ def build_world():
     add_shelf(stage, "/World/Shelf")
     add_hammer(stage, "/World/Shelf/Hammer")
     # Add RealSense rsd455 camera + ROS2 publishers (rgb + point cloud)
-    camera_prim_path = add_realsense_camera(
-        stage,
-        prim_path="/World/Camera1",
-        spawn_position=np.array([-0.65, 0.65, 2.0]),
-        spawn_rotation_deg=np.array([0.0, 45.0, -45.0]),
-    )
-    attach_ros2_camera_graph(
-        camera_prim_path=camera_prim_path,
-        graph_path="/World/ROS_Camera1",
-        rgb_topic="/camera1/rgb",
-        pcl_topic="/camera1/points",
-        frame_id="camera1_optical_frame",
-        resolution=(640, 480),
-    )
+    # camera_prim_path = add_realsense_camera(
+    #     stage,
+    #     prim_path="/World/Camera1",
+    #     spawn_position=np.array([-0.65, 0.65, 2.0]),
+    #     spawn_rotation_deg=np.array([0.0, 45.0, -45.0]),
+    # )
+    # attach_ros2_camera_graph(
+    #     camera_prim_path=camera_prim_path,
+    #     graph_path="/World/ROS_Camera1",
+    #     rgb_topic="/camera1/rgb",
+    #     pcl_topic="/camera1/points",
+    #     frame_id="camera1_optical_frame",
+    #     resolution=(640, 480),
+    # )
 
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)

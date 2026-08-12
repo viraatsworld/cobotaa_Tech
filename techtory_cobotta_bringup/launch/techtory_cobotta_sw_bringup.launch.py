@@ -144,6 +144,14 @@ def generate_launch_description():
         )
     )
     declared_arguments.append(
+        DeclareLaunchArgument(
+            "hardware_type",
+            default_value="topic_based",
+            description="Hardware backend type: real, mock, mujoco, topic_based",
+        )
+    )
+
+    declared_arguments.append(
     DeclareLaunchArgument(
         "gripper_controller",
         default_value="onrobot_rg6",
@@ -169,6 +177,8 @@ def generate_launch_description():
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
     verbose = LaunchConfiguration("verbose")
     cvrb_prefix = LaunchConfiguration("cvrb_prefix")
+    hardware_type = LaunchConfiguration("hardware_type")
+
     gripper_controller = LaunchConfiguration("gripper_controller")
 
     denso_robot_core_pkg = get_package_share_directory("denso_robot_core")
@@ -198,6 +208,9 @@ def generate_launch_description():
                 " ",
                 "cvrb_prefix:=",
                 cvrb_prefix,
+                " ",
+                "hardware_type:=",
+                hardware_type,
                 " ",
                 "ip_address:=",
                 ip_address,
