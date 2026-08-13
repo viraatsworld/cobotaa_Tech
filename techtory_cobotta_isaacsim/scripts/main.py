@@ -17,13 +17,14 @@ import numpy as np
 ext_manager = omni.kit.app.get_app().get_extension_manager()
 ext_manager.set_extension_enabled_immediate("omni.graph.bundle.action", True)
 ext_manager.set_extension_enabled_immediate("omni.graph.nodes", True)
-ext_manager.set_extension_enabled_immediate("omni.isaac.core_nodes", True)
+ext_manager.set_extension_enabled_immediate("isaacsim.core.nodes", True)
+ext_manager.set_extension_enabled_immediate("isaacsim.core.api", True)
 ext_manager.set_extension_enabled_immediate("isaacsim.ros2.bridge", True)
 
 simulation_app.update()
 
 # IMPORT WORLD AFTER SIMULATION APP IS RUNNING
-from omni.isaac.core import World
+from isaacsim.core.api import World
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import add_robot
 from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf

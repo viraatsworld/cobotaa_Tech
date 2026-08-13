@@ -9,7 +9,7 @@ def generate_launch_description():
 
     isaac_sim_process = ExecuteProcess(
         cmd=[
-            '/home/anm-vi/Main/Environment/isaaclab/bin/python3',
+            '/home/anm-vi/Main/Environment/isaac6/bin/python3',
             isaac_script
         ],
         additional_env={

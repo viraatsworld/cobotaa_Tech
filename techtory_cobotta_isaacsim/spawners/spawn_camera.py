@@ -32,8 +32,8 @@ def add_realsense_camera(stage,
                          spawn_position=np.array([-0.65, 0.65, 2.0]),
                          spawn_rotation_deg=np.array([-180, -45, 45])):
     """Reference the Isaac RealSense rsd455 asset into the stage and pose it."""
-    from omni.isaac.core.utils.stage import add_reference_to_stage
-    from omni.isaac.nucleus import get_assets_root_path
+    from isaacsim.core.utils.stage import add_reference_to_stage
+    from isaacsim.storage.native import get_assets_root_path
 
     assets_root = get_assets_root_path()
     if assets_root is None:

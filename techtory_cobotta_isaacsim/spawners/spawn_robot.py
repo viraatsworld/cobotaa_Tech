@@ -2,8 +2,8 @@ import os
 import numpy as np
 from pxr import UsdGeom, Gf
 from ament_index_python.packages import get_package_share_directory
-from omni.isaac.core.utils.stage import add_reference_to_stage
-from omni.isaac.core.robots import Robot # Corrected import
+from isaacsim.core.utils.stage import add_reference_to_stage
+from isaacsim.core.api.robots import Robot # Corrected import
 
 def add_robot(stage, prim_path: str, spawn_position=np.array([0.0, 0.0, 0.8]), spawn_rotation_deg=np.array([0.0, 0.0, 90.0])):
     pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
