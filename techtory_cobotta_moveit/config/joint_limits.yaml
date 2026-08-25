@@ -50,3 +50,12 @@ joint_limits:
     max_acceleration: 1.0
     has_deceleration_limits: true
     max_deceleration: -1.0
+  # OnRobot RG6 actuated joint. max_velocity matches the URDF (2.0 rad/s); the accelerations are
+  # what time parameterization needs for the one-joint gripper group.
+  finger_joint:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+    has_deceleration_limits: true
+    max_deceleration: -5.0

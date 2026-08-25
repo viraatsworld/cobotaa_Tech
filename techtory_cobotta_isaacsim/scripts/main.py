@@ -26,7 +26,7 @@ simulation_app.update()
 # IMPORT WORLD AFTER SIMULATION APP IS RUNNING
 from isaacsim.core.api import World
 from spawners.spawn_scene import add_world
-from spawners.spawn_robot import add_robot
+from spawners.spawn_robot import add_robot, filter_mount_collisions, set_initial_joint_positions
 from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
@@ -34,8 +34,25 @@ from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 world = World(stage_units_in_meters=1.0)
 stage = world.scene.stage
 
-robot_spawn_position = np.array([-0.275, -0.24, 0.95])
+# Must match the URDF mount chain exactly, otherwise Isaac and TF/MoveIt disagree:
+#   cell_link -> robot_base_plate_link  xyz (-0.275, -0.24, 0.94)   (techtory_cell.xacro)
+#   robot_base_plate_link -> cobotta_pro_base_link  xyz (0, 0, 0.02) rpy (0, 0, 1.5708)  (joint_w)
+# The base collider starts at its own z=0 and the plate's top face is at 0.956, so anything
+# below 0.956 buries the base in the plate; PhysX then fights that penetration every step and
+# the arm reads as "stuck" unless collisions are switched off.
+robot_spawn_position = np.array([-0.275, -0.24, 0.96])
 robot_rotation_deg = np.array([0.0, 0.0, 90.0])
+
+# Start pose, in joint order. The USD default is all-zero, which points the arm straight up
+# and puts the wrist through the cell roof, so this has to be authored before physics starts.
+HOME_JOINT_POSITIONS = {
+    "cobotta_pro_joint_1": 0.0,
+    "cobotta_pro_joint_2": 0.349066,
+    "cobotta_pro_joint_3": 1.309,
+    "cobotta_pro_joint_4": 0.0,
+    "cobotta_pro_joint_5": 1.48353,
+    "cobotta_pro_joint_6": 0.0,
+}
 
 def build_world():
     # Add static environment
@@ -61,6 +78,20 @@ def build_world():
 
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)
+
+    # The robot is bolted to the plate, so that interface must never be collision-checked --
+    # same pairs the SRDF already disables for MoveIt.
+    filter_mount_collisions(
+        stage,
+        "/World/Cobotta",
+        [
+            "/World/techtory_demo_description/robot_base_plate_link",
+            "/World/techtory_demo_description/cell_link",
+        ],
+    )
+
+    # Must happen before world.reset(), while this is still just USD authoring.
+    set_initial_joint_positions(stage, "/World/Cobotta", HOME_JOINT_POSITIONS)
     
     # 2. Add the robot to the World scene so Isaac Sim tracks its physics
     world.scene.add(cobotta)
@@ -122,12 +153,18 @@ og.Controller.edit(
     },
 )
 
-# 4. NOW you can safely set joint positions (Physics is initialized!)
-joint_positions = np.array([0.0, 0.349066, 1.309, 0.0, 1.48353, 0.0])
+# 4. The pose was authored into the USD before reset, so the articulation already came up in
+# it. Re-assert it here and register it as the default state so any later world.reset() also
+# returns to it rather than to the all-zero pose that intersects the cell.
+joint_positions = np.array(list(HOME_JOINT_POSITIONS.values()))
 # Tell Isaac Sim to only apply these to indices 0 through 5
 arm_joint_indices = np.array([0, 1, 2, 3, 4, 5])
-# Apply positions safely
 cobotta_robot.set_joint_positions(joint_positions, joint_indices=arm_joint_indices)
+
+# Default state covers every DOF; the gripper DOFs stay at 0 (open).
+default_positions = np.zeros(len(cobotta_robot.dof_names))
+default_positions[arm_joint_indices] = joint_positions
+cobotta_robot.set_joints_default_state(positions=default_positions)
 
 # 5. Step the world instead of just updating the app
 while simulation_app.is_running():

@@ -28,6 +28,52 @@ def add_techtory_cell(stage, prim_path: str):
             p.SetActive(False)
             print(f"Deactivated stale prim {stale_path}")
 
+    make_cell_collisions_static(stage, "/World/techtory_demo_description")
+
+
+def make_cell_collisions_static(stage, root_path: str):
+    """Turn the cell into static, exact-mesh colliders.
+
+    The cell was imported from URDF, so its links are rigid bodies in an articulation and the
+    collision meshes default to physics:approximation = "convexHull". The hull of cell_link is
+    the hull of the *whole* cell frame -- a solid ~2.2 m block filling the entire cell interior.
+    Everything mounted inside the cell, the robot included, therefore starts fully inside a
+    solid collider, and PhysX spends every step trying to push it out: the arm gets thrown
+    around and dropped objects get expelled through the floor. That is the reason collisions
+    had to be switched off to get anything to run.
+
+    The cell never moves, so the right model is static geometry with the exact triangle mesh:
+    disable the rigid bodies (their colliders stay, as static colliders) and switch the
+    approximation to "none", which is only legal for static/kinematic bodies. Objects then rest
+    on the table and the arm is left alone unless it really touches the frame.
+    """
+    from pxr import Usd, UsdPhysics
+
+    root = stage.GetPrimAtPath(root_path)
+    if not root or not root.IsValid():
+        print(f"WARNING: {root_path} not found; cell collisions left as imported")
+        return
+
+    # The importer references the collision meshes as instances, and instance proxies cannot be
+    # edited, so de-instance first. Nested instances appear only once the outer one is opened.
+    while True:
+        instances = [p for p in Usd.PrimRange(root, Usd.TraverseInstanceProxies()) if p.IsInstance()]
+        if not instances:
+            break
+        for p in instances:
+            stage.GetPrimAtPath(p.GetPath()).SetInstanceable(False)
+
+    colliders = bodies = 0
+    for prim in Usd.PrimRange(root, Usd.TraverseInstanceProxies()):
+        if prim.HasAPI(UsdPhysics.MeshCollisionAPI):
+            UsdPhysics.MeshCollisionAPI(prim).CreateApproximationAttr("none")
+            colliders += 1
+        if prim.HasAPI(UsdPhysics.RigidBodyAPI):
+            UsdPhysics.RigidBodyAPI(prim).CreateRigidBodyEnabledAttr(False)
+            bodies += 1
+
+    print(f"Cell collisions: {colliders} mesh colliders set to exact, {bodies} links made static")
+
 def add_shelf(stage, prim_path: str):
     from pxr import Usd, Sdf, UsdGeom, Gf
     from ament_index_python import get_package_share_directory

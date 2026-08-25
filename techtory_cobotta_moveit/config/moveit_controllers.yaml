@@ -3,6 +3,7 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 moveit_simple_controller_manager:
   controller_names:
     - denso_joint_trajectory_controller
+    - onrobot_rg6
 
   denso_joint_trajectory_controller:
     action_ns: follow_joint_trajectory
@@ -15,6 +16,20 @@ moveit_simple_controller_manager:
       - cobotta_pro_joint_4
       - cobotta_pro_joint_5
       - cobotta_pro_joint_6
+
+  # OnRobot RG6 -> /onrobot_rg6/gripper_cmd (control_msgs/action/ParallelGripperCommand),
+  # served by parallel_gripper_action_controller (see techtory_cobotta_bringup/config/controller.yaml).
+  # max_effort/max_velocity are only put into the goal when > 0.0, and are read once at startup:
+  # they are per-controller constants, not per-motion values.
+  onrobot_rg6:
+    action_ns: gripper_cmd
+    type: ParallelGripperCommand
+    default: true
+    joints:
+      - finger_joint
+    command_joint: finger_joint
+    max_effort: 3.0
+    max_velocity: 1.0
 
 
 trajectory_execution:
