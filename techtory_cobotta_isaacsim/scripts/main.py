@@ -26,7 +26,7 @@ simulation_app.update()
 # IMPORT WORLD AFTER SIMULATION APP IS RUNNING
 from isaacsim.core.api import World
 from spawners.spawn_scene import add_world
-from spawners.spawn_robot import add_robot, filter_mount_collisions, set_initial_joint_positions
+from spawners.spawn_robot import add_robot,  set_initial_joint_positions
 from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
@@ -79,16 +79,6 @@ def build_world():
     # Add robot
     cobotta = add_robot(stage, "/World/Cobotta", spawn_position=robot_spawn_position, spawn_rotation_deg=robot_rotation_deg)
 
-    # The robot is bolted to the plate, so that interface must never be collision-checked --
-    # same pairs the SRDF already disables for MoveIt.
-    filter_mount_collisions(
-        stage,
-        "/World/Cobotta",
-        [
-            "/World/techtory_demo_description/robot_base_plate_link",
-            "/World/techtory_demo_description/cell_link",
-        ],
-    )
 
     # Must happen before world.reset(), while this is still just USD authoring.
     set_initial_joint_positions(stage, "/World/Cobotta", HOME_JOINT_POSITIONS)

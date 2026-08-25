@@ -34,38 +34,7 @@ def add_robot(stage, prim_path: str, spawn_position=np.array([0.0, 0.0, 0.8]), s
     
     return cobotta_robot
 
-def filter_mount_collisions(stage, robot_prim_path: str, mount_prim_paths,
-                            base_link_name: str = "cobotta_pro_base_link"):
-    """Stop PhysX from ever evaluating contacts at the robot's mounting interface.
 
-    The base is bolted to the cell's base plate, so those bodies are permanently in
-    contact by construction. Left unfiltered, any overlap between the base collider and
-    the plate/cell colliders feeds the articulation solver a penetration it can never
-    resolve (both articulations are fixed-base), which shows up as the arm being stuck.
-    MoveIt already ignores the same pairs via disable_collisions in the SRDF
-    (cobotta_pro_base_link vs robot_base_plate_link / cell_link); this keeps the physics
-    side consistent without disabling collisions scene-wide.
-    """
-    base_link = None
-    for prim in stage.Traverse():
-        path = prim.GetPath().pathString
-        if path.startswith(robot_prim_path + "/") and prim.GetName() == base_link_name:
-            base_link = prim
-            break
-
-    if base_link is None:
-        print(f"WARNING: {base_link_name} not found under {robot_prim_path}; mount collisions not filtered")
-        return
-
-    filtered = UsdPhysics.FilteredPairsAPI.Apply(base_link)
-    rel = filtered.CreateFilteredPairsRel()
-    for mount_path in mount_prim_paths:
-        mount_prim = stage.GetPrimAtPath(mount_path)
-        if not mount_prim or not mount_prim.IsValid():
-            print(f"WARNING: mount prim {mount_path} not found; skipping collision filter")
-            continue
-        rel.AddTarget(mount_path)
-        print(f"Filtered collisions between {base_link.GetPath()} and {mount_path}")
 
 
 def set_initial_joint_positions(stage, robot_prim_path: str, joint_positions_rad: dict):

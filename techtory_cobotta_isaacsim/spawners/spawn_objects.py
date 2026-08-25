@@ -46,6 +46,12 @@ def make_cell_collisions_static(stage, root_path: str):
     disable the rigid bodies (their colliders stay, as static colliders) and switch the
     approximation to "none", which is only legal for static/kinematic bodies. Objects then rest
     on the table and the arm is left alone unless it really touches the frame.
+
+    The joints have to go with them. The URDF importer wrote a fixed joint per link plus a
+    root_joint carrying PhysicsArticulationRootAPI, and PhysX refuses to build a joint whose
+    two ends are both static -- that is the "cannot create a joint between static bodies"
+    error. The cell is 3 links and 2 fixed joints, i.e. zero DOF, so the joints carry no
+    information: each static collider keeps the world transform USD already composed for it.
     """
     from pxr import Usd, UsdPhysics
 
@@ -64,6 +70,7 @@ def make_cell_collisions_static(stage, root_path: str):
             stage.GetPrimAtPath(p.GetPath()).SetInstanceable(False)
 
     colliders = bodies = 0
+    joint_prims = []
     for prim in Usd.PrimRange(root, Usd.TraverseInstanceProxies()):
         if prim.HasAPI(UsdPhysics.MeshCollisionAPI):
             UsdPhysics.MeshCollisionAPI(prim).CreateApproximationAttr("none")
@@ -71,8 +78,16 @@ def make_cell_collisions_static(stage, root_path: str):
         if prim.HasAPI(UsdPhysics.RigidBodyAPI):
             UsdPhysics.RigidBodyAPI(prim).CreateRigidBodyEnabledAttr(False)
             bodies += 1
+        if prim.IsA(UsdPhysics.Joint):
+            joint_prims.append(prim.GetPath())
 
-    print(f"Cell collisions: {colliders} mesh colliders set to exact, {bodies} links made static")
+    # Deactivate after the traversal -- deactivating mid-range prunes the subtree we are
+    # still walking. This also drops PhysicsArticulationRootAPI, which sits on root_joint.
+    for joint_path in joint_prims:
+        stage.GetPrimAtPath(joint_path).SetActive(False)
+
+    print(f"Cell collisions: {colliders} mesh colliders set to exact, {bodies} links made "
+          f"static, {len(joint_prims)} fixed joints removed")
 
 def add_shelf(stage, prim_path: str):
     from pxr import Usd, Sdf, UsdGeom, Gf
