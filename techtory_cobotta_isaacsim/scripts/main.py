@@ -28,8 +28,9 @@ from isaacsim.core.api import World
 from spawners.spawn_scene import add_world
 from spawners.spawn_robot import (add_robot, set_initial_joint_positions, fix_gripper_collisions,
                                   disable_articulation_self_collisions, configure_gripper_drive,
-                                  add_grip_friction)
-from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf
+                                  stabilize_gripper_joints, add_grip_friction)
+from spawners.spawn_objects import (add_hammer, add_techtory_cell, add_shelf,
+                                    configure_graspable_object)
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
 # 1. Initialize the World (This automatically creates the stage and Physics Scene)
@@ -62,6 +63,8 @@ def build_world():
     add_techtory_cell(stage, "/World/TechtoryCell")  # prim_path unused (sublayer load)
     add_shelf(stage, "/World/Shelf")
     add_hammer(stage, "/World/Shelf/Hammer")
+
+    configure_graspable_object(stage, "/World/Shelf/Hammer")
     # Add RealSense rsd455 camera + ROS2 publishers (rgb + point cloud)
     # camera_prim_path = add_realsense_camera(
     #     stage,
@@ -93,6 +96,8 @@ def build_world():
     fix_gripper_collisions(stage, "/World/Cobotta/onrobot_rg6")
     disable_articulation_self_collisions(stage, "/World/Cobotta")
     configure_gripper_drive(stage)
+    # Caps how hard the fingers squeeze
+    stabilize_gripper_joints(stage, "/World/Cobotta/onrobot_rg6")
     add_grip_friction(stage, "/World/Cobotta/onrobot_rg6")
 
 

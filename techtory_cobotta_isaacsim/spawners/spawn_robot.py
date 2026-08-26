@@ -14,6 +14,14 @@ DEFAULT_GRIP_TORQUE = 5.0
 GRIP_DRIVE_STIFFNESS = 3.0
 GRIP_DRIVE_DAMPING = 0.1
 
+GRIP_ARMATURE = 0.15
+
+# Coulomb friction at each gripper joint. See the table above.
+GRIP_JOINT_FRICTION = 0.4
+
+# Closing-speed cap for every gripper joint, in rad/s (written to USD in deg/s).
+GRIP_MAX_JOINT_VELOCITY = 0.6
+
 def add_robot(stage, prim_path: str, spawn_position=np.array([0.0, 0.0, 0.8]), spawn_rotation_deg=np.array([0.0, 0.0, 90.0])):
     pkg_path = get_package_share_directory('techtory_cobotta_isaacsim')
     robot_usd = os.path.join(pkg_path, 'assets', 'robots', 'cvrb0609', 'cvrb0609_with_graph2.usd')
@@ -146,6 +154,38 @@ def configure_gripper_drive(stage,
           f"damping={damping}/deg (~{max_torque / 0.080:.0f} N of finger force)")
 
 
+def stabilize_gripper_joints(stage, gripper_prim_path: str = "/World/Cobotta/onrobot_rg6",
+                             armature: float = GRIP_ARMATURE,
+                             joint_friction: float = GRIP_JOINT_FRICTION,
+                             max_joint_velocity: float = GRIP_MAX_JOINT_VELOCITY):
+    """Give the gripper joints actuator inertia, dissipation, and a sane speed cap.
+
+     Applied to all six gripper joints, not just finger_joint: the other five are PhysX mimic
+    joints but still real DOFs, so they ring too if left massless.
+    """
+    from pxr import Usd, PhysxSchema
+
+    root = stage.GetPrimAtPath(gripper_prim_path)
+    if not root or not root.IsValid():
+        print(f"WARNING: {gripper_prim_path} not found; gripper joints left as imported")
+        return
+
+    max_joint_velocity_deg = math.degrees(max_joint_velocity)
+    touched = 0
+    for prim in Usd.PrimRange(root):
+        if not (prim.IsA(UsdPhysics.RevoluteJoint) or prim.IsA(UsdPhysics.PrismaticJoint)):
+            continue
+        joint_api = PhysxSchema.PhysxJointAPI.Apply(prim)
+        joint_api.CreateArmatureAttr().Set(float(armature))
+        joint_api.CreateJointFrictionAttr().Set(float(joint_friction))
+        joint_api.CreateMaxJointVelocityAttr().Set(float(max_joint_velocity_deg))
+        touched += 1
+
+    print(f"Gripper joints: armature={armature} kg*m^2, jointFriction={joint_friction}, "
+          f"maxJointVelocity={max_joint_velocity_deg:.1f} deg/s ({max_joint_velocity} rad/s) "
+          f"on {touched} joints")
+
+
 def add_grip_friction(stage, gripper_prim_path: str = "/World/Cobotta/onrobot_rg6",
                       static_friction: float = 1.2, dynamic_friction: float = 1.1):
     """Bind a high-friction physics material to the two finger pads.
@@ -177,15 +217,7 @@ def add_grip_friction(stage, gripper_prim_path: str = "/World/Cobotta/onrobot_rg
 
 
 def set_initial_joint_positions(stage, robot_prim_path: str, joint_positions_rad: dict):
-    """Author the start pose into the USD *before* physics starts.
-
-    The USD ships every joint at 0, which stands the arm straight up: J6 ends at z=2.23
-    while the cell roof is at ~2.05-2.13, so the wrist and gripper spawn inside/through the
-    cell's top panel. PhysX then has to resolve a deep penetration on the very first step
-    and the articulation blows up. Setting the joint state after world.reset() is too late --
-    the articulation has already been created in the broken pose. Writing the joint state and
-    the drive target here means the robot is never in that configuration at all.
-
+    """Author the start pose into the USD *before* physics starts
     Angles are given in radians (ROS convention) and written in degrees (USD convention).
     """
     from pxr import Usd
@@ -213,3 +245,4 @@ def set_initial_joint_positions(stage, robot_prim_path: str, joint_positions_rad
 
     if remaining:
         print(f"WARNING: joints not found under {robot_prim_path}: {sorted(remaining)}")
+        

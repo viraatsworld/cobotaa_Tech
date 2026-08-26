@@ -33,25 +33,6 @@ def add_techtory_cell(stage, prim_path: str):
 
 def make_cell_collisions_static(stage, root_path: str):
     """Turn the cell into static, exact-mesh colliders.
-
-    The cell was imported from URDF, so its links are rigid bodies in an articulation and the
-    collision meshes default to physics:approximation = "convexHull". The hull of cell_link is
-    the hull of the *whole* cell frame -- a solid ~2.2 m block filling the entire cell interior.
-    Everything mounted inside the cell, the robot included, therefore starts fully inside a
-    solid collider, and PhysX spends every step trying to push it out: the arm gets thrown
-    around and dropped objects get expelled through the floor. That is the reason collisions
-    had to be switched off to get anything to run.
-
-    The cell never moves, so the right model is static geometry with the exact triangle mesh:
-    disable the rigid bodies (their colliders stay, as static colliders) and switch the
-    approximation to "none", which is only legal for static/kinematic bodies. Objects then rest
-    on the table and the arm is left alone unless it really touches the frame.
-
-    The joints have to go with them. The URDF importer wrote a fixed joint per link plus a
-    root_joint carrying PhysicsArticulationRootAPI, and PhysX refuses to build a joint whose
-    two ends are both static -- that is the "cannot create a joint between static bodies"
-    error. The cell is 3 links and 2 fixed joints, i.e. zero DOF, so the joints carry no
-    information: each static collider keeps the world transform USD already composed for it.
     """
     from pxr import Usd, UsdPhysics
 
@@ -88,6 +69,77 @@ def make_cell_collisions_static(stage, root_path: str):
 
     print(f"Cell collisions: {colliders} mesh colliders set to exact, {bodies} links made "
           f"static, {len(joint_prims)} fixed joints removed")
+
+def configure_graspable_object(stage, prim_path: str, mass: float = 0.3,
+                               static_friction: float = 1.2, dynamic_friction: float = 1.1,
+                               max_convex_hulls: int = 32):
+    """Make a spawned object something the gripper can actually hold.
+
+    As authored, hammer1.usd gives PhysX three reasons to refuse a grasp:
+
+      * `physics:approximation = "convexHull"` on the mesh. The convex hull of a hammer is a
+        solid wedge spanning head to handle -- it fills the entire notch you are trying to grab.
+        The pads therefore never touch the handle; they close on a sloping hull face, and a
+        sloping face plus finite friction means the part is squeezed straight out of the jaw.
+        convexDecomposition keeps the head and the handle as separate hulls, so the pads land on
+        the flat sides of the handle and the grasp is force-closed.
+      * No PhysicsMassAPI, so mass and inertia are integrated from that same wrong hull at the
+        default density -- the object PhysX is simulating is not the object you can see.
+      * No physics material, so the object runs on the engine default while spawn_robot's
+        add_grip_friction() gives the finger pads 1.2/1.1. PhysX combines the two materials
+        (default: average), so the pad material alone only gets you halfway.
+
+    Safe to call on any spawned object; it walks the subtree, so it does not care how deep the
+    reference put the rigid body.
+    """
+    from pxr import Usd, UsdGeom, UsdPhysics, UsdShade, Sdf, PhysxSchema
+
+    root = stage.GetPrimAtPath(prim_path)
+    if not root or not root.IsValid():
+        print(f"WARNING: {prim_path} not found; object physics left as imported")
+        return
+
+    # Instance proxies cannot be edited (same reason as make_cell_collisions_static).
+    while True:
+        instances = [p for p in Usd.PrimRange(root, Usd.TraverseInstanceProxies()) if p.IsInstance()]
+        if not instances:
+            break
+        for p in instances:
+            stage.GetPrimAtPath(p.GetPath()).SetInstanceable(False)
+
+    material_path = Sdf.Path("/World/PhysicsMaterials/GraspableObject")
+    if not stage.GetPrimAtPath(material_path).IsValid():
+        UsdGeom.Scope.Define(stage, material_path.GetParentPath())
+        material = UsdShade.Material.Define(stage, material_path)
+        physics_material = UsdPhysics.MaterialAPI.Apply(material.GetPrim())
+        physics_material.CreateStaticFrictionAttr().Set(static_friction)
+        physics_material.CreateDynamicFrictionAttr().Set(dynamic_friction)
+        physics_material.CreateRestitutionAttr().Set(0.0)
+    material = UsdShade.Material.Get(stage, material_path)
+
+    bodies = colliders = decomposed = 0
+    for prim in Usd.PrimRange(root):
+        if prim.HasAPI(UsdPhysics.RigidBodyAPI):
+            UsdPhysics.MassAPI.Apply(prim).CreateMassAttr().Set(float(mass))
+            bodies += 1
+        if not prim.HasAPI(UsdPhysics.CollisionAPI):
+            continue
+        # Only mesh colliders have an approximation to change. Primitive shapes (a Cube, a
+        # Sphere) are already exact and must not be reported as decomposed.
+        if prim.HasAPI(UsdPhysics.MeshCollisionAPI):
+            UsdPhysics.MeshCollisionAPI(prim).CreateApproximationAttr("convexDecomposition")
+            decomposition = PhysxSchema.PhysxConvexDecompositionCollisionAPI.Apply(prim)
+            decomposition.CreateMaxConvexHullsAttr().Set(int(max_convex_hulls))
+            decomposition.CreateErrorPercentageAttr().Set(2.0)
+            decomposed += 1
+        UsdShade.MaterialBindingAPI.Apply(prim).Bind(
+            material, UsdShade.Tokens.weakerThanDescendants, "physics")
+        colliders += 1
+
+    print(f"Graspable {prim_path}: mass={mass} kg on {bodies} body(ies), friction "
+          f"{static_friction}/{dynamic_friction} on {colliders} collider(s), "
+          f"{decomposed} mesh collider(s) set to convexDecomposition")
+
 
 def add_shelf(stage, prim_path: str):
     from pxr import Usd, Sdf, UsdGeom, Gf

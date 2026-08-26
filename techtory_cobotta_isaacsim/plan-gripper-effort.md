@@ -26,7 +26,14 @@ Sibling document: `plan-ft-implement.md` (wrist FT sensor). The two share the ar
 - [x] Stage 1 — static force limit (kills the crushing, no ROS changes). Done in USD authoring
       in `spawners/spawn_robot.py:configure_gripper_drive`, called from `scripts/main.py`.
 - [ ] Stage 2 — per-goal effort plumbed from the action to the PhysX drive.
+      **Nothing of Stage 2 is implemented**: `cobotta_hardware.ros2_control.xacro` still declares only
+      `position` + `acceleration` on every joint, `main.py:148` still wires
+      `SubscribeJS.outputs:effortCommand → ArtCtrl.inputs:effortCommand`, and there is no ScriptNode.
+      The design in §4 Stage 2 is also **wrong as written** — see §4 Stage 2a and §5.
 - [x] Stage 3 — friction (`add_grip_friction`). Torque→force calibration still open.
+- [x] **Stage 1b — MoveIt "close on an object" now terminates, and the grip actually holds.**
+      Two rounds: the controller's stall threshold was below Isaac's noise floor (§2a), and the
+      fingers were ringing on contact while the hammer was un-graspable by construction (§2b).
 
 ---
 
@@ -128,7 +135,7 @@ not a reduced coordinate — hence 6 gripper DOFs, not 1.
 | Action type | `control_msgs::action::ParallelGripperCommand` (`parallel_gripper_action_controller.hpp:97`). **Not** `GripperCommand`. |
 | Real parameter set | `joint`, `state_interfaces`, `goal_tolerance`, `allow_stalling`, `stall_velocity_threshold`, `stall_timeout`, `max_effort_interface`, `max_effort`, `max_velocity_interface`, `max_velocity`, `action_monitor_rate` (`parallel_gripper_action_controller_parameters.hpp:72-83`). |
 | Goal effort | Used **only** when `max_effort_interface` is non-empty; then `command.effort[0]` is written to that interface each cycle, else the `max_effort` param is used (`_impl.hpp:149-156`, `:101-104`). |
-| `max_effort_interface` format | A **full** interface name — the controller does not prefix the joint (`_impl.hpp:405-408`). Must be `finger_joint/effort`, not `effort`. |
+| `max_effort_interface` format | A **full** interface name — the controller does not prefix the joint (`_impl.hpp:405-408`). But the claimed interface is only *bound* to `effort_interface_` when its interface name is literally `set_gripper_max_effort` (`_impl.hpp:346-355`). So it must be **`finger_joint/set_gripper_max_effort`** — `finger_joint/effort` would be claimed and then silently never written. |
 | Claimed command interfaces | `<joint>/position` always, plus `max_effort_interface` / `max_velocity_interface` if set (`_impl.hpp:402-415`). |
 | Stall → success | If `|position error| > goal_tolerance` and `|velocity| < stall_velocity_threshold` for `stall_timeout`, the goal **succeeds** with `stalled: true` when `allow_stalling: true`, aborts otherwise (`_impl.hpp:225-262`). This is the "gripped an object of unknown size" path. |
 
@@ -166,6 +173,116 @@ not a reduced coordinate — hence 6 gripper DOFs, not 1.
    and Isaac then drops *all* commands (§1 transport + Isaac facts).
 4. **Even delivered, effort ≠ force limit.** `main.py:114` routes `effortCommand → ArtCtrl`, which applies
    additive torque. Against `stiffness = 1.7e10`, `maxForce = 6000` it changes nothing observable.
+
+## 2a. Why MoveIt's "close" failed on a held object — **fixed**
+
+Symptom: the force-limited grip worked in Isaac, but closing the `gripper` group from MoveIt on an
+object already in the jaw never returned. From `move_group`'s log:
+
+```
+[INFO ] trajectory_execution_manager: Validating trajectory with allowed_start_tolerance 0.01
+[INFO ] trajectory_execution_manager: Starting trajectory execution ...
+[WARN ] parallel_gripper_controller_handle: waitForExecution timed out
+[ERROR] trajectory_execution_manager: Controller is taking too long to execute trajectory
+        (the expected upper bound for the trajectory execution was 11.997270 seconds). Stopping.
+[INFO ] trajectory_execution_manager: Completed trajectory execution with status TIMED_OUT
+```
+
+and from `ros2_control_node`, 12 s apart with nothing in between:
+
+```
+[INFO] [onrobot_rg6]: Received & accepted new action goal
+[INFO] [onrobot_rg6]: Got request to cancel goal
+```
+
+Planning was never the problem — `CheckStartStateCollision` passed and OMPL returned a path. The
+goal simply never terminated.
+
+**Root cause.** `check_for_success` (`_impl.hpp:209-256`) has exactly two exits: position error
+inside `goal_tolerance`, or velocity under `stall_velocity_threshold` for `stall_timeout`. With the
+object in the jaw the first is unreachable by construction. The second was never reached either:
+`stall_velocity_threshold` was left at its upstream default of **0.001 rad/s**, and Isaac's reported
+`finger_joint` velocity chatters above that on every cycle while the PhysX drive presses into the
+object. `last_movement_time_ = time` therefore ran on every update and the stall clock never
+started. `allow_stalling: true` was already set — it was simply never consulted, which is why the
+goal hung instead of aborting at ~1 s.
+
+**Fix** (`techtory_cobotta_bringup/config/controller.yaml`): `stall_velocity_threshold: 0.1`,
+`stall_timeout: 0.5`, and the block rewritten to use only parameters this controller actually has
+(blocker 1's dead keys removed). 0.1 rad/s sits ~14x below a free close (~1.4 rad/s = the 2.0 rad/s
+joint limit x MoveIt's 0.7 velocity scaling), so it cannot be tripped mid-stroke.
+
+**Why an early stall is safe.** The controller keeps writing `position_cmd_` to the position
+command interface *after* the goal completes — it does not release or hold-at-current. So the drive
+goes on closing to the force limit regardless of when the action returned; declaring the stall
+early reports the grip sooner without weakening it.
+
+### 2b. Round two — the threshold was not the whole story
+
+With `stall_velocity_threshold: 0.1` installed and active, a close on the hammer *still* ran 18 s
+to `TIMED_OUT` (goal accepted 877.53, cancelled 895.72), while free open/close goals in the same
+session finished in 0.27–0.52 s. `finger_joint` can only travel 1.26 rad end to end, so 18 s above
+0.1 rad/s is not creep — the finger was **oscillating**. Same session: the gripper closed on the
+hammer but did not hold it. One cause, two symptoms.
+
+**Cause A — the fingers are effectively massless.** The RG6 links carry ~1e-4 kg·m² about their
+own joints, and `configure_gripper_drive` puts 5 N·m on them: ~5e4 rad/s² of available
+acceleration, bounded only by `maxJointVelocity`. The fingers hit the object with far more kinetic
+energy than the real gripper has, bounce, and ring. Fixed in
+`spawn_robot.py:stabilize_gripper_joints` — `physxJoint:armature = 0.01` on all six gripper joints
+(PhysX's model of the gear-train inertia the imported asset lacks, peak accel → ~500 rad/s²), plus
+`physxJoint:maxJointVelocity` 2.0 → 0.6 rad/s so touchdown is gentler and any residual ringing
+stays well under the controller's threshold.
+
+**Cause B — the hammer cannot be grasped at all, at any force.** `hammer1.usd` authors
+`physics:approximation = "convexHull"` on `hamLo`, and the convex hull of a hammer is a solid
+wedge from head to handle — it fills in the very notch the pads aim for. The pads therefore never
+touch the handle; they close on a sloping hull face and extrude the part out of the jaw. The asset
+also has **no `PhysicsMassAPI`** (mass and inertia integrated from that wrong hull at default
+density) and **no physics material**, so it ran on the engine default while the pads had 1.2/1.1 —
+PhysX averages the two, so binding the pads alone only got halfway. All three fixed in
+`spawn_objects.py:configure_graspable_object`, called from `main.py` right after `add_hammer`.
+
+**Armature alone was not enough — measured, not assumed.** Closing on a 50 mm / 0.2 kg cube and
+reading `finger_joint`'s |velocity| p95 over the last 1.5 s of the squeeze:
+
+| armature | jointFriction | press p95 (rad/s) | cube held? | stall would fire? |
+|---:|---:|---:|:--|:--|
+| 0.01 | 0.0 | 0.175 | no | no |
+| 0.01 | 0.2 | 0.136 | no | no |
+| 0.05 | 0.0 | 0.113 | yes | no |
+| 0.05 | 0.2 | 0.088 | yes | yes |
+| 0.10 | 0.2 | 0.063 | yes | yes |
+| **0.15** | **0.4** | **0.042** | **yes** | **yes** — chosen, 2.4x margin |
+
+Joint friction is doing work armature cannot. At a ~0.35 rad position error the drive is
+saturated at `maxForce`, so its damping term is clamped away entirely: the squeeze is a constant
+torque with no velocity feedback, which is precisely the condition for a limit cycle. Coulomb
+friction at the joint is the dissipation that closes it.
+
+### 2c. Verified
+
+Headless, driving the PhysX articulation directly (no ROS bridge), against the committed config:
+
+```
+A. FREE  close 2.42 s, open 2.50 s (MoveIt budget 6.8 s)      -> reached_goal path OK
+B. QUIET blocked at +0.1692 rad, press |vel| p95 = 0.0351 rad/s (threshold 0.1)
+C. HOLD  cube z 1.2059 -> 1.2059  (+0.0 mm)
+D. LIFT  cube moved 140.7 mm with the arm, final z 1.3441
+```
+
+Also confirmed along the way, against claims that were previously only inferred:
+- **PhysX really does have shapes for all six RG6 links** — scene-query overlap over the jaw
+  returns all six `*/collisions` prims. §1a's fix is genuinely in force.
+- **The clear jaw opening at −0.62 rad is 151.0 mm**, matching §1's measured 151.4 mm.
+- **The inner knuckles sit ~10 mm apart** and occupy the z-band *above* the pads
+  (1.2249–1.3003 at open, descending as the jaw closes). An object presented too high is caught
+  between the knuckles ~20 mm before the pads ever reach it and is not gripped at all. This is a
+  real constraint on grasp poses, not just a test artefact.
+
+**Still unverified:** that MoveIt's close goal now returns SUCCEEDED rather than TIMED_OUT. That
+needs the full bringup restarted; B is the mechanism it depends on, but the end-to-end path has
+not been exercised. The hammer specifically has not been grasped either — C/D used a cube.
 
 ---
 
@@ -228,34 +345,36 @@ nothing in the jaw still reaches the 0.628 rad stop, so `goal_tolerance` termina
 
 ### Stage 2 — per-goal effort
 
-**2a. `cobotta_hardware.ros2_control.xacro`** — inside `cobotta_topic_based_ros2_control`, add
+**2a. Blocker 5 — `topic_based_ros2_control` cannot carry this interface at all.** The name the
+controller binds is `set_gripper_max_effort` (§1 table), which is not one of `position` / `velocity`
+/ `effort`. `TopicBasedSystem::export_command_interfaces` runs every declared interface through
+`getInterface`, which only matches `standard_interfaces_`, and **throws**
+`std::runtime_error("Interface is not found in the standard list.")` on anything else
+(`topic_based_system.cpp:184-201`) — that kills the whole hardware component, not just the gripper.
+Declaring `<command_interface name="effort"/>` instead avoids the throw but is never written to,
+because `effort_interface_` stays `nullopt` unless the interface name matches exactly.
 
-```xml
-<command_interface name="effort"/>
-```
+So Stage 2 needs one of:
 
-to **all seven** joints (the six arm joints and `finger_joint`). The arm entries are never claimed and
-publish as `0.0`; they exist purely to keep `JointState.effort` index-aligned with `JointState.name`
-(blocker 3). Do the same in the `mock` / `mujoco` macros only if those backends are used for this.
+- **(i) Patch `topic_based_system.cpp`** to accept `set_gripper_max_effort` and map it into
+  `JointState.effort`. Smallest change that keeps the stock controller; the plugin is vendored under
+  `plugins/controls/`, so it is ours to patch. Note the §1 array-alignment rule still applies —
+  whatever interface carries it must be declared on all seven joints.
+- **(ii) Skip the controller's effort path** and set the drive limit out of band (a small node that
+  writes the ScriptNode's `defaultEffort` input, or a service on the Isaac side). Keeps the goal's
+  `effort` field unused, which is honest about what the wire actually carries today.
 
-**2b. `controller.yaml`** — replace the `onrobot_rg6` block (`:52-70`) with valid parameters:
+Pick one before writing 2c. **(i)** is the one that makes `command.effort` mean something end to
+end, which is what §3's architecture assumes.
+
+**2b. `controller.yaml`** — **DONE** (§2a of this document). The block now carries only real
+parameters, with the stall path tuned so a grip terminates. When 2a lands, add:
 
 ```yaml
-onrobot_rg6:
-  ros__parameters:
-    joint: finger_joint
-    state_interfaces: [position, velocity, effort]
-    max_effort_interface: finger_joint/effort   # full interface name, not "effort"
-    max_effort: 3.0                             # N·m, used when the goal omits effort
-    goal_tolerance: 0.01                        # rad
-    allow_stalling: true                        # stall on object ⇒ SUCCEEDED
-    stall_velocity_threshold: 0.01              # rad/s
-    stall_timeout: 0.4                          # s
-    action_monitor_rate: 20.0
+    max_effort_interface: finger_joint/set_gripper_max_effort
 ```
 
-Drop the stray `type:` key from inside `ros__parameters` — the controller type belongs only in the
-`controller_manager` section (`:14-15`).
+and drop the "inert today" comment above `max_effort`.
 
 **2c. `scripts/main.py`** — remove this connection from the `/ActionGraph_Robot` edit (`:114`):
 
@@ -341,8 +460,15 @@ the drive is permanently saturated at `maxForce` during free motion. See §5 for
   `art.get_link_incoming_joint_force()` on a finger link, and fill in a real table here.
 - **Friction — done.** `spawn_robot.py:add_grip_friction` defines `/World/PhysicsMaterials/GripperPad`
   (static 1.2 / dynamic 1.1 / restitution 0) and binds it with purpose `physics` to the two
-  `*_inner_finger/collisions` prims. Objects still run on the engine default (0.5); the cell objects
-  (`hammer1.usd`, `shelf.usd`) have no authored `PhysicsMaterial` either and are worth giving one.
+  `*_inner_finger/collisions` prims. The object side is now covered too —
+  `spawn_objects.py:configure_graspable_object` defines `/World/PhysicsMaterials/GraspableObject`
+  with the same numbers and binds it to the hammer's collider (§2b Cause B). `shelf.usd` is static
+  and does not need one.
+- **Object collider shape matters more than grip force.** A `convexHull` approximation on any
+  object with a concave grasp feature (a hammer, a mug, an L-bracket) fills that feature in, and no
+  amount of squeeze will hold it — the pads never reach the real surface. Use
+  `convexDecomposition` for anything the gripper is meant to pick up. This is checked per object;
+  `soda_can.usd` is convex and is fine as a hull.
 
 ### Verify
 
@@ -393,6 +519,14 @@ ros2 topic echo /topic_based_joint_commands
   companion logic or add `trigger_joint_command_threshold` as a hardware param — do not assume it works.
 - **Array alignment is load-bearing.** Any future joint added to the `<ros2_control>` block without an
   `effort` command interface silently re-breaks blocker 3 and freezes the whole arm, not just the gripper.
+- **Non-standard command interfaces take the whole hardware component down.** `TopicBasedSystem`
+  throws on any interface outside `position`/`velocity`/`effort`, so a stray
+  `<command_interface name="set_gripper_max_effort"/>` does not degrade to "gripper effort ignored" —
+  `ros2_control_node` fails to configure. See §4 Stage 2a.
+- **Stall detection is velocity-threshold-bound, and sim velocity is noisy.** `stall_velocity_threshold`
+  under Isaac's resting chatter means the goal never terminates rather than aborting — a hang, not an
+  error. If a gripper goal ever hangs again, echo `/topic_based_joint_states` and look at
+  `finger_joint`'s velocity while it presses, then set the threshold above it (§2a).
 - **The BT node cannot talk to this controller.** `techtory_cobotta_system/trees/techtory_cobotta_gripper.xml:6`
   uses the `GripperCommand` BT client, which is `control_msgs/action/GripperCommand`
   (`gripper_command_action_bt_client.hpp:28`), while this controller serves `ParallelGripperCommand`.

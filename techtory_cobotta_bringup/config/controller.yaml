@@ -49,22 +49,21 @@ denso_joint_group_position_controller:
       - cobotta_pro_joint_6                                                                                                                                                                                               
     interface_name: position
 
+
 onrobot_rg6:
   ros__parameters:
-    type: parallel_gripper_action_controller/GripperActionController
     joint: finger_joint
-    allow_stalling: true   
-    command_interfaces:
-      - position
     state_interfaces:
       - position
       - velocity
       - effort
-    use_effort_interface: true
-    state_publish_rate: 500
+
+    goal_tolerance: 0.01        # rad — reached_goal path (free close/open, nothing in the jaw)
+    allow_stalling: true        # stalled ⇒ SUCCEEDED instead of ABORTED
+
+    stall_velocity_threshold: 0.1   # rad/s
+    stall_timeout: 0.5              # s below the threshold before the grip is declared
+    max_effort: 5.0
+    max_velocity: 2.0
+
     action_monitor_rate: 20.0
-    allow_partial_joints_goal: false
-    open_loop_control: false
-    constraints:
-      stopped_velocity_tolerance: 0.01
-      goal_time: 1.0
