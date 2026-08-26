@@ -4,106 +4,76 @@
   <include path="subtrees/pnp_pipeline.xml"/>
 
   <BehaviorTree ID="main">
-    <!-- <KeepRunningUntilFailure> -->
-      <Sequence>
-      <!-- Open the gripper before approaching the object.
-           OnRobot RG6: position -0.628 = open, 0.628 = close. -->
-
-        <GripperCommand server_name="/rg6_controller"
-                      server_timeout="5000ms"
-                      position="-0.6"
-                      max_effort="0.1"
-                      error_code_id="{gripper_error_code_id}"/>
-
-        <SubTree ID="pnp_pipeline"
+    <Sequence>
+      <SubTree ID="pnp_pipeline"
+               name="Pick Red Cube from bin to place on shelf"
+               yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+               pick_approach="pick_red_approach"
+               pick="pick_red"
+               pick_retreat="pick_red_retreat"
+               shelf_approach="shelf_approach"
+               place_approach="place_red_approach"
+               place="place_red"
+               place_retreat="place_red_retreat"
+               gripper_open_pos="-0.6"
+               gripper_open_effort="0.1"
+               gripper_close_pos="0.5"
+               gripper_close_effort="0.1"
+               _autoremap="true"/>
+      <SubTree ID="pnp_pipeline"
+               yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+               pick_approach="pick_green_approach"
+               pick="pick_green"
+               pick_retreat="pick_green_retreat"
+               shelf_approach="shelf_green_approach"
+               place_approach="place_green_approach"
+               place="place_green"
+               place_retreat="place_green_retreat"
+               gripper_open_pos="-0.3"
+               gripper_open_effort="0.1"
+               gripper_close_pos="0.45"
+               gripper_close_effort="0.1"
+               _autoremap="true"/>
+      <SubTree ID="execute_motion"
                  yaml_path="src/techtory_cobotta_system/config/poses.yaml"
-                 pick_approach="pick_red_approach"
-                 pick="pick_red"
-                 gripper_close_pos="0.5"
-                 gripper_close_effort="0.1"
-                 pick_retreat="pick_red_retreat"
-                 shelf_approach="shelf_approach"
-                 place_approach="place_red_approach"
-                 place="place_red"
-                 gripper_open_pos="-0.6"
-                 gripper_open_effort="0.1"
-                 place_retreat="place_red_retreat"
+                 pose_name="shelf_approach"
                  _autoremap="true"/>
-
-                <GripperCommand server_name="/rg6_controller"
-                      server_timeout="5000ms"
-                      position="{gripper_open_pos}"
-                      max_effort="{gripper_open_effort}"
-                      error_code_id="{gripper_error_code_id}"/>
-
-        <SubTree ID="pnp_pipeline"
+      <SubTree ID="pnp_pipeline"
+               yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+               pick_approach="place_red_approach"
+               pick="place_red"
+               pick_retreat="place_red_retreat"
+               shelf_approach="shelf_approach"
+               place_approach="pick_red_approach"
+               place="pick_red"
+               place_retreat="pick_red_retreat"
+               gripper_open_pos="-0.0"
+               gripper_open_effort="0.1"
+               gripper_close_pos="0.5"
+               gripper_close_effort="0.1"
+               _autoremap="true"/>
+      <SubTree ID="execute_motion"
                  yaml_path="src/techtory_cobotta_system/config/poses.yaml"
-                 pick_approach="pick_green_approach"
-                 gripper_open_pos="-0.3"
-                 gripper_open_effort="0.1"
-                 pick="pick_green"
-                 gripper_close_pos="0.45"
-                 gripper_close_effort="0.1"
-                 pick_retreat="pick_green_retreat"
-                 shelf_approach="shelf_approach"
-                 place_approach="place_green_approach"
-                 place_approach2="place_green_approach_2"
-                 place="place_green"
-                 //todo- gripper open
-                 place_retreat="place_green_retreat"
-                 _autoremap="true"
-                 />
-              <GripperCommand server_name="/rg6_controller"
-                      server_timeout="5000ms"
-                      position="{gripper_open_pos}"
-                      max_effort="{gripper_open_effort}"
-                      error_code_id="{gripper_error_code_id}"/>
-        
-                <SubTree ID="pnp_pipeline"
-                 yaml_path="src/techtory_cobotta_system/config/poses.yaml"
-                 pick_approach="pick_blue_approach"
-                 gripper_open_pos="-0.6"
-                 gripper_open_effort="0.1"
-                 pick="pick_blue"
-                 gripper_close_pos="0.5"
-                 gripper_close_effort="0.1"
-                 pick_retreat="pick_blue_retreat"
-                 shelf_approach="shelf_approach"
-                 place_approach="place_blue_approach"
-                 place_approach2="place_blue_approach_2"
-                 place="place_blue"
-                 gripper_open_pos="-0.6"
-                 gripper_open_effort="0.1"
-                 place_retreat="place_blue_retreat"
-                 _autoremap="true"
-                 />
-
-                <GripperCommand server_name="/rg6_controller"
-                      server_timeout="5000ms"
-                      position="{gripper_open_pos}"
-                      max_effort="{gripper_open_effort}"
-                      error_code_id="{gripper_error_code_id}"/>
-                 
-      </Sequence>
-    <!-- </KeepRunningUntilFailure> -->
+                 pose_name="shelf_green_approach"
+                 _autoremap="true"/>
+      <SubTree ID="pnp_pipeline"
+               yaml_path="src/techtory_cobotta_system/config/poses.yaml"
+               pick_approach="place_green_approach"
+               pick="place_green"
+               pick_retreat="place_green_retreat"
+               shelf_approach="shelf_green_approach"
+               place_approach="place_green_approach"
+               place="place_green"
+               place_retreat="place_green_retreat"
+               gripper_open_pos="-0.3"
+               gripper_open_effort="0.1"
+               gripper_close_pos="0.45"
+               gripper_close_effort="0.1"
+               _autoremap="true"/>
+    </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel/>
-  <Action ID="GripperCommand">
-      <input_port name="server_name"
-                  default="/gripper_command"
-                  type="std::string">Gripper action server</input_port>
-      <input_port name="server_timeout"
-                  default="5000ms"
-                  type="std::chrono::milliseconds">Server timeout</input_port>
-      <input_port name="position"
-                  type="double">Finger position (1.0=open, 0.0=close)</input_port>
-      <input_port name="max_effort"
-                  type="double">Gripper max effort</input_port>
-      <output_port name="error_code_id"
-                   type="int32_t">Action error code ID</output_port>
-    </Action>
-  </TreeNodesModel>
 
 </root>
