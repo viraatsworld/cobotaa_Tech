@@ -21,9 +21,12 @@ Sibling document: `plan-ft-implement.md` (wrist FT sensor). The two share the ar
 
 - [x] Command path traced end to end — see §1.
 - [x] Root causes of "effort does nothing" identified — see §2.
-- [ ] Stage 1 — static force limit (kills the crushing, no ROS changes).
+- [x] **Blocker 0 found and fixed: the gripper had no collision shapes at all** — see §1a.
+      This was never a force problem in the first place; the fingers were a ghost.
+- [x] Stage 1 — static force limit (kills the crushing, no ROS changes). Done in USD authoring
+      in `spawners/spawn_robot.py:configure_gripper_drive`, called from `scripts/main.py`.
 - [ ] Stage 2 — per-goal effort plumbed from the action to the PhysX drive.
-- [ ] Stage 3 — calibration + friction.
+- [x] Stage 3 — friction (`add_grip_friction`). Torque→force calibration still open.
 
 ---
 
@@ -64,19 +67,53 @@ deleted. Their leftover `drive:*` attribute values are inert.
 **Consequence: all grip torque comes from the single `finger_joint` drive.** Limiting that drive's
 max force limits the whole grasp. Nothing else needs to be touched.
 
-Authored `finger_joint` drive:
+`finger_joint` drive — note the **composed** values differ from what
+`onrobot_rg6_physics.usd` authors, because `cvrb0609_with_graph2.usd` overrides them. Always
+read the composed stage, not the physics layer:
 
-| attribute | value | note |
-|---|---:|---|
-| `drive:angular:physics:type` | `force` | |
-| `drive:angular:physics:stiffness` | 1.745329e10 | per **degree** in USD |
-| `drive:angular:physics:damping` | 1.745329e9 | per **degree** in USD |
-| `drive:angular:physics:maxForce` | **6000** | torque, N·m — effectively unlimited |
-| `physics:lowerLimit` / `upperLimit` | ∓36.0° | = ∓0.628 rad ✓ matches the action range |
-| `physxJoint:maxJointVelocity` | 114.59°/s | = 2.0 rad/s |
+| attribute | in `onrobot_rg6_physics.usd` | **composed on stage** | note |
+|---|---:|---:|---|
+| `drive:angular:physics:type` | `force` | `force` | |
+| `drive:angular:physics:stiffness` | 1.745329e10 | **1.745329e6** | per **degree** in USD |
+| `drive:angular:physics:damping` | 1.745329e9 | **1745.33** | per **degree** in USD |
+| `drive:angular:physics:maxForce` | 6000 | **6000** | torque, N·m — effectively unlimited |
+| `physics:lowerLimit` / `upperLimit` | ∓36.0° | ∓36.0° | = ∓0.628 rad ✓ matches the action range |
+| `physxJoint:maxJointVelocity` | 114.59°/s | 114.59°/s | = 2.0 rad/s |
 
-A 6000 N·m limit against a 1.7e10 stiffness is a rigid position servo. **This is why the gripper
-crushes or ejects objects today.**
+6000 N·m at the ~0.080 m finger lever is ~75 kN. Nothing an object can do opposes that, so
+"close" always runs to the hard stop. **This is why the gripper crushes or ejects objects.**
+
+Measured stroke (after §1a is fixed), commanded angle → clear gap between the pad faces:
+
+| `finger_joint` | −0.628 | −0.314 | 0.000 | +0.314 | +0.628 |
+|---|---:|---:|---:|---:|---:|
+| jaw opening | 151.4 mm | 128.9 mm | 93.7 mm | 49.2 mm | ~0 mm |
+
+### 1a. Blocker 0 — the gripper had no collision shapes (fixed)
+
+Verified with `omni.physx` scene-query overlaps over the jaw: PhysX reported colliders for the
+arm links and **none** for any of the six RG6 links. A 50 mm cube parked between 94 mm jaws was
+displaced **0.00 mm** while the drive ran to its hard stop.
+
+Cause: each RG6 link's `collisions` Xform carries `PhysxMeshMergeCollisionAPI`, so PhysX builds
+one collision shape out of whatever the prim's `collisionmeshes` collection resolves to. The
+asset ships that collection as `expansionRule = "explicitOnly"` with a single include — the
+`collisions` Xform itself. "explicitOnly" means exactly the listed paths and nothing under them,
+so the collection resolves to one Xform and **zero meshes**, and the merge produces no shape.
+The `collisions` prims are also `instanceable = true`, and a collection cannot reach prims inside
+an instance prototype.
+
+Fix (`spawn_robot.py:fix_gripper_collisions`): de-instance, then set
+`expansionRule = "expandPrims"`. The collision meshes are 15 000 points each and their world
+bounds match the visual pads exactly, so `convexHull` is a tight approximation — no need for SDF
+or convex decomposition.
+
+**Second-order consequence** — `physxArticulation:enabledSelfCollisions = 0` is authored on
+`/onrobot_rg6/gripper_joint`, which is **no longer the articulation root** (the root is the arm's
+`root_joint`, where the attribute is unset and defaults to True). Harmless while the gripper had
+no shapes; the moment it has them the four-bar's overlapping knuckles and fingers push each other
+apart and the jaw jams at 0.097 rad with nothing between the fingers. Hence
+`spawn_robot.py:disable_articulation_self_collisions`, which must run alongside the collision fix.
 
 ### Articulation (shared with `plan-ft-implement.md` §1)
 
@@ -157,18 +194,37 @@ Behaviour that falls out of this:
 
 ## 4. Implementation
 
-### Stage 1 — static force limit (no ROS changes, biggest single win)
+### Stage 1 — static force limit — **DONE**, but not the way this section originally proposed
 
-In `scripts/main.py`, after `world.reset()` and after the articulation is initialised:
+Authored into USD in `build_world()` **before** `world.reset()`, next to
+`set_initial_joint_positions`, rather than through the tensor API after reset:
 
 ```python
-from isaacsim.core.experimental.prims import Articulation
-_art = Articulation(ARTICULATION_PATH)
-_finger_dof = int(_art.get_dof_indices("finger_joint").numpy().item())
-_art.set_dof_max_efforts([DEFAULT_GRIP_TORQUE], dof_indices=[_finger_dof])   # e.g. 3.0 N·m
+fix_gripper_collisions(stage, "/World/Cobotta/onrobot_rg6")     # §1a — must come first
+disable_articulation_self_collisions(stage, "/World/Cobotta")   # §1a
+configure_gripper_drive(stage)                                  # maxForce/stiffness/damping
+add_grip_friction(stage, "/World/Cobotta/onrobot_rg6")          # Stage 3
 ```
 
-Verify: close on the hammer — it should be held, not launched. This alone makes the gripper usable.
+USD authoring was chosen over `set_dof_max_efforts` because the USD attribute units are
+unambiguous (see §5) and because the limit is then in force on the very first physics step.
+
+Values in `spawn_robot.py`: `DEFAULT_GRIP_TORQUE = 5.0` N·m (~62 N),
+`GRIP_DRIVE_STIFFNESS = 3.0` /deg, `GRIP_DRIVE_DAMPING = 0.1` /deg.
+
+Measured, 50 mm / 0.2 kg cube standing on a post, close then lift the shoulder 0.25 rad:
+
+| grip torque | ≈ finger force | stall angle | cube displaced while closing | lifted with the arm |
+|---:|---:|---:|---:|:--|
+| 1 N·m | 12 N | 0.198 rad | 0.04 mm | yes |
+| 2 N·m | 25 N | 0.198 rad | 0.01 mm | yes |
+| 5 N·m | 62 N | 0.198 rad | 0.01 mm | yes |
+| 10 N·m | 125 N | 0.199 rad | 0.02 mm | yes |
+| **6000 N·m** (as shipped) | 75 kN | **0.266 rad** | **1.93 mm** | yes |
+
+The shipped drive overshoots the geometric stall by 0.07 rad and shoves the cube ~2 mm — that is
+the crushing. Anything in the 1–10 N·m band stops in the same place and holds. Free close with
+nothing in the jaw still reaches the 0.628 rad stop, so `goal_tolerance` termination is unaffected.
 
 ### Stage 2 — per-goal effort
 
@@ -283,9 +339,10 @@ the drive is permanently saturated at `maxForce` during free motion. See §5 for
   RG6, and the real gripper's range is 25–120 N ⇒ roughly **2–10 N·m** is the useful band. Measure with
   the wrist FT work in `plan-ft-implement.md`, or with
   `art.get_link_incoming_joint_force()` on a finger link, and fill in a real table here.
-- **Friction.** Neither the RG6 fingers nor `assets/objects/hammer.usd` has an authored
-  `PhysicsMaterial` — both run on engine defaults. With a correctly limited force the object will slip
-  before it is crushed. Add a high-friction material to the two `*_inner_finger` collision prims.
+- **Friction — done.** `spawn_robot.py:add_grip_friction` defines `/World/PhysicsMaterials/GripperPad`
+  (static 1.2 / dynamic 1.1 / restitution 0) and binds it with purpose `physics` to the two
+  `*_inner_finger/collisions` prims. Objects still run on the engine default (0.5); the cell objects
+  (`hammer1.usd`, `shelf.usd`) have no authored `PhysicsMaterial` either and are worth giving one.
 
 ### Verify
 
@@ -317,6 +374,13 @@ ros2 topic echo /topic_based_joint_commands
 
 ## 5. Gotchas
 
+- **`set_dof_max_efforts` did not behave predictably in testing.** Sweeping the cap at runtime with
+  `Articulation.set_dof_max_efforts([tau], dof_indices=[dof])` between trials in one process gave
+  non-monotonic stall angles (0.02–0.20 rad) for the same scenario, while authoring the same values
+  in USD across separate processes gave a flat 0.198 rad every time. Not root-caused — it may be the
+  argument shape (the API is batched over environments, so `[[tau]]` may be what it wants) rather
+  than the API. **Stage 2 depends on this call, so verify it against a USD-authored baseline before
+  building on it.**
 - **Angular gain units.** USD angular drive stiffness/damping are per **degree**; the tensor API is
   documented per **radian**. `maxForce` is torque in both, so the effort mapping is unit-safe — but
   verify before trusting any stiffness/damping number set from Python. A 57× error hides here.

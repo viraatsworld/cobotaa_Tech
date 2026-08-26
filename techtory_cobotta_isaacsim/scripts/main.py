@@ -26,7 +26,9 @@ simulation_app.update()
 # IMPORT WORLD AFTER SIMULATION APP IS RUNNING
 from isaacsim.core.api import World
 from spawners.spawn_scene import add_world
-from spawners.spawn_robot import add_robot,  set_initial_joint_positions
+from spawners.spawn_robot import (add_robot, set_initial_joint_positions, fix_gripper_collisions,
+                                  disable_articulation_self_collisions, configure_gripper_drive,
+                                  add_grip_friction)
 from spawners.spawn_objects import add_hammer,add_techtory_cell, add_shelf
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 
@@ -82,7 +84,18 @@ def build_world():
 
     # Must happen before world.reset(), while this is still just USD authoring.
     set_initial_joint_positions(stage, "/World/Cobotta", HOME_JOINT_POSITIONS)
-    
+
+    # Same window: the gripper only becomes a physical object here. As imported it has no
+    # collision shapes at all (empty mesh-merge collections) and an effectively unlimited
+    # drive, which is the pair of reasons the fingers pass through objects and then slam
+    # shut. Order matters -- giving the links shapes without disabling self-collision jams
+    # the four-bar linkage.
+    fix_gripper_collisions(stage, "/World/Cobotta/onrobot_rg6")
+    disable_articulation_self_collisions(stage, "/World/Cobotta")
+    configure_gripper_drive(stage)
+    add_grip_friction(stage, "/World/Cobotta/onrobot_rg6")
+
+
     # 2. Add the robot to the World scene so Isaac Sim tracks its physics
     world.scene.add(cobotta)
     return cobotta
