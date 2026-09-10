@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.22)
+project(techtory_cobotta_mujoco)
+
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+ament_python_install_package(${PROJECT_NAME})
+install(DIRECTORY config launch urdf DESTINATION share/${PROJECT_NAME})
+install(FILES README.md requirements.txt DESTINATION share/${PROJECT_NAME})
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  find_package(ros_testing REQUIRED)
+  ament_add_pytest_test(test_model test/test_model.py TIMEOUT 300)
+  add_ros_test(test/test_simulation.launch.py TARGET test_simulation TIMEOUT 300)
+endif()
+ament_package()

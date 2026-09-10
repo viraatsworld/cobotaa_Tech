@@ -1,0 +1,31 @@
+# MuJoCo position-servo gains and force limits, consumed by model.py at scene generation time.
+#
+# These deliberately do NOT come from the URDF. denso_robot_descriptions authors placeholder
+# dynamics for the CVRB0609 -- every link is mass=1 kg with an identity inertia tensor, and
+# every joint carries `effort="1"`. Deriving `forcerange` from that (the way
+# rox_fr3_demo_mujoco does for the FR3, whose description has real numbers) yields +/-1 Nm and
+# the arm folds under its own weight the moment physics starts.
+#
+# The values below are therefore chosen to hold the arm, not to model the real drive train.
+# Wrench readings on /tcp_wrench are indicative, not calibrated.
+defaults:
+  arm:
+    kp: 4000.0
+    kv: 200.0
+    forcerange: 300.0     # Nm, applied symmetrically as -f f
+  finger:
+    kp: 200.0
+    kv: 10.0
+    forcerange: 20.0
+
+# Per-joint overrides. Joints 2 and 3 carry the most gravity load (shoulder and elbow).
+joints:
+  cobotta_pro_joint_2:
+    forcerange: 600.0
+  cobotta_pro_joint_3:
+    forcerange: 400.0
+
+# Equality-constraint softness for the five RG6 mimic joints. Softer (larger first value)
+# reduces linkage jitter at the cost of mimic tracking accuracy.
+mimic:
+  solref: "0.002 1"

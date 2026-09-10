@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- MuJoCo hardware interface for the Cobotta workcell.
+
+       techtory_cobotta_workcell.urdf.xacro already calls
+         <xacro:cobotta_mujoco_ros2_control namespace="$(arg namespace)"/>
+       when hardware_type:=mujoco, but no macro by that name was ever defined, so that branch
+       could not expand. This file supplies it. The call site passes only `namespace`, so
+       everything else is read from globals that techtory_cobotta_mujoco.urdf.xacro declares.
+
+       Deliberately absent: odom_free_joint_name / odom_topic. Those are for a floating base;
+       this cell is welded to `world`. -->
+  <xacro:macro name="cobotta_mujoco_ros2_control" params="namespace">
+
+    <xacro:property name="initial"
+        value="${xacro.load_yaml('$(arg initial_positions_file)')['initial_positions']}"/>
+
+    <ros2_control name="${namespace}MujocoSystem" type="system">
+      <hardware>
+        <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+        <!-- Placeholder. The launch file rewrites this to the generated absolute scene path
+             after model.py has produced it; see techtory_cobotta_mujoco.launch.py. -->
+        <param name="mujoco_model">$(arg mujoco_model)</param>
+        <param name="headless">$(arg headless)</param>
+        <param name="sim_speed_factor">1.0</param>
+      </hardware>
+
+      <xacro:macro name="controlled_joint" params="name initial_value:=0.0">
+        <joint name="${name}">
+          <command_interface name="position"/>
+          <state_interface name="position">
+            <param name="initial_value">${initial_value}</param>
+          </state_interface>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+      </xacro:macro>
+
+      <xacro:controlled_joint name="${namespace}joint_1" initial_value="${initial[namespace + 'joint_1']}"/>
+      <xacro:controlled_joint name="${namespace}joint_2" initial_value="${initial[namespace + 'joint_2']}"/>
+      <xacro:controlled_joint name="${namespace}joint_3" initial_value="${initial[namespace + 'joint_3']}"/>
+      <xacro:controlled_joint name="${namespace}joint_4" initial_value="${initial[namespace + 'joint_4']}"/>
+      <xacro:controlled_joint name="${namespace}joint_5" initial_value="${initial[namespace + 'joint_5']}"/>
+      <xacro:controlled_joint name="${namespace}joint_6" initial_value="${initial[namespace + 'joint_6']}"/>
+
+      <!-- The RG6's other five joints are URDF mimics of finger_joint. They are resolved by
+           MJCF equality constraints in the simulator and by RobotModel in TF, so they must
+           NOT be declared here - ros2_control would claim DOFs that MuJoCo does not actuate. -->
+      <xacro:controlled_joint name="finger_joint" initial_value="${initial['finger_joint']}"/>
+
+      <!-- Wrist force/torque sensor at the J6 -> gripper interface.
+
+           `mujoco_type` and `mujoco_sensor_name` are the keys the hardware interface actually
+           reads (mujoco_system_interface.cpp register_sensors). The `<FTS>_fts` convention in
+           the mujoco_system_interface.hpp docstring is stale. A name that does not resolve
+           against the MJCF fails SILENTLY - one RCLCPP_ERROR and the six state interfaces
+           simply never appear - so `tcp_fts` must match the sensor names model.py emits
+           (tcp_fts_force / tcp_fts_torque, via the default _force/_torque suffixes). -->
+      <sensor name="tcp_fts_sensor">
+        <param name="mujoco_type">fts</param>
+        <param name="mujoco_sensor_name">tcp_fts</param>
+        <state_interface name="force.x"/>
+        <state_interface name="force.y"/>
+        <state_interface name="force.z"/>
+        <state_interface name="torque.x"/>
+        <state_interface name="torque.y"/>
+        <state_interface name="torque.z"/>
+      </sensor>
+    </ros2_control>
+  </xacro:macro>
+</robot>

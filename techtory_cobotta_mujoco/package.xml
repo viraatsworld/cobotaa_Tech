@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>techtory_cobotta_mujoco</name>
+  <version>0.1.0</version>
+  <description>MuJoCo simulation of the Techtory Cobotta workcell: Denso CVRB0609 arm, OnRobot RG6 gripper and a wrist force/torque sensor.</description>
+  <maintainer email="prachandabhanu@gmail.com">ipa326</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <exec_depend>mujoco_ros2_control</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>parallel_gripper_controller</exec_depend>
+  <exec_depend>force_torque_sensor_broadcaster</exec_depend>
+
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>control_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>controller_manager_msgs</exec_depend>
+
+  <exec_depend>techtory_cobotta_workcell_description</exec_depend>
+  <exec_depend>techtory_cobotta_moveit</exec_depend>
+  <!-- kinematics.yaml selects this IKFast solver for the `arm` group; without it
+       move_group starts but cannot instantiate a kinematics solver. -->
+  <exec_depend>techtory_demo_description_arm_ikfast_plugin</exec_depend>
+  <exec_depend>denso_robot_descriptions</exec_depend>
+  <exec_depend>techtory_cell_description</exec_depend>
+  <exec_depend>onrobot_rg_description</exec_depend>
+
+  <exec_depend>moveit_configs_utils</exec_depend>
+  <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>launch_testing_ros</test_depend>
+  <test_depend>ros_testing</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

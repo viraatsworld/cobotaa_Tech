@@ -1,0 +1,76 @@
+# Controller names must match techtory_cobotta_moveit/config/moveit_controllers.yaml exactly
+# (denso_joint_trajectory_controller + onrobot_rg6), otherwise MoveIt cannot execute.
+controller_manager:
+  ros__parameters:
+    update_rate: 125  # Hz -- matches techtory_cobotta_bringup; MuJoCo steps at 500 Hz
+    use_sim_time: true
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    denso_joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    onrobot_rg6:
+      type: parallel_gripper_action_controller/GripperActionController
+
+    tcp_force_torque_sensor_broadcaster:
+      type: force_torque_sensor_broadcaster/ForceTorqueSensorBroadcaster
+
+denso_joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - cobotta_pro_joint_1
+      - cobotta_pro_joint_2
+      - cobotta_pro_joint_3
+      - cobotta_pro_joint_4
+      - cobotta_pro_joint_5
+      - cobotta_pro_joint_6
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_partial_joints_goal: false
+    # Closed-loop against the simulator, unlike the open_loop_control the real Denso
+    # driver needs -- MuJoCo reports true joint state every cycle.
+    open_loop_control: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.05
+      cobotta_pro_joint_1: {trajectory: 0.2, goal: 0.03}
+      cobotta_pro_joint_2: {trajectory: 0.2, goal: 0.03}
+      cobotta_pro_joint_3: {trajectory: 0.2, goal: 0.03}
+      cobotta_pro_joint_4: {trajectory: 0.2, goal: 0.03}
+      cobotta_pro_joint_5: {trajectory: 0.2, goal: 0.03}
+      cobotta_pro_joint_6: {trajectory: 0.2, goal: 0.03}
+
+# Serves /onrobot_rg6/gripper_cmd (control_msgs/action/ParallelGripperCommand).
+# Tuning carried over from techtory_cobotta_bringup/config/controller.yaml, which is the
+# block already known to work against MoveIt's ParallelGripperCommand controller entry.
+onrobot_rg6:
+  ros__parameters:
+    joint: finger_joint
+    state_interfaces:
+      - position
+      - velocity
+      - effort
+    goal_tolerance: 0.01        # rad -- free open/close with nothing in the jaw
+    allow_stalling: true        # stalled on an object => SUCCEEDED, not ABORTED
+    stall_velocity_threshold: 0.1   # rad/s
+    stall_timeout: 0.5              # s below the threshold before the grip is declared
+    max_effort: 5.0
+    max_velocity: 2.0
+    action_monitor_rate: 20.0
+
+# Publishes the J6 -> gripper reaction wrench measured by the MJCF force/torque sensor pair.
+# sensor_name must match the <sensor name=...> in cobotta_mujoco.ros2_control.xacro.
+# `sensor_name` binds the whole 6-axis semantic component, so the individual
+# interface_names.* parameters are not needed. There is no `topic_name` parameter on Jazzy --
+# the controller publishes to `~/wrench`, and the launch file remaps that to /tcp_wrench.
+tcp_force_torque_sensor_broadcaster:
+  ros__parameters:
+    sensor_name: tcp_fts_sensor
+    # The OnRobot RG6 is instantiated with an empty prefix in the workcell xacro, so its
+    # base link -- the wrist FT mounting frame -- is literally named "base_link".
+    frame_id: base_link

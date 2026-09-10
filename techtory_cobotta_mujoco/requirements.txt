@@ -1,0 +1,11 @@
+# Match ros-jazzy-mujoco-vendor's physics/model format.
+mujoco==3.4.0
+trimesh==5.1.0
+pycollada==0.9.3
+# trimesh imports scipy, which on Jazzy comes from the system (built against numpy 1.x).
+# Letting pip pull numpy 2.x into the venv shadows the system numpy and breaks that import
+# with "numpy.dtype size changed". Pin to the distro version.
+numpy==1.26.4
+# Quadric decimation backend for trimesh. The Techtory cell shell is ~467k faces, over
+# MuJoCo's 200k-per-mesh limit, so the scene will not compile without it.
+fast-simplification==0.2.0

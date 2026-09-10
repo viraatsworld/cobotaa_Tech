@@ -1,0 +1,18 @@
+# Startup pose for the MuJoCo simulation.
+#
+# Taken verbatim from techtory_cobotta_isaacsim/scripts/main.py HOME_JOINT_POSITIONS so the
+# two simulators start the cell in the same configuration. The all-zero pose points the arm
+# straight up and puts the wrist through the cell roof, so a non-zero start is mandatory.
+#
+# Note this deliberately differs from the three other "initial pose" definitions in the repo
+# (techtory_cobotta_moveit/config/initial_positions.yaml, the SRDF `home` group state, and
+# cobotta_sphere_cumotion.xrdf). Isaac is the reference here.
+initial_positions:
+  cobotta_pro_joint_1: 0.0
+  cobotta_pro_joint_2: 0.349066   # 20 deg
+  cobotta_pro_joint_3: 1.309      # 75 deg
+  cobotta_pro_joint_4: 0.0
+  cobotta_pro_joint_5: 1.48353    # 85 deg
+  cobotta_pro_joint_6: 0.0
+  # RG6: -0.628 fully open, +0.628 fully closed. Isaac starts the gripper DOFs at 0.
+  finger_joint: 0.0

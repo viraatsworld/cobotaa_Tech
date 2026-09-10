@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!-- Top-level description for the MuJoCo simulation of the Techtory Cobotta workcell.
+
+     The robot name must stay `techtory_demo_description`: the SRDF, the IKFast plugin and
+     MoveItConfigsBuilder("techtory_demo_description", ...) all key off it. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="techtory_demo_description">
+
+  <!-- Consumed by cobotta_mujoco_ros2_control, which the workcell xacro invokes for us. -->
+  <xacro:arg name="mujoco_model" default="scene.xml"/>
+  <xacro:arg name="headless" default="false"/>
+  <xacro:arg name="initial_positions_file"
+      default="$(find techtory_cobotta_mujoco)/config/initial_positions.yaml"/>
+
+  <!-- Define the macro before pulling in the workcell, which calls it. -->
+  <xacro:include filename="$(find techtory_cobotta_mujoco)/urdf/cobotta_mujoco.ros2_control.xacro"/>
+
+  <!-- Brings in the cell, the CVRB0609 arm kinematics, the RG6 gripper and the shelf, and
+       dispatches on hardware_type. The launch file passes hardware_type:=mujoco through
+       xacro mappings so it beats the file's own `topic_based` default. -->
+  <xacro:include
+      filename="$(find techtory_cobotta_workcell_description)/urdf/techtory_cobotta_workcell.urdf.xacro"/>
+</robot>
