@@ -252,3 +252,75 @@ the six values into `PubFT`'s input attributes with `og.Controller.set()` from i
 
 Fewer moving parts and the bridge still publishes — but it can lag one frame, and it breaks if the sim
 is ever driven from the GUI instead of that Python loop.
+
+---
+
+## 7. Grip-load channel — the payload the wrist row cannot see
+
+**Verified empirically (headless, Isaac Sim 6.0.1):** grasp a rigid body, lift it clear of every
+support, and the `base_link` measured-joint-force row does **not** move. `get_measured_joint_forces()`
+reports the articulation's *internal* reaction (gravity on the gripper links + finger drive efforts).
+A grasped object is a *separate* rigid body; its weight enters the gripper only through the pad↔object
+friction **contact**, and PhysX does not fold that reaction into the measured-joint-force table.
+NVIDIA acknowledged this gap (IsaacLab #1092, #1725).
+
+### Contact reads don't work on this gripper either — tested
+
+| Approach | Result |
+|---|---|
+| `get_net_contact_forces()` / `get_contact_force_matrix()` on the **finger links** | flat `[0,0,0]` even with the drive provably stalled against an object — articulation-link contact is not reported |
+| Same, on the **grasped object** (a free rigid body) | works — reads `m·g` on a surface, squeeze when gripped… |
+| …but only if the finger has a **plain collider**. The RG6 pads use `PhysxMeshMergeCollisionAPI`; merged-mesh shapes collide but emit **no** contact reports, so object-side reads zero while only the merged pads touch it |
+| `RigidPrim(list_of_paths, track_contact_forces=True)` | raises `filter pattern list must match sensor pattern list` → view is `None` → `AttributeError: 'NoneType' … 'sensor_count'`. **Pass a single regex string, never a Python list.** |
+
+### What is used instead — a payload dynamics observer
+
+`get_measured_joint_forces` stays the **gravity/bias channel**; the payload channel comes from Newton's
+2nd law on the grasped object, so it needs no contact reporting at all:
+
+```
+F_ext_on_object = m·a  = F_from_gripper + m·g        (g = (0,0,−9.81))
+F_from_gripper  = m·(a − g)
+load on the wrist = reaction = m·(g − a)             a = Δv/Δt of the object, EMA-smoothed
+
+wrench at wrist ≈ /wrist_ft     (WristFTSensor — gravity + drive, articulation-internal)
+               + /grip_contact  (GripContactSensor — payload weight + inertia)
+```
+
+### `spawners/grip_contact_sensor.py` — `GripContactSensor`
+
+- **Auto-discovery** (`auto_discover=True`, default): every `scan_every` reads it walks `discover_root`
+  for prims with `UsdPhysics.RigidBodyAPI` (skipping `exclude_prefixes` — the robot — and kinematic /
+  disabled bodies) and tracks any whose origin is within `discover_radius` of the jaw centre (midpoint
+  of the two inner-finger links) for `discover_persistence` scans; drops them when they leave for that
+  many scans. So a GUI-spawned cube needs no prim path. `object_paths` still force-tracks extra
+  bodies. Verified: a cube in the jaw is tracked, one 0.5 m away is not, and it is released when
+  yanked out.
+- `isaacsim.core.prims.RigidPrim` per tracked body, `XFormPrim` for the wrist and the two jaw links.
+  Views build lazily — the prim need not exist before `world.reset()`.
+- Per step: `f_obj = m·(GRAVITY − a_filt)` with `m` from `get_masses()`, `a` a finite diff of
+  `get_linear_velocities()` clamped to `A_MAX` and smoothed by `ema` (0 → weight only), first
+  `WARMUP_READS` reads forced to weight-only. Torque = Σ (p_obj − p_wrist) × f_obj. Both rotated into
+  `base_link`, published as `geometry_msgs/WrenchStamped` on `/grip_contact`, same `frame_id` as
+  `/wrist_ft`.
+- `spawn_robot.add_pad_contact_colliders` (small box + `PhysxContactReportAPI` per pad) exists for a
+  possible future contact-based path and as a grip aid; the observer does not use it. Off by default
+  (`GRIP_CONTACT_PAD_COLLIDERS`).
+
+### Acceptance (matches the headless test)
+
+- 0.3 kg cube held still: `/grip_contact` force ≈ `(0, 0, 2.94)` N in the wrist frame (= m·g), steady.
+- During a lift: Z swings with arm accel/decel (≈3.4 → 2.8 N), X grows with the swing, `T_y` ≈ 0.15 N·m.
+- `/wrist_ft` unchanged by the grasp (still ~9.81 N Z) — expected, not a bug.
+
+### Gotchas
+
+- **Always attributes `m·(g−a)` to the gripper.** It cannot tell that a table is sharing the load, so
+  the reading is only meaningful once the object is actually gripper-borne. An object left sitting in
+  the *open* jaw is auto-discovered too — close the jaw or move it out.
+- **Needs the object's authored mass** to be right (`configure_graspable_object` sets it; a bare GUI
+  cube uses its own).
+- **No `I·α` term** — reported torque is the moment of the force only.
+- **Sign.** Default (`negate=False`) is "force the environment applies to the tool" — the *opposite*
+  default sense to `WristFTSensor(negate=…)`. Match conventions before adding the topics.
+- **Gravity** is hard-coded `(0,0,−9.81)` in the module (`GRAVITY`).

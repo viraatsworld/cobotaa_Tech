@@ -216,6 +216,50 @@ def add_grip_friction(stage, gripper_prim_path: str = "/World/Cobotta/onrobot_rg
           f"bound to {bound} finger pads")
 
 
+def add_pad_contact_colliders(stage, gripper_prim_path: str = "/World/Cobotta/onrobot_rg6",
+                              half_extents=(0.006, 0.010, 0.018),
+                              offset=(0.0, 0.0, 0.0)):
+    """Give each inner finger a plain box collider + contact reporting.
+
+    The RG6 pads collide through ``PhysxMeshMergeCollisionAPI`` (see
+    ``fix_gripper_collisions``). Merged-mesh shapes collide but emit **no**
+    contact reports, so ``GripContactSensor`` -- which reads the net contact
+    force on the grasped object -- gets nothing while only the merged pads touch
+    it. A small explicit ``Cube`` collider on each ``*_inner_finger`` link fixes
+    that (and firms up the grasp). ``PhysxContactReportAPI`` with threshold 0 is
+    applied to the link so every contact is reported.
+
+    Must run before ``world.reset()`` (USD authoring + contact-reporter
+    registration happen during the physics parse).
+    """
+    from pxr import PhysxSchema
+
+    hx, hy, hz = half_extents
+    ox, oy, oz = offset
+    added = 0
+    for side in ("left", "right"):
+        link_path = f"{gripper_prim_path}/{side}_inner_finger"
+        link = stage.GetPrimAtPath(link_path)
+        if not link or not link.IsValid():
+            print(f"WARNING: {link_path} not found; no contact-pad collider added")
+            continue
+        pad_path = f"{link_path}/ContactPad"
+        pad = stage.DefinePrim(pad_path, "Cube")
+        UsdGeom.Cube(pad).GetSizeAttr().Set(1.0)
+        xf = UsdGeom.Xformable(pad)
+        xf.ClearXformOpOrder()
+        xf.AddTranslateOp().Set(Gf.Vec3d(float(ox), float(oy), float(oz)))
+        xf.AddScaleOp().Set(Gf.Vec3d(float(hx), float(hy), float(hz)))
+        UsdGeom.Imageable(pad).CreateVisibilityAttr().Set("invisible")
+        UsdPhysics.CollisionAPI.Apply(pad)
+        cr = PhysxSchema.PhysxContactReportAPI.Apply(link)
+        cr.CreateThresholdAttr().Set(0)
+        added += 1
+
+    print(f"Gripper contact pads: {added} box collider(s) added "
+          f"(half-extents {half_extents}), contact reporting on")
+
+
 def set_initial_joint_positions(stage, robot_prim_path: str, joint_positions_rad: dict):
     """Author the start pose into the USD *before* physics starts
     Angles are given in radians (ROS convention) and written in degrees (USD convention).

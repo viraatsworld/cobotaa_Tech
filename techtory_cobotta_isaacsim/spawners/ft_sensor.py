@@ -1,0 +1,179 @@
+"""Wrist force/torque sensor for the cvrb0609 + OnRobot RG6.
+
+Reads the 6-axis reaction wrench at the arm-flange -> gripper interface straight
+from PhysX and hands it back as plain numpy vectors. Optionally mirrors it onto a
+ROS 2 ``geometry_msgs/msg/WrenchStamped`` topic.
+
+Where it sits in the articulation
+--------------------------------
+The gripper hangs off ``cobotta_pro_J6`` through the fixed
+``onrobot_rg6/gripper_joint``. PhysX keeps a row for that fixed joint in its
+link-incoming-joint-force table, so the RG6 ``base_link`` is the first solid
+frame below the tool flange -- exactly where a real wrist FT sensor bolts in.
+``get_measured_joint_forces()`` returns, per link, the total 6D force/torque its
+incoming joint carries to balance everything distal to it; the ``base_link`` row
+is therefore the flange <-> gripper wrench.
+
+What the numbers mean
+--------------------
+This is the *raw* PhysX constraint wrench: noise-free, no bias drift, no
+bandwidth limit. At rest the ``base_link`` row reads the tool weight
+(~9.81 N in +Z for the 1.0 kg authored gripper) with near-zero torque, because
+in the home pose the gripper CoM sits essentially on the J6 axis. Push or pull
+on the fingers and all six axes respond.
+
+Sign: the raw reading is the constraint force the wrist joint exerts *on the
+tool* (it points +Z, holding the tool up against gravity). Pipelines that expect
+"force the environment applies to the tool" want the opposite -- pass
+``negate=True`` for that convention.
+
+Frame: the wrench is expressed in the child link's joint frame, which is not
+guaranteed to match the URDF/TF orientation of ``onrobot_rg6/base_link``. The Z
+magnitude alone will not catch a rotated frame -- verify X/Y against a known
+push before trusting them downstream.
+
+See ``plan-ft-implement.md`` (sections 0, 1, 4) for the full rationale and the
+baseline numbers this is regression-checked against.
+"""
+
+import numpy as np
+
+
+class WristFTSensor:
+    """Samples the flange <-> gripper reaction wrench from the articulation.
+
+    Args:
+        robot: the ``isaacsim.core.api.robots.Robot`` (SingleArticulation) wrapper
+            for the arm+gripper. Must be added to the scene and ``world.reset()``
+            already called so its physics handles exist.
+        link_name: link whose incoming joint carries the wrench. ``base_link`` is
+            the RG6 base = the wrist FT frame.
+        negate: flip the sign convention (see module docstring).
+    """
+
+    def __init__(self, robot, link_name: str = "base_link", negate: bool = False):
+        self._robot = robot
+        self._link_name = link_name
+        self._sign = -1.0 if negate else 1.0
+        self._row = None          # resolved lazily, once physics is live
+        self._warned = False
+
+        # ROS 2 (optional, wired by try_enable_ros2)
+        self._ros_node = None
+        self._ros_pub = None
+        self._ros_msg = None
+        self._frame_id = link_name
+
+    # ------------------------------------------------------------------ reading
+
+    def _resolve_row(self) -> bool:
+        """Map link_name -> row index in the measured-joint-forces table.
+
+        The table is link-indexed (one row per link's incoming joint, the fixed
+        gripper joint included), so the link's body index is the row. Resolve by
+        name -- the index depends on link ordering and must never be hardcoded.
+        """
+        view = self._robot._articulation_view
+        try:
+            idx = view.get_body_index(self._link_name)
+        except (KeyError, TypeError):
+            idx = None
+
+        if idx is None:
+            # Fall back to a suffix match against the full link list, so a
+            # namespaced name ("onrobot_rg6/base_link") still resolves.
+            names = list(getattr(view, "body_names", None) or [])
+            matches = [i for i, n in enumerate(names)
+                       if n == self._link_name or n.endswith("/" + self._link_name)]
+            if len(matches) == 1:
+                idx = matches[0]
+            elif not self._warned:
+                print(f"[WristFTSensor] link '{self._link_name}' not resolvable "
+                      f"(candidates: {names}); FT disabled")
+                self._warned = True
+                return False
+
+        self._row = int(idx)
+        print(f"[WristFTSensor] wrist wrench frame = link '{self._link_name}' "
+              f"(row {self._row}), sign {'-1 (env->tool)' if self._sign < 0 else '+1 (raw)'}")
+        return True
+
+    def read(self):
+        """Return ``(force, torque)`` as numpy (3,) arrays, or ``(None, None)``.
+
+        ``(None, None)`` means physics is not up yet -- call again next step.
+        """
+        if not self._robot.handles_initialized:
+            return None, None
+        if self._row is None and not self._resolve_row():
+            return None, None
+
+        try:
+            wrench = self._robot.get_measured_joint_forces(joint_indices=[self._row])
+        except Exception:                       # handles vanished mid-reset, etc.
+            return None, None
+        if wrench is None:
+            return None, None
+
+        wrench = np.asarray(wrench).reshape(-1)  # (6,) -> fx fy fz tx ty tz
+        return self._sign * wrench[:3].copy(), self._sign * wrench[3:].copy()
+
+    @staticmethod
+    def format(force, torque) -> str:
+        """One-line readout: components + magnitudes, fixed width."""
+        f, t = np.asarray(force), np.asarray(torque)
+        return (f"FT  F[N] = ({f[0]:8.3f} {f[1]:8.3f} {f[2]:8.3f}) |F|={np.linalg.norm(f):7.3f}   "
+                f"T[Nm] = ({t[0]:7.4f} {t[1]:7.4f} {t[2]:7.4f}) |T|={np.linalg.norm(t):6.4f}")
+
+    # ------------------------------------------------------------------- ROS 2
+
+    def try_enable_ros2(self, topic: str = "/wrist_ft", frame_id: str | None = None) -> bool:
+        """Best-effort: stand up a WrenchStamped publisher. Returns success.
+
+        Kept optional and non-fatal -- if rclpy/geometry_msgs are not importable
+        in this interpreter the sensor still works as a console readout.
+        """
+        try:
+            import rclpy
+            from rclpy.node import Node
+            from geometry_msgs.msg import WrenchStamped
+        except Exception as exc:
+            print(f"[WristFTSensor] ROS 2 publish disabled ({exc.__class__.__name__}: {exc})")
+            return False
+
+        if frame_id is not None:
+            self._frame_id = frame_id
+
+        if not rclpy.ok():
+            rclpy.init(args=None)
+        self._ros_node = Node("wrist_ft_sensor")
+        self._ros_pub = self._ros_node.create_publisher(WrenchStamped, topic, 10)
+        self._ros_msg = WrenchStamped()
+        self._ros_msg.header.frame_id = self._frame_id
+        print(f"[WristFTSensor] publishing geometry_msgs/WrenchStamped on '{topic}' "
+              f"(frame_id '{self._frame_id}')")
+        return True
+
+    def publish(self, force, torque, sim_time: float | None = None) -> None:
+        """Publish one WrenchStamped. No-op if ROS 2 was not enabled.
+
+        Pass ``sim_time`` (e.g. ``world.current_time``) to stamp with simulation
+        time so the wrench lines up with ``/clock`` and the joint states; without
+        it the stamp is wall-clock node time.
+        """
+        if self._ros_pub is None:
+            return
+        m = self._ros_msg
+        if sim_time is None:
+            m.header.stamp = self._ros_node.get_clock().now().to_msg()
+        else:
+            m.header.stamp.sec = int(sim_time)
+            m.header.stamp.nanosec = int((sim_time - int(sim_time)) * 1e9)
+        m.wrench.force.x, m.wrench.force.y, m.wrench.force.z = map(float, force)
+        m.wrench.torque.x, m.wrench.torque.y, m.wrench.torque.z = map(float, torque)
+        self._ros_pub.publish(m)
+
+    def shutdown(self) -> None:
+        if self._ros_node is not None:
+            self._ros_node.destroy_node()
+            self._ros_node = None
