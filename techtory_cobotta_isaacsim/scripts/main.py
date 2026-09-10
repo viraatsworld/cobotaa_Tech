@@ -148,16 +148,6 @@ def build_world():
 cobotta_robot = build_world()
 print("World fully composed")
 
-# 2b. Grip-contact sensor views must be created BEFORE world.reset() so PhysX
-# registers their contact reporters during the scene parse.
-grip_sensor = None
-if GRIP_CONTACT_ENABLE:
-    grip_sensor = GripContactSensor(world, GRIP_CONTACT_OBJECT_PATHS,
-                                    wrist_prim_path="/World/Cobotta/onrobot_rg6/base_link",
-                                    auto_discover=GRIP_CONTACT_AUTO_DISCOVER,
-                                    negate=GRIP_CONTACT_NEGATE, ema=GRIP_CONTACT_EMA)
-    grip_sensor.prepare()
-
 # 3. Reset the world. This is CRITICAL. It starts the timeline and initializes robot articulations.
 world.reset()
 
@@ -232,29 +222,46 @@ if FT_ENABLE:
     if FT_PUBLISH_ROS2:
         ft_sensor.try_enable_ros2(topic=FT_TOPIC, frame_id=FT_FRAME_ID)
 
-# 4c. Grip-contact sensor was built before world.reset() (section 2b); its views
-# are now live. Wire up the ROS 2 publisher here, same wrist frame as /wrist_ft.
-if grip_sensor is not None and GRIP_CONTACT_PUBLISH_ROS2:
-    grip_sensor.try_enable_ros2(topic=GRIP_CONTACT_TOPIC, frame_id=FT_FRAME_ID)
+# 4c. Grip-load sensor. Built AFTER world.reset(): it is a pure observer (no
+# contact reporters to register during the scene parse), and its prim views must
+# bind to the simulation view that reset() just created, not to the pre-reset one
+# that reset() invalidates.
+grip_sensor = None
+if GRIP_CONTACT_ENABLE:
+    grip_sensor = GripContactSensor(world, GRIP_CONTACT_OBJECT_PATHS,
+                                    wrist_prim_path="/World/Cobotta/onrobot_rg6/base_link",
+                                    auto_discover=GRIP_CONTACT_AUTO_DISCOVER,
+                                    negate=GRIP_CONTACT_NEGATE, ema=GRIP_CONTACT_EMA)
+    grip_sensor.prepare()
+    if GRIP_CONTACT_PUBLISH_ROS2:
+        grip_sensor.try_enable_ros2(topic=GRIP_CONTACT_TOPIC, frame_id=FT_FRAME_ID)
 
 # 5. Step the world instead of just updating the app
 step_count = 0
 while simulation_app.is_running():
     world.step(render=True) # This steps physics, ROS clocks, and renders the frame
 
+    # Print on the same cadence whether or not a reading came back -- a silent
+    # sensor is indistinguishable from a broken one, so say which it is.
+    verbose = FT_PRINT_EVERY_N_STEPS and step_count % FT_PRINT_EVERY_N_STEPS == 0
+
     if ft_sensor is not None:
         force, torque = ft_sensor.read()
         if force is not None:
             ft_sensor.publish(force, torque, sim_time=world.current_time)
-            if FT_PRINT_EVERY_N_STEPS and step_count % FT_PRINT_EVERY_N_STEPS == 0:
+            if verbose:
                 print(ft_sensor.format(force, torque))
+        elif verbose:
+            print(f"FT   -- no reading: {ft_sensor.status()}")
 
     if grip_sensor is not None:
         g_force, g_torque = grip_sensor.read()
         if g_force is not None:
             grip_sensor.publish(g_force, g_torque, sim_time=world.current_time)
-            if FT_PRINT_EVERY_N_STEPS and step_count % FT_PRINT_EVERY_N_STEPS == 0:
+            if verbose:
                 print(grip_sensor.format(g_force, g_torque))
+        elif verbose:
+            print(f"GRIP -- no reading: {grip_sensor.status()}")
     step_count += 1
 
 if ft_sensor is not None:

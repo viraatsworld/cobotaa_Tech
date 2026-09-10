@@ -48,6 +48,32 @@ frame as ``/wrist_ft``, so the two add:
 ``negate=False`` (default) gives "force the environment applies to the tool" --
 the opposite default sense to ``WristFTSensor.negate``.
 
+Stage hygiene (why views are cached, never rebuilt per scan)
+------------------------------------------------------------
+Constructing an ``XFormPrim``/``RigidPrim`` is *not* a read-only operation:
+
+* with the default ``reset_xform_properties=True`` it calls ``ClearXformOpOrder``,
+  rewrites ``xformOp:translate/orient/scale`` and then teleports the prim with
+  ``set_world_poses`` -- USD authoring on a live rigid body, which makes PhysX
+  resync that actor;
+* it stamps a fresh ``isaac_sim:view_index:<hash(view)>`` attribute into fabric,
+  one per view instance;
+* ``RigidPrim.__init__`` creates a PhysX rigid-body view off the *current*
+  simulation view and calls ``get_linear_velocities()`` on it.
+
+A PhysX resync invalidates ``SimulationManager._physics_sim_view`` in place, and
+nothing on the Python side is notified (``PHYSICS_READY`` only fires on play, and
+``is_physics_handle_valid()`` only checks for ``None``). Every view built before
+that point keeps a dangling handle and the next read logs
+
+    [omni.physx.tensors.plugin] Simulation view object is invalidated
+    and cannot be used again to call getVelocities
+
+So: one view per prim, built once and cached, always with
+``reset_xform_properties=False``; discovery probes are pose-only ``XFormPrim``s
+(no rigid-body view, no velocity read). ``_rebind_if_stale`` additionally
+re-initializes the views if the simulation view object is ever swapped out.
+
 Requirements / limits
 ---------------------
 * Uses the object's authored mass (``RigidPrim.get_masses``). If that is wrong,
@@ -134,6 +160,7 @@ class GripContactSensor:
         self._ema = float(np.clip(ema, 0.0, 1.0))
 
         self._obj_views = {}        # {path: RigidPrim}  (explicit + discovered)
+        self._probe_views = {}      # {path: XFormPrim}  pose-only, discovery scans
         self._wrist_view = None
         self._jaw_views = []        # XFormPrim per jaw link
         self._v_prev = {}
@@ -144,9 +171,12 @@ class GripContactSensor:
         self._read_count = 0
         self._RigidPrim = None
         self._XFormPrim = None
+        self._SimulationManager = None
+        self._sim_view = None       # the SimulationView our views were built against
         self._stage = None
         self._disabled = False
         self._warned = False
+        self._last_error = None     # why the last read came back empty
 
         # ROS 2 (optional)
         self._ros_node = None
@@ -168,6 +198,7 @@ class GripContactSensor:
         if self._RigidPrim is None:
             try:
                 from isaacsim.core.prims import RigidPrim, XFormPrim
+                from isaacsim.core.simulation_manager import SimulationManager
                 from isaacsim.core.utils.stage import get_current_stage
             except Exception as exc:             # pragma: no cover - env dependent
                 print(f"[GripContactSensor] isaacsim core APIs unavailable "
@@ -176,18 +207,20 @@ class GripContactSensor:
                 return False
             self._RigidPrim = RigidPrim
             self._XFormPrim = XFormPrim
+            self._SimulationManager = SimulationManager
             self._stage = get_current_stage()
+            self._sim_view = SimulationManager.get_physics_sim_view()
 
         if self._wrist_view is None:
             try:
-                self._wrist_view = self._XFormPrim(self._wrist_path, name="grip_ld_wrist")
+                self._wrist_view = self._xform_view(self._wrist_path, "grip_ld_wrist")
             except Exception:
                 self._wrist_view = None
                 return False
 
         if self._auto and not self._jaw_views:
             try:
-                self._jaw_views = [self._XFormPrim(p, name=f"grip_ld_jaw{i}")
+                self._jaw_views = [self._xform_view(p, f"grip_ld_jaw{i}")
                                    for i, p in enumerate(self._jaw_paths)]
             except Exception:
                 self._jaw_views = []
@@ -204,6 +237,24 @@ class GripContactSensor:
                   + (f", explicit {self._explicit}" if self._explicit else ""))
         return True
 
+    def _xform_view(self, path, name):
+        """Pose-only view. ``reset_xform_properties=False`` is load-bearing: the
+        default rewrites the prim's xform op stack and teleports it (see the
+        "Stage hygiene" note in the module docstring)."""
+        return self._XFormPrim(path, name=name, reset_xform_properties=False)
+
+    def _probe_view(self, path):
+        """Cached pose-only view used by discovery. Built once per prim path.
+
+        Never a ``RigidPrim``: that would build a PhysX rigid-body view (and read
+        velocities off it) for every candidate on every scan.
+        """
+        view = self._probe_views.get(path)
+        if view is None:
+            view = self._xform_view(path, f"grip_ld_probe_{abs(hash(path)) % 100000}")
+            self._probe_views[path] = view
+        return view
+
     def _add_view(self, path) -> bool:
         if path in self._obj_views:
             return True
@@ -214,8 +265,12 @@ class GripContactSensor:
         if not is_prim_path_valid(path):
             return False
         try:
-            view = self._RigidPrim(path, name=f"grip_ld_obj_{abs(hash(path)) % 100000}")
-            view.initialize()
+            view = self._RigidPrim(path, name=f"grip_ld_obj_{abs(hash(path)) % 100000}",
+                                   reset_xform_properties=False)
+            # __init__ already builds the physics handle when physics is live;
+            # only initialize() if it did not, so we never create a second view.
+            if not view.is_physics_handle_valid():
+                view.initialize()
             self._obj_views[path] = view
             print(f"[GripContactSensor] tracking '{path}'")
             return True
@@ -231,6 +286,42 @@ class GripContactSensor:
         for d in (self._v_prev, self._a_filt, self._reads, self._in_streak, self._out_streak):
             d.pop(path, None)
         print(f"[GripContactSensor] released '{path}' (left the jaw)")
+
+    # -------------------------------------------------------- view lifecycle
+
+    def _rebind_if_stale(self) -> bool:
+        """Re-init the object views if the simulation view was swapped out.
+
+        ``World.reset()`` (and any timeline stop/play) invalidates the old
+        ``SimulationView`` and builds a new one. Views created against the old
+        one recover via the ``PHYSICS_READY`` callback they register themselves,
+        but only for that path -- comparing the object identity here also covers
+        a swap that arrives without the event.
+
+        Returns False if physics is not up, in which case there is nothing to
+        read this step.
+        """
+        if self._SimulationManager is None:
+            return True
+        sim_view = self._SimulationManager.get_physics_sim_view()
+        if sim_view is None:
+            return False
+        if sim_view is self._sim_view:
+            return True
+
+        self._sim_view = sim_view
+        for path, view in list(self._obj_views.items()):
+            try:
+                if not view.is_physics_handle_valid():
+                    view.initialize()
+            except Exception:
+                self._obj_views.pop(path, None)
+        # velocity history spans the discontinuity; drop it so the inertial term
+        # does not spike on the first read after the reset.
+        self._v_prev.clear()
+        self._a_filt.clear()
+        self._reads.clear()
+        return True
 
     # --------------------------------------------------------------- discovery
 
@@ -279,11 +370,8 @@ class GripContactSensor:
             if path in self._explicit:
                 continue
             try:
-                if path in self._obj_views:
-                    pos, _ = self._pose(self._obj_views[path])
-                else:
-                    probe = self._RigidPrim(path, name=f"grip_ld_probe_{abs(hash(path)) % 100000}")
-                    pos, _ = self._pose(probe)
+                view = self._obj_views.get(path) or self._probe_view(path)
+                pos, _ = self._pose(view)
             except Exception:
                 continue
             inside = np.linalg.norm(np.asarray(pos) - centre) <= self._radius
@@ -303,6 +391,11 @@ class GripContactSensor:
             if path not in self._explicit and path not in candidates:
                 self._drop_view(path)
 
+        # keep the probe cache from growing over deleted prims
+        for path in list(self._probe_views):
+            if path not in candidates:
+                self._probe_views.pop(path, None)
+
     # ------------------------------------------------------------------ read
 
     def read(self):
@@ -313,11 +406,16 @@ class GripContactSensor:
         surface (no net support from the gripper).
         """
         if self._disabled:
+            self._last_error = "disabled"
             return None, None
         if self._wrist_view is None or (self._auto and not self._jaw_views) \
                 or (not self._auto and len(self._obj_views) < len(self._explicit)):
             if not self.prepare():
+                self._last_error = "views not built yet (wrist/jaw prims not resolvable)"
                 return None, None
+        if not self._rebind_if_stale():
+            self._last_error = "physics simulation view not created yet"
+            return None, None
 
         self._read_count += 1
         if self._auto and self._read_count % self._scan_every == 1:
@@ -326,6 +424,9 @@ class GripContactSensor:
             except Exception:
                 pass
         if not self._obj_views:
+            # Expected whenever the jaw is empty: with no payload there is no
+            # extra load on the wrist, so there is nothing to report.
+            self._last_error = "no object in the jaw (nothing tracked)"
             return None, None
 
         dt = self._world.get_physics_dt() or (1.0 / 60.0)
@@ -335,6 +436,8 @@ class GripContactSensor:
             t_world = np.zeros(3)
             got = False
             for path, view in self._obj_views.items():
+                if not view.is_physics_handle_valid():
+                    continue        # handle not up yet; _rebind_if_stale retries
                 v = _to_np(view.get_linear_velocities(clone=True)).reshape(-1, 3)[0]
                 m = float(_to_np(view.get_masses(clone=True)).reshape(-1)[0])
                 p_obj, _ = self._pose(view)
@@ -354,14 +457,22 @@ class GripContactSensor:
                 f_world += f_obj
                 t_world += np.cross(p_obj - p_wrist, f_obj)
                 got = True
-        except Exception:                           # handles vanished mid-reset
+        except Exception as exc:                    # handles vanished mid-reset
+            self._last_error = f"read raised {exc.__class__.__name__}: {exc}"
             return None, None
         if not got:
+            self._last_error = ("tracked objects have no valid physics handle "
+                                f"({list(self._obj_views)})")
             return None, None
 
+        self._last_error = None
         f = _quat_rotate_inverse(q_wrist, f_world)
         t = _quat_rotate_inverse(q_wrist, t_world)
         return self._sign * f, self._sign * t
+
+    def status(self) -> str:
+        """Why the last ``read()`` produced nothing. Empty string when healthy."""
+        return self._last_error or ""
 
     def _pose(self, view):
         for kw in (dict(clone=True, usd=False), dict(usd=False), dict(clone=True), {}):

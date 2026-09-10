@@ -57,6 +57,7 @@ class WristFTSensor:
         self._sign = -1.0 if negate else 1.0
         self._row = None          # resolved lazily, once physics is live
         self._warned = False
+        self._last_error = None   # why the last read came back empty
 
         # ROS 2 (optional, wired by try_enable_ros2)
         self._ros_node = None
@@ -82,17 +83,28 @@ class WristFTSensor:
         if idx is None:
             # Fall back to a suffix match against the full link list, so a
             # namespaced name ("onrobot_rg6/base_link") still resolves.
+            # body_names is None until the view is initialized -- that is a
+            # "not yet", not a "never", so keep retrying on later steps.
             names = list(getattr(view, "body_names", None) or [])
             matches = [i for i, n in enumerate(names)
                        if n == self._link_name or n.endswith("/" + self._link_name)]
             if len(matches) == 1:
                 idx = matches[0]
-            elif not self._warned:
-                print(f"[WristFTSensor] link '{self._link_name}' not resolvable "
-                      f"(candidates: {names}); FT disabled")
-                self._warned = True
-                return False
+            else:
+                if not names:
+                    self._last_error = "articulation view not initialized (no body names yet)"
+                elif len(matches) > 1:
+                    self._last_error = (f"link '{self._link_name}' is ambiguous, matches "
+                                        f"{[names[i] for i in matches]}")
+                else:
+                    self._last_error = (f"link '{self._link_name}' not in the articulation; "
+                                        f"links are {names}")
+                if not self._warned and names:
+                    print(f"[WristFTSensor] {self._last_error}; no wrench will be published")
+                    self._warned = True
+                return False        # never fall through to int(None)
 
+        self._last_error = None
         self._row = int(idx)
         print(f"[WristFTSensor] wrist wrench frame = link '{self._link_name}' "
               f"(row {self._row}), sign {'-1 (env->tool)' if self._sign < 0 else '+1 (raw)'}")
@@ -104,19 +116,30 @@ class WristFTSensor:
         ``(None, None)`` means physics is not up yet -- call again next step.
         """
         if not self._robot.handles_initialized:
+            self._last_error = "articulation handles not initialized (physics not live yet)"
             return None, None
         if self._row is None and not self._resolve_row():
             return None, None
 
         try:
             wrench = self._robot.get_measured_joint_forces(joint_indices=[self._row])
-        except Exception:                       # handles vanished mid-reset, etc.
+        except Exception as exc:                # handles vanished mid-reset, etc.
+            self._last_error = f"get_measured_joint_forces raised {exc.__class__.__name__}: {exc}"
             return None, None
         if wrench is None:
+            # Isaac logs the detail as a carb warning and hands back None: either
+            # the articulation view is not initialized or the physics simulation
+            # view does not exist yet.
+            self._last_error = "get_measured_joint_forces returned None (physics sim view not ready)"
             return None, None
 
+        self._last_error = None
         wrench = np.asarray(wrench).reshape(-1)  # (6,) -> fx fy fz tx ty tz
         return self._sign * wrench[:3].copy(), self._sign * wrench[3:].copy()
+
+    def status(self) -> str:
+        """Why the last ``read()`` produced nothing. Empty string when healthy."""
+        return self._last_error or ""
 
     @staticmethod
     def format(force, torque) -> str:
