@@ -44,7 +44,7 @@ FT_PUBLISH_ROS2 = True             # geometry_msgs/WrenchStamped on FT_TOPIC
 FT_TOPIC = "/wrist_ft"
 FT_FRAME_ID = "onrobot_rg6_base_link"
 FT_PRINT_EVERY_N_STEPS = 30        # console readout cadence; 0 = never print
-FT_NEGATE = False                  # True -> "force the environment applies to the tool"
+FT_NEGATE = True                  # True -> "force the environment applies to the tool"
 
 # --- Grip-load sensor ------------------------------------------------------
 # The wrist row above does NOT see a grasped payload -- its weight reaches the
