@@ -25,12 +25,12 @@ simulation_app.update()
 
 # IMPORT WORLD AFTER SIMULATION APP IS RUNNING
 from isaacsim.core.api import World
-from spawners.spawn_scene import add_world
+from spawners.spawn_scene import add_world, add_cell_lights
 from spawners.spawn_robot import (add_robot, set_initial_joint_positions, fix_gripper_collisions,
                                   disable_articulation_self_collisions, configure_gripper_drive,
                                   stabilize_gripper_joints, add_grip_friction,
                                   add_pad_contact_colliders)
-from spawners.spawn_objects import (add_hammer, add_techtory_cell, add_shelf,
+from spawners.spawn_objects import (add_hammer, add_pallet, add_techtory_cell, add_shelf,
                                     configure_graspable_object)
 from spawners.spawn_camera import add_realsense_camera, attach_ros2_camera_graph
 from spawners.ft_sensor import WristFTSensor
@@ -43,7 +43,6 @@ FT_ENABLE = True
 FT_PUBLISH_ROS2 = True             # geometry_msgs/WrenchStamped on FT_TOPIC
 FT_TOPIC = "/wrist_ft"
 FT_FRAME_ID = "onrobot_rg6_base_link"
-FT_PRINT_EVERY_N_STEPS = 30        # console readout cadence; 0 = never print
 FT_NEGATE = True                  # True -> "force the environment applies to the tool"
 
 # --- Grip-load sensor ------------------------------------------------------
@@ -96,8 +95,14 @@ def build_world():
     # Add static environment
     add_world(stage)
     add_techtory_cell(stage, "/World/TechtoryCell")  # prim_path unused (sublayer load)
+    # After the cell: the panels hang under its roof, which occludes the global lights.
+    add_cell_lights(stage)
     add_shelf(stage, "/World/Shelf")
     add_hammer(stage, "/World/Shelf/Hammer")
+    # Must be a sibling of the shelf, not a child: add_pallet authors the pose from the
+    # xacro (world-relative, xyz -0.16 0.3 0.94), and under /World/Shelf that would compose
+    # with the shelf's own translate (0.61, 0.27, 0.94) + yaw 90 deg -> (0.31, 0.11, 1.88).
+    add_pallet(stage, "/World/Pallet")
 
     configure_graspable_object(stage, "/World/Shelf/Hammer")
     # Add RealSense rsd455 camera + ROS2 publishers (rgb + point cloud)
@@ -237,32 +242,18 @@ if GRIP_CONTACT_ENABLE:
         grip_sensor.try_enable_ros2(topic=GRIP_CONTACT_TOPIC, frame_id=FT_FRAME_ID)
 
 # 5. Step the world instead of just updating the app
-step_count = 0
 while simulation_app.is_running():
     world.step(render=True) # This steps physics, ROS clocks, and renders the frame
-
-    # Print on the same cadence whether or not a reading came back -- a silent
-    # sensor is indistinguishable from a broken one, so say which it is.
-    verbose = FT_PRINT_EVERY_N_STEPS and step_count % FT_PRINT_EVERY_N_STEPS == 0
 
     if ft_sensor is not None:
         force, torque = ft_sensor.read()
         if force is not None:
             ft_sensor.publish(force, torque, sim_time=world.current_time)
-            if verbose:
-                print(ft_sensor.format(force, torque))
-        elif verbose:
-            print(f"FT   -- no reading: {ft_sensor.status()}")
 
     if grip_sensor is not None:
         g_force, g_torque = grip_sensor.read()
         if g_force is not None:
             grip_sensor.publish(g_force, g_torque, sim_time=world.current_time)
-            if verbose:
-                print(grip_sensor.format(g_force, g_torque))
-        elif verbose:
-            print(f"GRIP -- no reading: {grip_sensor.status()}")
-    step_count += 1
 
 if ft_sensor is not None:
     ft_sensor.shutdown()

@@ -141,20 +141,13 @@ class WristFTSensor:
         """Why the last ``read()`` produced nothing. Empty string when healthy."""
         return self._last_error or ""
 
-    @staticmethod
-    def format(force, torque) -> str:
-        """One-line readout: components + magnitudes, fixed width."""
-        f, t = np.asarray(force), np.asarray(torque)
-        return (f"FT  F[N] = ({f[0]:8.3f} {f[1]:8.3f} {f[2]:8.3f}) |F|={np.linalg.norm(f):7.3f}   "
-                f"T[Nm] = ({t[0]:7.4f} {t[1]:7.4f} {t[2]:7.4f}) |T|={np.linalg.norm(t):6.4f}")
-
     # ------------------------------------------------------------------- ROS 2
 
     def try_enable_ros2(self, topic: str = "/wrist_ft", frame_id: str | None = None) -> bool:
         """Best-effort: stand up a WrenchStamped publisher. Returns success.
 
         Kept optional and non-fatal -- if rclpy/geometry_msgs are not importable
-        in this interpreter the sensor still works as a console readout.
+        in this interpreter the sensor still reads, it just publishes nothing.
         """
         try:
             import rclpy

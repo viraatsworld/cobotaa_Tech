@@ -489,12 +489,6 @@ class GripContactSensor:
         """Prim paths currently contributing to the wrench."""
         return list(self._obj_views)
 
-    @staticmethod
-    def format(force, torque) -> str:
-        f, t = np.asarray(force), np.asarray(torque)
-        return (f"GRIP F[N] = ({f[0]:8.3f} {f[1]:8.3f} {f[2]:8.3f}) |F|={np.linalg.norm(f):7.3f}   "
-                f"T[Nm] = ({t[0]:7.4f} {t[1]:7.4f} {t[2]:7.4f}) |T|={np.linalg.norm(t):6.4f}")
-
     # ------------------------------------------------------------------- ROS 2
 
     def try_enable_ros2(self, topic: str = "/grip_contact", frame_id: str | None = None) -> bool:

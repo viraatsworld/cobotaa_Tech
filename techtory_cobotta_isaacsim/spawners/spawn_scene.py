@@ -1,5 +1,76 @@
 import os
 
+# --- Cell interior lighting ----------------------------------------------------
+# cell_link.STL bounding box, in the cell_link frame (== world, the cell mounts at
+# the origin in techtory_cell.xacro):
+#   x -1.283 .. 0.896, y -0.862 .. 1.316, z 0.000 .. 2.135
+# The work surface is at z = 0.94. The roof at 2.135 blocks the DomeLight and the
+# two CylinderLights (which sit at z = 15), so without fixtures *inside* the cell
+# the interior only gets what leaks in through the open front.
+CELL_X_CENTER = -0.194
+CELL_CEILING_Z = 2.135
+
+# Brightness knobs. normalize is left OFF, so these are radiance: enlarging a panel
+# also makes it brighter. Scale intensity by 1/area if you resize and want the same
+# exposure. Raise CEILING_INTENSITY for a brighter cell; the two panels are large
+# and close, so the light stays soft (broad source -> soft shadow edges) and most of
+# the extra reads as fill rather than glare.
+CEILING_INTENSITY = 10000.0
+FRONT_FILL_INTENSITY = 3000.0
+LIGHT_TEMPERATURE_K = 6500.0   # neutral white; 3000 = warm, 6500 = cold daylight
+
+
+def add_cell_lights(stage):
+    """Two ceiling panels plus a front fill, all inside the cell envelope.
+
+    Call this AFTER add_techtory_cell -- the panels hang just under the roof, and
+    placing them relies on the cell already being where the bounding box says.
+    """
+    from pxr import UsdLux, UsdGeom, Gf
+
+    def _panel(path, translate, width, height, intensity, rotate=None):
+        light = UsdLux.RectLight.Define(stage, path)
+        light.CreateWidthAttr(width)
+        light.CreateHeightAttr(height)
+        light.CreateIntensityAttr(intensity)
+        light.CreateNormalizeAttr(False)
+        light.CreateColorAttr(Gf.Vec3f(1.0, 1.0, 1.0))
+        light.CreateEnableColorTemperatureAttr(True)
+        light.CreateColorTemperatureAttr(LIGHT_TEMPERATURE_K)
+        # Diffuse only -- a specular highlight of the panel mirrored in the cell's
+        # sheet metal and in the robot's painted links is the main thing that makes
+        # this kind of setup read as "CG lighting" rather than as a room.
+        light.CreateSpecularAttr(0.35)
+
+        xform_api = UsdGeom.XformCommonAPI(stage.GetPrimAtPath(path))
+        xform_api.SetTranslate(Gf.Vec3d(*translate))
+        if rotate is not None:
+            xform_api.SetRotate(Gf.Vec3f(*rotate), UsdGeom.XformCommonAPI.RotationOrderXYZ)
+        return light
+
+    # A RectLight lies in its local XY plane and emits along -Z, so an unrotated
+    # panel at the ceiling already points straight down at the bench.
+    panel_z = CELL_CEILING_Z - 0.07
+
+    # Front panel: over the robot (base at x -0.275, y -0.24) and the working volume.
+    _panel("/World/CellLightFront", (CELL_X_CENTER, -0.10, panel_z),
+           width=1.70, height=0.45, intensity=CEILING_INTENSITY)
+
+    # Rear panel: over the shelf (0.61, 0.27) and the pallet (-0.16, 0.3).
+    _panel("/World/CellLightRear", (CELL_X_CENTER, 0.55, panel_z),
+           width=1.70, height=0.45, intensity=CEILING_INTENSITY)
+
+    # Front fill. Two overhead sources alone leave the vertical faces that matter
+    # for depth -- the shelf uprights, the pallet walls, the gripper jaws -- lit only
+    # from straight above, which flattens them. This panel stands just inside the
+    # open front face (y = -0.862) and is tilted back and down into the cell.
+    _panel("/World/CellLightFill", (CELL_X_CENTER, -0.80, 1.60),
+           width=1.60, height=0.70, intensity=FRONT_FILL_INTENSITY,
+           rotate=(60.0, 0.0, 0.0))
+
+    print("Cell lighting: 2 ceiling panels + 1 front fill added inside the cell")
+
+
 def add_world(stage):
     from pxr import Usd, UsdLux, UsdGeom, Gf, UsdShade, Sdf, UsdPhysics, PhysxSchema
     """Creates base world settings with environment, lights, and flat grid"""
@@ -24,25 +95,7 @@ def add_world(stage):
     dome_light = UsdLux.DomeLight.Define(stage, dome_light_path)
     dome_light.CreateIntensityAttr(800)
 
-    # Add cylinder light 1
-    light_path = "/World/CylinderLight"
-    cylinder_light = UsdLux.CylinderLight.Define(stage, light_path)
-    cylinder_light.CreateIntensityAttr(200)
-    cylinder_light.CreateRadiusAttr(5)
-    cylinder_light.CreateLengthAttr(100)
-    xform_api = UsdGeom.XformCommonAPI(stage.GetPrimAtPath(light_path))
-    xform_api.SetTranslate(Gf.Vec3d(3.85931, -11.67055, 12.94707))
-    xform_api.SetRotate(Gf.Vec3f(90.0, 90.0, 0.0), UsdGeom.XformCommonAPI.RotationOrderXYZ)
 
-    # Add cylinder light 2
-    light_path2 = "/World/CylinderLight2"
-    cylinder_light2 = UsdLux.CylinderLight.Define(stage, light_path2)
-    cylinder_light2.CreateIntensityAttr(200)
-    cylinder_light2.CreateRadiusAttr(5)
-    cylinder_light2.CreateLengthAttr(100)
-    xform_api2 = UsdGeom.XformCommonAPI(stage.GetPrimAtPath(light_path2))
-    xform_api2.SetTranslate(Gf.Vec3d(-3.85931, 11.67055, 12.94707))
-    xform_api2.SetRotate(Gf.Vec3f(90.0, 270.0, 0.0), UsdGeom.XformCommonAPI.RotationOrderXYZ)
 
     # =========================
     # Ground plane (robust grid)
@@ -85,9 +138,7 @@ def add_world(stage):
     )
 
     UsdShade.MaterialBindingAPI(ground_plane).Bind(material)
-    #lift Lights
-    xform_api.SetTranslate(Gf.Vec3d(3.8, -11.6, 15.0))
-    xform_api2.SetTranslate(Gf.Vec3d(-3.8, 11.6, 15.0))
+
 
     UsdPhysics.CollisionAPI.Apply(ground_plane.GetPrim())
     print("Base world created with environment, lights, and blue flat grid")
