@@ -1,99 +1,96 @@
-# Copyright (c) 2026, Fraunhofer IPA.
+# Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
 # All rights reserved.
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13"]
+build-backend = "uv_build"
 
 [project]
-name = "techtory-cobotta-isaaclab"
+name = "techtory_cobotta_isaaclab"
 version = "0.1.0"
-description = "Denso Cobotta Pro (CVRB0609) + OnRobot RG6 in the Techtory cell, as an Isaac Lab robot with a wrist force/torque sensor."
+description = "Isaac Lab environments for techtory_cobotta_isaaclab."
 readme = "README.md"
-authors = [
-    { name = "ipa326", email = "prachandabhanu@gmail.com" },
-]
+license = { file = "LICENSE" }
+authors = [{ name = "Isaac Lab Project Developers" }]
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "techtory-cobotta-isaaclab-ext",
+    "isaaclab-dev[rsl-rl,rl-games,skrl,sb3]",
 ]
 
+[project.entry-points."isaaclab.tasks"]
+"techtory_cobotta_isaaclab" = "techtory_cobotta_isaaclab.tasks"
+
+[project.optional-dependencies]
+isaacsim = ["isaaclab-dev[isaacsim]"]
+ov = ["isaaclab-dev[ov]"]
+ovphysx = ["isaaclab-dev[ovphysx]"]
+ovrtx = ["isaaclab-dev[ovrtx]"]
+
 [dependency-groups]
-dev = [
-    "pytest>=8",
+dev = ["codespell>=2.4", "pre-commit>=4.2", "pytest>=8.3", "ruff>=0.11"]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
+prerelease = "allow"
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64'",
+    "sys_platform == 'win32' and platform_machine == 'AMD64'",
+]
+override-dependencies = [
+    "numpy>=2",
+    "mujoco~=3.11.0",
+    "mujoco-warp~=3.11.0",
+    "newton[sim]==1.5.2",
+    "newton-usd-schemas>=0.4.1",
+    "torch==2.11.0",
+    "torchvision==0.26.0",
+    "torchaudio==2.11.0",
+    "packaging>=20,<27",
 ]
 
 [tool.uv.sources]
-# The extension itself. Isaac Lab and Isaac Sim are NOT listed as dependencies:
-# they are installed once into the interpreter this project runs under
-# (/opt/isaac-venv here) and shared, which is how Isaac Lab's own project
-# template expects an extension to be consumed. See the README.
-techtory-cobotta-isaaclab-ext = { path = "source/techtory_cobotta_isaaclab", editable = true }
+"isaaclab" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab", editable = true }
+"isaaclab-assets" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_assets", editable = true }
+"isaaclab-contrib" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_contrib", editable = true }
+"isaaclab-dev" = { path = "/home/anm-vi/Main/Environment/IsaacLab", editable = true }
+"isaaclab-experimental" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_experimental", editable = true }
+"isaaclab-mimic" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_mimic", editable = true }
+"isaaclab-newton" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_newton", editable = true }
+"isaaclab-ov" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_ov", editable = true }
+"isaaclab-physx" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_physx", editable = true }
+"isaaclab-ppisp" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_ppisp", editable = true }
+"isaaclab-rl" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_rl", editable = true }
+"isaaclab-tasks" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_tasks", editable = true }
+"isaaclab-tasks-experimental" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_tasks_experimental", editable = true }
+"isaaclab-teleop" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_teleop", editable = true }
+"isaaclab-visualizers" = { path = "/home/anm-vi/Main/Environment/IsaacLab/source/isaaclab_visualizers", editable = true }
+"omniverseclient" = { index = "pypi-public" }
+"ovphysx" = { index = "pypi-public" }
+"ovrtx" = { index = "pypi-public" }
+"ovstage" = { index = "pypi-public" }
+"torch" = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" }, { index = "pytorch-cu128", marker = "sys_platform == 'win32'" }, { index = "pytorch-cu130", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" }]
+"torchaudio" = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" }, { index = "pytorch-cu128", marker = "sys_platform == 'win32'" }, { index = "pytorch-cu130", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" }]
+"torchvision" = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" }, { index = "pytorch-cu128", marker = "sys_platform == 'win32'" }, { index = "pytorch-cu130", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" }]
 
-[tool.uv]
-# Some NVIDIA-hosted dependencies have mismatched versions across
-# pypi.nvidia.com and PyPI. unsafe-best-match lets uv resolve the correct
-# version from any index, and prerelease=allow covers packages that only
-# publish pre-release wheels.
-index-strategy = "unsafe-best-match"
-prerelease = "allow"
-
-# Add pypi.nvidia.com so that Isaac Sim wheels resolve without --extra-index-url.
-[[tool.uv.index]]
-url = "https://pypi.nvidia.com"
-explicit = false
-
-[[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
-explicit = true
+[tool.uv.build-backend]
+module-name = "techtory_cobotta_isaaclab"
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-extend-exclude = [
-    "logs",
-    "_isaac_sim",
-    ".vscode",
-    "_*",
-    ".git",
-    # Generated from the ROS robot description; not ours to lint.
-    "source/techtory_cobotta_isaaclab/techtory_cobotta_isaaclab/robot/assets",
-]
 
 [tool.ruff.lint]
-select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # pyflakes
-    "I",      # isort
-    "UP",     # pyupgrade
-    "C90",    # mccabe complexity
-    "SIM",    # flake8-simplify
-    "RET",    # flake8-return
-]
-ignore = [
-    "E402",   # Module level import not at top of file
-    "RET504", # Unnecessary variable assignment before return statement
-    "RET505", # Unnecessary elif after return statement
-    "SIM102", # Use a single if-statement instead of nested if-statements
-    "SIM108", # Use ternary operator instead of if-else statement
-    "UP006",  # Use 'dict' instead of 'Dict' type annotation
-]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]  # Re-export modules deliberately.
-
-[tool.ruff.lint.mccabe]
-max-complexity = 30
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
+select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
+known-first-party = ["techtory_cobotta_isaaclab"]
 section-order = [
     "future",
     "standard-library",
     "third-party",
-    "omniverse-extensions",
     "isaaclab",
     "isaaclab-rl",
     "isaaclab-tasks",
@@ -103,38 +100,53 @@ section-order = [
 ]
 
 [tool.ruff.lint.isort.sections]
-"omniverse-extensions" = ["isaacsim", "omni", "pxr", "carb", "usdrt", "Semantics"]
-"isaaclab" = ["isaaclab", "isaaclab_newton", "isaaclab_physx"]
+isaaclab = ["isaaclab", "isaaclab_newton", "isaaclab_ov", "isaaclab_physx"]
 "isaaclab-rl" = ["isaaclab_rl"]
 "isaaclab-tasks" = ["isaaclab_tasks"]
 "isaaclab-assets" = ["isaaclab_assets"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401", "F403"]
+"**/__init__.pyi" = ["F401", "F403"]
+"scripts/**/*.py" = ["E402"]
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.pyright]
-include = ["source", "scripts", "tests"]
-exclude = [
-    "**/__pycache__",
-    "**/_isaac_sim",
-    "**/logs",
-    ".git",
-    ".vscode",
-]
+include = ["src", "scripts", "tests"]
+exclude = ["**/__pycache__", "**/logs", ".git", ".venv", ".vscode"]
 typeCheckingMode = "basic"
-pythonVersion = "3.12"
-pythonPlatform = "Linux"
-enableTypeIgnoreComments = true
-reportMissingImports = "none"
-reportMissingModuleSource = "none"
-reportGeneralTypeIssues = "none"
-reportOptionalMemberAccess = "warning"
-reportPrivateUsage = "warning"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "unit: test exercises isolated logic and does not launch the simulator",
+    "integration: test drives the simulator/scene/environment end-to-end",
+    "smoke: tests for core installation, task, and RL functionality",
+    "kitless: test must pass inside the Kit-less container, which has no Isaac Sim runtime",
+]
 
 [tool.codespell]
-skip = '*.usd,*.usda,*.usdz,*.dae,*.stl,*.urdf,_isaac_sim*,*/_build'
-quiet-level = 0
-ignore-words-list = "haa,slq,collapsable,buss,reacher,thirdparty"
+skip = "*.usd,*.usda,*.usdc,*.json,*.onnx,*.pt,*.mp4,*.data,uv.lock,logs"
+
+[[tool.uv.index]]
+url = "https://pypi.nvidia.com"
+explicit = false
+
+[[tool.uv.index]]
+name = "pypi-public"
+url = "https://pypi.org/simple"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+

@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Blue plastic pallet, built from box primitives so it can be converted to USD
+  with the Isaac Sim URDF importer.
+
+  All units are SI (m, kg).
+
+  Outer envelope : 0.600 (X, length) x 0.400 (Y, breadth) x 0.075 (Z, height)
+  Border / wall  : 0.015 wide, 0.075 tall (full height), around the full
+                   perimeter, standing on the ground
+  Floor plate    : 0.570 x 0.370 x 0.015, closing the BOTTOM of the frame
+                   (z 0.000 .. 0.015). Loads sit on it, at z = 0.015 - the
+                   "ground clearance of 0.015 inside".
+  Inner cavity   : 0.570 x 0.370 x 0.060, open at the top. The pallet is an
+                   open-topped box: closed underneath, walls all round.
+
+  Frame convention: link origin is at the centre of the footprint, on the
+  ground plane (z = 0 is the underside of the pallet).
+-->
+<robot name="pallet">
+
+  <material name="pallet_blue">
+    <color rgba="0.04 0.24 0.62 1.0" />
+  </material>
+
+  <link name="pallet_base_link">
+
+    <!-- 5 kg plastic pallet (935 kg/m^3 over the solid volume of deck + border,
+         i.e. HDPE). Inertia integrated over those five boxes about the CoM,
+         which the floor plate pulls down to z = 0.01975. -->
+    <inertial>
+      <origin xyz="0 0 0.01975" rpy="0 0 0" />
+      <mass value="5.0" />
+      <inertia ixx="0.0914" ixy="0.0" ixz="0.0"
+               iyy="0.1868" iyz="0.0"
+               izz="0.2740" />
+    </inertial>
+
+    <!-- ==== floor plate (z: 0.000 .. 0.015), closes the bottom, load face ==== -->
+    <visual name="pallet_deck_visual">
+      <origin xyz="0 0 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.370 0.015" />
+      </geometry>
+      <material name="pallet_blue" />
+    </visual>
+    <collision name="pallet_deck_collision">
+      <origin xyz="0 0 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.370 0.015" />
+      </geometry>
+    </collision>
+
+    <!-- ========= border +X (z: 0.000 .. 0.075, full breadth) ========= -->
+    <visual name="pallet_wall_xpos_visual">
+      <origin xyz="0.2925 0 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.400 0.075" />
+      </geometry>
+      <material name="pallet_blue" />
+    </visual>
+    <collision name="pallet_wall_xpos_collision">
+      <origin xyz="0.2925 0 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.400 0.075" />
+      </geometry>
+    </collision>
+
+    <!-- ===================== wall -X ===================== -->
+    <visual name="pallet_wall_xneg_visual">
+      <origin xyz="-0.2925 0 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.400 0.075" />
+      </geometry>
+      <material name="pallet_blue" />
+    </visual>
+    <collision name="pallet_wall_xneg_collision">
+      <origin xyz="-0.2925 0 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.400 0.075" />
+      </geometry>
+    </collision>
+
+    <!-- ====== border +Y (fits between the two X borders: 0.570) ====== -->
+    <visual name="pallet_wall_ypos_visual">
+      <origin xyz="0 0.1925 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.015 0.075" />
+      </geometry>
+      <material name="pallet_blue" />
+    </visual>
+    <collision name="pallet_wall_ypos_collision">
+      <origin xyz="0 0.1925 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.015 0.075" />
+      </geometry>
+    </collision>
+
+    <!-- ===================== wall -Y ===================== -->
+    <visual name="pallet_wall_yneg_visual">
+      <origin xyz="0 -0.1925 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.015 0.075" />
+      </geometry>
+      <material name="pallet_blue" />
+    </visual>
+    <collision name="pallet_wall_yneg_collision">
+      <origin xyz="0 -0.1925 0.0375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.570 0.015 0.075" />
+      </geometry>
+    </collision>
+
+  </link>
+
+</robot>

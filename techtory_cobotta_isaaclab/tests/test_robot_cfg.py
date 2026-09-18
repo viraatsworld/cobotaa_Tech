@@ -3,71 +3,109 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Regression tests for ``COBOTTA_CFG`` itself, not the URDF it wraps.
+"""Regression tests for ``COBOTTA_RG6_CFG`` and the action space, against the robot USD.
 
-Importing ``robot_cfg`` needs Isaac Lab installed but no simulator or GPU: it
-only builds config dataclasses. Skipped when Isaac Lab is absent.
-
-The skip is a marker, not a module-level ``pytest.importorskip``: in a shell
-that has sourced ROS 2, the ``launch_testing`` pytest plugin turns a skip
-raised during collection into "no tests collected" for the WHOLE run, which
-silently hides every other test file.
+Kit-less: importing the configs builds dataclasses only, and the USD is read with plain ``pxr``.
 """
 
 from __future__ import annotations
 
-import importlib.util
+import math
 import re
 
 import pytest
+from pxr import Usd, UsdPhysics
 
-pytestmark = pytest.mark.skipif(
-    importlib.util.find_spec("isaaclab") is None, reason="Isaac Lab is not installed"
+from techtory_cobotta_isaaclab.assets import COBOTTA_RG6_USD
+from techtory_cobotta_isaaclab.robot import ActionsCfg
+from techtory_cobotta_isaaclab.robot.robot_cfg import (
+    ARM_JOINTS,
+    COBOTTA_RG6_CFG,
+    GRIPPER_JOINT,
+    GRIPPER_MIMIC_JOINTS,
+    HOME_POSE,
 )
 
+pytestmark = pytest.mark.unit
 
-@pytest.fixture(scope="module")
-def cfg():
-    from techtory_cobotta_isaaclab.robot.robot_cfg import COBOTTA_CFG
-
-    return COBOTTA_CFG
+PER_DEG = 180.0 / math.pi
 
 
 @pytest.fixture(scope="module")
-def names() -> tuple[tuple[str, ...], tuple[str, ...]]:
-    from techtory_cobotta_isaaclab.robot.joints import ARM_JOINTS, FT_JOINT, GRIPPER_JOINTS
-
-    return ARM_JOINTS, (*GRIPPER_JOINTS, FT_JOINT)
-
-
-def test_fixed_joints_are_not_merged(cfg) -> None:
-    """Merging would delete cobotta_pro_tool0, the EE frame."""
-    assert cfg.spawn.merge_fixed_joints is False
+def usd_stage() -> Usd.Stage:
+    # Prims do not keep their stage alive, so the stage gets a fixture of its own.
+    return Usd.Stage.Open(str(COBOTTA_RG6_USD))
 
 
-def test_base_is_fixed(cfg) -> None:
-    assert cfg.spawn.fix_base is True
+@pytest.fixture(scope="module")
+def usd_joints(usd_stage: Usd.Stage) -> dict[str, Usd.Prim]:
+    return {
+        p.GetName(): p for p in usd_stage.Traverse() if p.IsA(UsdPhysics.Joint) and not p.IsA(UsdPhysics.FixedJoint)
+    }
 
 
-def test_actuators_cover_every_joint_exactly_once(cfg, names) -> None:
-    arm, gripper = names
-    claimed: list[str] = []
-    for actuator in cfg.actuators.values():
-        for joint in (*arm, *gripper):
-            if any(re.fullmatch(expr, joint) for expr in actuator.joint_names_expr):
-                claimed.append(joint)
-    assert sorted(claimed) == sorted((*arm, *gripper))
+def _limits_rad(joint: Usd.Prim) -> tuple[float, float]:
+    revolute = UsdPhysics.RevoluteJoint(joint)
+    return math.radians(revolute.GetLowerLimitAttr().Get()), math.radians(revolute.GetUpperLimitAttr().Get())
 
 
-def test_arm_effort_limits_partition_the_arm(cfg, names) -> None:
-    arm, _ = names
-    limits = cfg.actuators["arm"].effort_limit_sim
-    for joint in arm:
-        assert sum(bool(re.fullmatch(expr, joint)) for expr in limits) == 1, joint
+def test_actuators_cover_every_joint_exactly_once(usd_joints: dict[str, Usd.Prim]) -> None:
+    for joint in usd_joints:
+        owners = [
+            name
+            for name, actuator in COBOTTA_RG6_CFG.actuators.items()
+            if any(re.fullmatch(expr, joint) for expr in actuator.joint_names_expr)
+        ]
+        assert len(owners) == 1, f"{joint} is driven by {owners}"
 
 
-def test_initial_joint_pos_partitions_the_joints(cfg, names) -> None:
-    arm, gripper = names
-    patterns = cfg.init_state.joint_pos
-    for joint in (*arm, *gripper):
-        assert sum(bool(re.fullmatch(expr, joint)) for expr in patterns) == 1, joint
+def test_init_state_sets_every_joint_inside_its_limits(usd_joints: dict[str, Usd.Prim]) -> None:
+    joint_pos = COBOTTA_RG6_CFG.init_state.joint_pos
+    assert set(joint_pos) == set(usd_joints)
+    for name, value in joint_pos.items():
+        lower, upper = _limits_rad(usd_joints[name])
+        assert lower <= value <= upper, name
+    assert {k: joint_pos[k] for k in ARM_JOINTS} == HOME_POSE
+
+
+def test_arm_gains_are_the_usd_gains_in_si(usd_joints: dict[str, Usd.Prim]) -> None:
+    """USD authors angular gains per degree; Isaac Lab takes them per radian. A 57x error hides here."""
+    arm = COBOTTA_RG6_CFG.actuators["arm"]
+    for name in ARM_JOINTS:
+        drive = UsdPhysics.DriveAPI(usd_joints[name], "angular")
+        assert arm.stiffness[name] / PER_DEG == pytest.approx(drive.GetStiffnessAttr().Get(), rel=1e-4)
+        assert arm.damping[name] / PER_DEG == pytest.approx(drive.GetDampingAttr().Get(), rel=1e-4)
+
+
+def test_gripper_drive_is_the_demos_force_limited_grip() -> None:
+    drive = COBOTTA_RG6_CFG.actuators["gripper_drive"]
+    assert drive.joint_names_expr == [GRIPPER_JOINT]
+    assert drive.joint_effort_limit == 5.0
+    assert drive.stiffness == pytest.approx(3.0 * PER_DEG)
+    assert drive.damping == pytest.approx(0.1 * PER_DEG)
+
+
+def test_mimic_joints_are_undriven() -> None:
+    mimic = COBOTTA_RG6_CFG.actuators["gripper_mimic"]
+    assert set(mimic.joint_names_expr) == set(GRIPPER_MIMIC_JOINTS)
+    assert mimic.stiffness == 0.0 and mimic.damping == 0.0
+
+
+def test_gripper_command_stays_inside_the_joint(usd_joints: dict[str, Usd.Prim]) -> None:
+    gripper = ActionsCfg().gripper
+    lower, upper = _limits_rad(usd_joints[GRIPPER_JOINT])
+    clip_low, clip_high = gripper.clip[GRIPPER_JOINT]
+    assert lower < clip_low < clip_high < upper
+    # +1 opens (finger_joint negative), -1 closes.
+    assert gripper.scale * 1.0 == pytest.approx(clip_low)
+    assert gripper.scale * -1.0 == pytest.approx(clip_high)
+
+
+def test_spawn_functions_resolve() -> None:
+    """The spawners use Isaac Lab's private _spawn_from_usd_file; fail here if an upgrade moves it."""
+    from isaaclab.utils.string import string_to_callable
+
+    from techtory_cobotta_isaaclab.scene.scene_cfg import HAMMER_CFG, SHELF_CFG, WORKCELL_CFG
+
+    for spawn in (COBOTTA_RG6_CFG.spawn, WORKCELL_CFG.spawn, SHELF_CFG.spawn, HAMMER_CFG.spawn):
+        assert callable(string_to_callable(spawn.func))
