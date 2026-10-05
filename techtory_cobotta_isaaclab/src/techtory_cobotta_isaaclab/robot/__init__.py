@@ -28,9 +28,6 @@ from techtory_cobotta_isaaclab.robot.observations import (
     ObservationsCfg as ObservationsCfg,
 )
 from techtory_cobotta_isaaclab.robot.observations import (
-    no_wrench as no_wrench,
-)
-from techtory_cobotta_isaaclab.robot.observations import (
     object_pose_b as object_pose_b,
 )
 from techtory_cobotta_isaaclab.robot.observations import (
@@ -41,9 +38,6 @@ from techtory_cobotta_isaaclab.robot.observations import (
 )
 from techtory_cobotta_isaaclab.robot.observations import (
     wrist_wrench as wrist_wrench,
-)
-from techtory_cobotta_isaaclab.robot.robot_cfg import (
-    ARM_ACTUATOR_NEWTON as ARM_ACTUATOR_NEWTON,
 )
 from techtory_cobotta_isaaclab.robot.robot_cfg import (
     ARM_JOINTS as ARM_JOINTS,

@@ -42,17 +42,17 @@ This is not a colcon package: it has only a `pyproject.toml`, so `colcon build` 
 
 ## Run it
 
-All scripts and CLI commands are run using `uv run` from the package directory. To run tasks with the Isaac Sim PhysX physics backend, pass `--extra isaacsim`:
+All scripts and CLI commands are run using `uv run` from the package directory. The task runs on
+Isaac Sim PhysX only, which needs Kit, so pass `--extra isaacsim`:
 
 ```bash
 cd src/dynamic_planning_demo/techtory_cobotta_isaaclab
 
-# Isaac Lab CLI: Run random agent with Isaac Sim PhysX
-uv run --extra isaacsim isaaclab random_agent --task TechtoryCobottaIsaaclab-Base-COBOTTA --num_envs 16 physics=isaacsim_physx --viz kit
+# Isaac Lab CLI: Run random agent
+uv run --extra isaacsim isaaclab random_agent --task TechtoryCobottaIsaaclab-Base-COBOTTA --num_envs 16 --viz kit
 
-# Isaac Lab CLI: Run zero agent (Newton by default, or with Isaac Sim PhysX)
-uv run isaaclab zero_agent --task TechtoryCobottaIsaaclab-Base-COBOTTA --num_envs 16
-uv run --extra isaacsim isaaclab zero_agent --task TechtoryCobottaIsaaclab-Base-COBOTTA --num_envs 16 physics=isaacsim_physx --viz kit
+# Isaac Lab CLI: Run zero agent
+uv run --extra isaacsim isaaclab zero_agent --task TechtoryCobottaIsaaclab-Base-COBOTTA --num_envs 16 --viz kit
 
 # Training and play
 uv run --extra isaacsim isaaclab train --rl_library rsl_rl --task TechtoryCobottaIsaaclab-Base-COBOTTA
@@ -62,10 +62,10 @@ uv run --extra isaacsim isaaclab play  --rl_library rsl_rl --task TechtoryCobott
 uv run python scripts/list_envs.py --show_presets
 
 # Drive each arm joint in turn, then the gripper; prints joints, TCP, wrist wrench, objects
-uv run python scripts/play.py  --viz newton_gl                      # Isaac Sim viewport
-uv run python scripts/play.py --viz none             # headless, printed readout only
+uv run --extra isaacsim python scripts/play.py                # Isaac Sim viewport
+uv run --extra isaacsim python scripts/play.py --viz none     # headless, printed readout only
 
-# Self-test of the F/T sensor and the grasp; prints PASS or FAIL (runs on Isaac Sim PhysX)
+# Self-test of the F/T sensor and the grasp; prints PASS or FAIL
 uv run --extra isaacsim python scripts/check_ft_payload.py
 ```
 
@@ -73,21 +73,14 @@ The base task has no reward, so `train` only exercises the plumbing. Subclass it
 rewards; see [Using the robot in an RL agent](#using-the-robot-in-an-rl-agent). Agent configs for
 rsl_rl, rl_games, skrl and sb3 are registered.
 
-**Physics: Newton by default, Isaac Sim PhysX for the gripper.** `physics=` picks one of:
+**Physics: Isaac Sim PhysX only.** `isaacsim_physx` is the task's one (and default) physics preset,
+so `physics=` can be left out. It is what the Isaac Sim demo ran on and what the gripper was tuned
+against.
 
-- **`newton_mjwarp`** (default; `newton_wraps` is an alias) runs without Kit. The arm uses softer
-  gains (`ARM_ACTUATOR_NEWTON`), because MuJoCo-Warp does not enforce the joint velocity limit that
-  the USD's very stiff gains rely on. Newton cannot follow the RG6's parallel motion, which is made of
-  PhysX mimic joints. Its joint-wrench sensor skips links attached by a fixed joint, and the F/T
-  sensor sits on exactly such a joint, so `wrist_wrench` reads zero; the observation stays 48-D.
-  The cell's own colliders are authored on Xforms, which Newton ignores; the shelf's boxes collide.
-- **`isaacsim_physx`** is what the Isaac Sim demo ran on and what the gripper was tuned against:
-  use it for grasping, wrist-wrench readings and contact with the cell. `check_ft_payload.py`
-  always runs on it.
-- **OvPhysX** is not offered. It simulates the robot and the wrist sensor correctly, but does not
-  build the RG6's colliders (`PhysxMeshMergeCollisionAPI`), so the fingers close through anything
-  and nothing can be held. That also rules out Isaac Lab's `physx` auto preset, which picks OvPhysX
-  whenever Kit is not otherwise needed.
+**OvPhysX** is not offered. It simulates the robot and the wrist sensor correctly, but does not
+build the RG6's colliders (`PhysxMeshMergeCollisionAPI`), so the fingers close through anything
+and nothing can be held. That also rules out Isaac Lab's `physx` auto preset, which picks OvPhysX
+whenever Kit is not otherwise needed.
 
 ## The scene
 
@@ -388,7 +381,6 @@ The unit tests check the configs against the USDs themselves:
 - **"Unresolved reference prim path" warnings.** These come from the Isaac Sim demo's USD files
   (e.g. the RG6's unused `base` prim) and are harmless. Kit mutes them; kit-less tools print them.
 - **Objects pass through the fingers.** Check that you are on Isaac Sim PhysX
-  (`physics=isaacsim_physx`; the default is Newton). See [Run it](#run-it) for why the others
-  cannot grip.
+  (`physics=isaacsim_physx`, the default). See [Run it](#run-it) for why OvPhysX cannot grip.
 - **The arm is slow.** It runs at MoveIt's joint velocity limits, as on the real robot's MoveIt
   setup. Raise `joint_velocity_limit` in `robot/robot_cfg.py` if a task needs faster motion.

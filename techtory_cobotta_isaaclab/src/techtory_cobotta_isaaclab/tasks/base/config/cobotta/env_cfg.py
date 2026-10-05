@@ -20,16 +20,14 @@ for.
 
 from isaaclab.envs import ManagerBasedRLEnvCfg
 from isaaclab.managers import EventTermCfg as EventTerm
-from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.utils import configclass
 from isaaclab.visualizers import VisualizerCfg
-from isaaclab_newton.physics import MJWarpSolverCfg, NewtonCfg
 from isaaclab_physx.physics import PhysxCfg
 
-from isaaclab_tasks.utils import PresetCfg, preset
+from isaaclab_tasks.utils import PresetCfg
 
-from techtory_cobotta_isaaclab.robot import ARM_ACTUATOR_NEWTON, ActionsCfg, ObservationsCfg, no_wrench
+from techtory_cobotta_isaaclab.robot import ActionsCfg, ObservationsCfg
 from techtory_cobotta_isaaclab.scene.scene_cfg import TechtoryCellSceneCfg
 
 from ... import mdp
@@ -41,51 +39,25 @@ from ... import mdp
 
 @configclass
 class BasePhysicsCfg(PresetCfg):
-    """Physics presets: Newton (MuJoCo-Warp) by default, Isaac Sim PhysX for the gripper.
-
-    * **Newton** (``newton_mjwarp``, the default; ``newton_wraps`` is an alias)
-      steps the arm and the cell without Kit, with softer arm gains
-      (``ARM_ACTUATOR_NEWTON``). It cannot follow the RG6's parallel motion --
-      five ``PhysxMimicJointAPI`` joints, a PhysX schema -- and its joint-wrench
-      sensor skips links attached by a fixed joint, which is exactly where the
-      wrist F/T sits, so the wrench observation reads zero. The cell's own
-      colliders sit on Xforms, which Newton ignores; the shelf's boxes collide.
-      Grasping, wrist-wrench readings and contact with the cell need
-      ``physics=isaacsim_physx``.
-    * **OvPhysX** simulates the robot and the wrist sensor correctly, but not the
-      RG6's colliders: they are ``PhysxMeshMergeCollisionAPI`` collectors, which
-      OvPhysX does not build, so the fingers close through anything and no object
-      can be held (measured with scripts/check_ft_payload.py). That also rules out
-      Isaac Lab's ``physx`` auto preset, which picks OvPhysX whenever Kit is not
-      otherwise needed.
+    """Physics: Isaac Sim PhysX only.
 
     ``isaacsim_physx`` is what the Isaac Sim demo ran on, and what the gripper
-    tuning was measured against.
+    tuning was measured against. It is also the default, so ``physics=`` can be
+    left out.
+
+    **OvPhysX** is not offered. It simulates the robot and the wrist sensor
+    correctly, but not the RG6's colliders: they are
+    ``PhysxMeshMergeCollisionAPI`` collectors, which OvPhysX does not build, so
+    the fingers close through anything and no object can be held (measured with
+    scripts/check_ft_payload.py). That also rules out Isaac Lab's ``physx`` auto
+    preset, which picks OvPhysX whenever Kit is not otherwise needed.
     """
 
     # Contact settings from Isaac Lab's Franka lift task: bounce_threshold keeps
     # small impacts inelastic, the short friction correlation distance resolves
     # friction on small patches like the RG6 pads.
     isaacsim_physx: PhysxCfg = PhysxCfg(bounce_threshold_velocity=0.01, friction_correlation_distance=0.00625)
-    # Solver settings from Isaac Lab's Franka lift task; two substeps keep the
-    # 0.01 s step at 5 ms for the gripper contacts.
-    newton_mjwarp: NewtonCfg = NewtonCfg(
-        solver_cfg=MJWarpSolverCfg(
-            solver="newton",
-            integrator="implicitfast",
-            njmax=300,
-            nconmax=200,
-            impratio=1.0,
-            cone="pyramidal",
-            iterations=100,
-            ls_iterations=15,
-            use_mujoco_contacts=False,
-        ),
-        num_substeps=2,
-        debug_mode=False,
-    )
-    newton_wraps: NewtonCfg = newton_mjwarp
-    default: NewtonCfg = newton_mjwarp
+    default: PhysxCfg = isaacsim_physx
 
 
 ##
@@ -150,10 +122,3 @@ class BaseEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.dt = 0.01
         self.sim.render_interval = self.decimation
         self.sim.physics = BasePhysicsCfg()
-        # Backend-specific robot terms, selected by the same physics= name: the
-        # USD's arm gains and the wrist F/T only work on Isaac Sim PhysX. The
-        # zero wrench keeps the observation at 48 values on Newton.
-        actuators = self.scene.robot.actuators
-        actuators["arm"] = preset(default=ARM_ACTUATOR_NEWTON, isaacsim_physx=actuators["arm"])
-        policy = self.observations.policy
-        policy.wrist_wrench = preset(default=ObsTerm(func=no_wrench), isaacsim_physx=policy.wrist_wrench)

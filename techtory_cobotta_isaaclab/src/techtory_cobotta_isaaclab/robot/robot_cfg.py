@@ -34,7 +34,6 @@ from techtory_cobotta_isaaclab.scene.layout import ROBOT_MOUNT
 from techtory_cobotta_isaaclab.spawners import CobottaRg6UsdFileCfg
 
 __all__ = [
-    "ARM_ACTUATOR_NEWTON",
     "ARM_JOINTS",
     "COBOTTA_RG6_CFG",
     "FT_BODY",
@@ -139,17 +138,6 @@ _ARM_ACTUATOR = ImplicitActuatorCfg(
     # twist the wrist, so J6 gets the same 60.
     joint_effort_limit=60.0,
 )
-
-# The same arm for Newton (MuJoCo-Warp). The USD gains rely on PhysX enforcing
-# the joint velocity limit while the drive saturates; MuJoCo-Warp does not
-# enforce it, and with those gains the arm overshoots and never settles. These
-# stay mostly out of saturation instead: at the 60 N*m limit the damping alone
-# caps the speed near 60 / 200 = 0.3 rad/s, the bottom of MoveIt's range, and
-# gravity sags J2/J3 by ~0.01 rad (measured with scripts/play.py).
-ARM_ACTUATOR_NEWTON = _ARM_ACTUATOR.replace(stiffness=2000.0, damping=200.0, armature=0.1)
-#ARM_ACTUATOR_NEWTON = _ARM_ACTUATOR
-
-"""Arm drive for the Newton presets; the task swaps it in (see ``BaseEnvCfg``)."""
 
 # The Isaac Sim demo's force-limited grip (spawn_robot.configure_gripper_drive and
 # stabilize_gripper_joints):

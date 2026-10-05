@@ -55,7 +55,6 @@ __all__ = [
     "FT_SENSOR_ENTITY",
     "TCP_ENTITY",
     "ObservationsCfg",
-    "no_wrench",
     "object_pose_b",
     "payload_wrench",
     "tcp_pose_b",
@@ -146,17 +145,6 @@ def wrist_wrench(env: ManagerBasedEnv, sensor_cfg: SceneEntityCfg) -> torch.Tens
         sensor_cfg: The joint-wrench sensor with the F/T body selected (:data:`FT_SENSOR_ENTITY`).
     """
     return _RAW_TO_LOAD * mdp.body_incoming_wrench(env, sensor_cfg)
-
-
-def no_wrench(env: ManagerBasedEnv) -> torch.Tensor:
-    """Zeros in place of :func:`wrist_wrench`, on backends without the wrist F/T.
-
-    Returns shape ``(num_envs, 6)``. Newton's joint-wrench sensor skips links
-    attached by a fixed joint, and the F/T sits on one (``gripper_joint``).
-    Keeping the six values holds the 48-D layout, so observation indices --
-    scripts/play.py, a trained policy -- are the same on every backend.
-    """
-    return torch.zeros(env.num_envs, 6, device=env.device)
 
 
 def payload_wrench(

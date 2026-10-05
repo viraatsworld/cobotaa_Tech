@@ -11,19 +11,16 @@ arm joints, jaw angle, TCP position, wrist wrench and object positions -- so a
 joint that does not move, a gripper that does not close, an object that falls
 through the shelf or a wrist sensor that reads nothing shows up as a number.
 
-Runs on Newton (MuJoCo-Warp) by default; ``physics=isaacsim_physx`` selects
-Isaac Sim PhysX, the only backend with a working wrist F/T and grasp::
+Runs on Isaac Sim PhysX, the task's only physics backend::
 
     python scripts/play.py                     # Isaac Sim viewport
     python scripts/play.py --viz none          # printed readout only, no window
-    python scripts/play.py physics=isaacsim_physx
     python scripts/play.py --num_envs 4 --phase_seconds 3.0
 
 Expect each joint to settle near its commanded offset (the arm moves at its
 MoveIt velocity limits, 0.33-0.60 rad/s, so give phases 2 s or more), the
 jaw to reach about -0.62 rad open and +0.62 rad closed, both objects to stay
-put on the shelf, and -- on Isaac Sim PhysX -- the wrist to read the gripper's
-weight (~9.8 N) at rest. Newton reads zero there.
+put on the shelf, and the wrist to read the gripper's weight (~9.8 N) at rest.
 """
 
 import argparse
@@ -39,7 +36,7 @@ from isaaclab_tasks.utils import resolve_task_config, setup_preset_cli
 import techtory_cobotta_isaaclab.tasks  # noqa: F401
 
 DEFAULT_TASK = "TechtoryCobottaIsaaclab-Base-COBOTTA"
-DEFAULT_PHYSICS = "newton_mjwarp"
+DEFAULT_PHYSICS = "isaacsim_physx"
 ARM_OFFSET = 0.3  # rad; small enough that no single joint swings the arm into the cell
 
 # (label, joint index to offset or None, offset in action units, gripper command)
