@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="main">
+  <include path="subtrees/pnp_pipeline.xml"/>
+
+  <!-- Pick the hammer from the shelf and drop it into the blue bin (pallet).
+       In poses_hammer.yaml the place_* poses are the hammer's slot on the shelf,
+       so they are used here as the pick side; bin_* are above the pallet centre.
+       OnRobot RG6: position -0.628 = open, 0.628 = close. -->
+  <BehaviorTree ID="main">
+    <Sequence>
+      <SubTree ID="pnp_pipeline"
+               name="Pick hammer from shelf and place in blue bin"
+               yaml_path="src/techtory_cobotta_system/config/poses_hammer.yaml"
+               pick_approach="place_approach"
+               pick="place"
+               pick_retreat="place_retreat"
+               shelf_approach="shelf_approach"
+               place_approach="bin_approach"
+               place="bin_place"
+               place_retreat="bin_retreat"
+               gripper_open_pos="-0.6"
+               gripper_open_effort="0.1"
+               gripper_close_pos="0.53"
+               gripper_close_effort="0.4"
+               _autoremap="true"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

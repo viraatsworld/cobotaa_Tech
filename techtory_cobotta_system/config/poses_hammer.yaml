@@ -103,3 +103,42 @@ frames:
       y: -0.4691035747528076
       z: 0.2606177031993866
     style: none
+  bin_approach:
+    group: ''
+    orientation:
+      w: 0.0022475501821647356
+      x: -0.9999974742558759
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.54
+      y: -0.115
+      z: 0.2
+    style: none
+  bin_place:
+    group: ''
+    orientation:
+      w: 0.0022475501821647356
+      x: -0.9999974742558759
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.54
+      y: -0.115
+      z: 0.06
+    style: none
+  bin_retreat:
+    group: ''
+    orientation:
+      w: 0.0022475501821647356
+      x: -0.9999974742558759
+      y: 0.0
+      z: 0.0
+    parent: cobotta_pro_base_link
+    position:
+      x: 0.54
+      y: -0.115
+      z: 0.2
+    style: none
