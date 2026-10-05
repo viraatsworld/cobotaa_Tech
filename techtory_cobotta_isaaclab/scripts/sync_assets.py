@@ -41,6 +41,7 @@ ROOT_USDS: tuple[str, ...] = (
     "objects/shelf.usd",
     "objects/hammer1.usd",
     "objects/soda_can.usd",
+    "objects/pallet.usd",
 )
 
 # Dependencies that are expected not to resolve to a file in the assets tree:

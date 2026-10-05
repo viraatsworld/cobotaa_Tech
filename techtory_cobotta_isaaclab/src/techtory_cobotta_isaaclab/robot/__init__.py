@@ -15,6 +15,9 @@ Everything a task needs::
 """
 
 from techtory_cobotta_isaaclab.robot.actions import ActionsCfg as ActionsCfg
+from techtory_cobotta_isaaclab.robot.actions import (
+    TopDownTcpTargetActionCfg as TopDownTcpTargetActionCfg,
+)
 from techtory_cobotta_isaaclab.robot.observations import (
     FT_ROBOT_ENTITY as FT_ROBOT_ENTITY,
 )

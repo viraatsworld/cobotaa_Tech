@@ -6,9 +6,11 @@ soda can. The robot, gripper, cell, shelf and objects are loaded from the same U
 [`techtory_cobotta_isaacsim`](../techtory_cobotta_isaacsim) uses, with the same tuning. There is no
 ROS in this package.
 
-The registered task is:
+The registered tasks are:
 
 - `TechtoryCobottaIsaaclab-Base-COBOTTA` — the cell with the robot and no reward: a base to build tasks on.
+- `TechtoryCobottaIsaaclab-HammerToBin-COBOTTA` (and `-Play`) — RL: pick the hammer up from a random
+  pose on the table and drop it into the blue pallet. See [Hammer-to-bin task](#hammer-to-bin-task).
 
 ## Virtual environment & installation
 
@@ -100,7 +102,7 @@ The simulation uses `sim.dt = 0.01` s with `decimation = 2`, so the policy runs 
 last 20 s. Environments are 3 m apart, because the cell is about 2.2 m square. A reset puts the
 robot back in its home pose and the objects back on the shelf.
 
-**Assets.** The 28 USD files the scene needs (44 MB) are copied, byte-identical, into
+**Assets.** The 33 USD files the scenes need (44 MB, the pallet included) are copied, byte-identical, into
 `src/techtory_cobotta_isaaclab/assets/usd`, in the same layout as `techtory_cobotta_isaacsim/assets`.
 When those assets change, refresh the copy with:
 
@@ -181,6 +183,80 @@ class MySceneCfg(InteractiveSceneCfg):
 The action and observation configs assume the scene names `robot`, `wrist_ft`, `hammer` and
 `soda_can`. If you rename one, pass the new name on each action term (`asset_name=`) and in the
 observation terms' `SceneEntityCfg`s. Drop the object-pose terms if your scene has other objects.
+
+## Hammer-to-bin task
+
+`TechtoryCobottaIsaaclab-HammerToBin-COBOTTA` trains the arm to pick the hammer up from the table and
+drop it into the blue pallet — the job of the real system's `hammer_to_bin` behaviour tree, with the
+pallet where the real cell has it (`bin_place` in `poses_hammer.yaml`). The design and its reasoning
+are in [`plan-hammer-to-bin.md`](plan-hammer-to-bin.md).
+
+```bash
+cd src/dynamic_planning_demo/techtory_cobotta_isaaclab
+
+# Before training: is the task sound? Each prints PASS or FAIL.
+uv run --extra isaacsim python scripts/check_hammer_to_bin.py --resets --num_envs 1024  # resets
+uv run --extra isaacsim python scripts/check_hammer_to_bin.py --hold                    # arm holds still
+uv run --extra isaacsim python scripts/check_hammer_to_bin.py --num_envs 64             # scripted pick-and-place
+
+# Train (about 2.2 s per iteration at 1024 environments on an RTX 4000 Ada), then watch
+uv run --extra isaacsim isaaclab train --rl_library rsl_rl --task TechtoryCobottaIsaaclab-HammerToBin-COBOTTA --num_envs 1024 --viz none
+uv run --extra isaacsim isaaclab play  --rl_library rsl_rl --task TechtoryCobottaIsaaclab-HammerToBin-COBOTTA-Play --checkpoint latest --viz kit
+tensorboard --logdir logs/rsl_rl/techtory_cobotta_hammer_to_bin
+```
+
+**One episode.** The hammer lies flat at a random position and yaw in front of and to the right of
+the robot (`layout.HAMMER_SPAWN_AREA`); the arm starts at home. The policy moves the TCP to the
+handle, the gripper rule closes the jaw, the policy lifts and carries the hammer over the pallet,
+the rule lets go, and the episode ends once the hammer rests in the pallet. The policy runs at
+25 Hz; episodes last at most 20 s.
+
+**Actions** — 4 values, only for the arm:
+
+| Index | Meaning | At ±1 |
+| --- | --- | --- |
+| `0:3` | step of the commanded TCP position, robot base frame | ±5 mm (0.125 m/s) |
+| `3` | step of the commanded TCP yaw | ±0.012 rad (0.3 rad/s) |
+
+The TCP always points straight down. The commanded target leads the actual TCP by at most 3 cm and
+0.1 rad and stays inside a workspace box; differential IK tracks it, and the joint targets move at
+most at MoveIt's joint speed limits. The gripper is not learned: a rule closes it when the TCP is
+within 8 mm of the grasp point (6 mm in height) with the jaw within 15° of across the handle, reopens
+after a miss, and lets go once every corner of the hammer is over the pallet. It runs the same drive
+as the base task, at 15 N·m (about 95 N per pad; the base task's 5 N·m lets the handle slip).
+
+**Observations.** The actor's `policy` group has only what the real robot can provide — joints,
+forward kinematics and a hammer pose estimate — 35 values: arm joint positions and velocities, TCP
+position and yaw, gripper closed, the grasp point and the hammer's yaw, grasp point minus TCP, the
+grasp yaw error, pallet target minus hammer, last action. Angles are sin/cos pairs, the grasp yaw
+error of twice the angle (the jaw and the handle look the same turned by 180°). The critic also gets
+a `critic` group of simulator ground truth: hammer orientation and velocities, wrist wrench, jaw
+position, grasped and picked flags.
+
+**Rewards** — weights are the reward per event or per step:
+
+| Stage | Term | When | Reward |
+| --- | --- | --- | ---: |
+| Approach | `approach_progress` | TCP closes in on the grasp pose, while not holding the hammer: `φ(t-1) − φ(t)`, `φ = distance + 0.1 m/rad × yaw error` | ×1.0 |
+| | `reached_hammer` | the rule closes the jaw (once) | +5 |
+| Pick | `picked_hammer` | grasped and lifted 2.5 cm (once) | +10 |
+| Transport | `transport_progress` | the hammer closes in on the point 12 cm above the pallet — only while grasped at both steps | ×1.0 |
+| | `near_bin` | the grasped hammer enters the pallet's vicinity (once) | +5 |
+| Place | `placed_in_bin` | the rule lets go over the pallet (once) | +20 |
+| Success | `success` | resting in the pallet for 0.4 s; ends the episode | +50 |
+| Failure | `dropped_outside_bin` | picked, then let go and at rest outside the pallet, or fallen off the table; ends the episode | −10 |
+| | `lost_in_transport` | the hammer slips out of the jaw away from the pallet | −5 |
+| Efficiency | `time_penalty` | every step | −0.005 |
+
+Isaac Lab logs each term as `Episode_Reward/<term>` divided by the episode length in seconds: a
++5 milestone shows up as 0.25. `Metrics/success_rate` is the share of episodes that ended in the
+pallet. Expect the milestones to appear in table order as training goes.
+
+**Scene.** The cell is drawn but not collided with: its collider is a 470k-triangle mesh, which at
+1024 environments overflowed PhysX's GPU buffers and, even with room, threw about 1 in 250 hammers
+around on their first steps. The table top and the robot's base plate are invisible boxes instead;
+the shelf and pallet are boxes already. The workspace box in place of the cell's frame keeps the arm
+in the space the task needs.
 
 ## Sending commands
 
@@ -346,8 +422,9 @@ src/techtory_cobotta_isaaclab/
 ├── spawners/          # spawn-time corrections of those USDs
 ├── robot/             # ArticulationCfg, actions, observations -- the robot on its own
 ├── scene/             # cell layout (plain numbers) and the scene configs
-└── tasks/base/        # the registered task: env config, agent configs
-scripts/               # play, check_ft_payload, list_envs, sync_assets
+├── tasks/base/        # the base task: env config, agent configs
+└── tasks/hammer_to_bin/  # the RL task: mdp/ terms (gripper rule, rewards, ...), env and PPO configs
+scripts/               # play, check_ft_payload, check_hammer_to_bin, list_envs, sync_assets
 tests/                 # kit-less unit tests
 ```
 
@@ -371,7 +448,11 @@ The unit tests check the configs against the USDs themselves:
   robot structure the configs rely on.
 - `test_robot_cfg.py` checks the actuators, the home pose, and the gains' degree-to-radian
   conversion.
-- `test_registration.py` checks the task registration and the CLI entry point.
+- `test_registration.py` checks the task registrations and the CLI entry point.
+- `test_hammer_to_bin_layout.py` checks the hammer's geometry against its USD, the pallet against the
+  real system's drop pose, the spawn area's clearances and the arm's workspace.
+- `test_hammer_to_bin_mdp.py` checks the task's logic with the scene stubbed out: the yaw wrap, the
+  arm action's limits, progress shaping, one-off bonuses, the gripper rule and the terminations.
 
 ## Troubleshooting
 

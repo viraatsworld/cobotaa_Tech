@@ -22,6 +22,7 @@ __all__ = [
     "ASSETS_DIR",
     "COBOTTA_RG6_USD",
     "HAMMER_USD",
+    "PALLET_USD",
     "SHELF_USD",
     "SODA_CAN_USD",
     "WORKCELL_USD",
@@ -41,6 +42,9 @@ SHELF_USD: Path = ASSETS_DIR / "objects" / "shelf.usd"
 HAMMER_USD: Path = ASSETS_DIR / "objects" / "hammer1.usd"
 SODA_CAN_USD: Path = ASSETS_DIR / "objects" / "soda_can.usd"
 
-for _path in (COBOTTA_RG6_USD, WORKCELL_USD, SHELF_USD, HAMMER_USD, SODA_CAN_USD):
+PALLET_USD: Path = ASSETS_DIR / "objects" / "pallet.usd"
+"""The blue 0.60 x 0.40 x 0.075 m pallet the hammer is dropped into: five box colliders, open on top."""
+
+for _path in (COBOTTA_RG6_USD, WORKCELL_USD, SHELF_USD, HAMMER_USD, SODA_CAN_USD, PALLET_USD):
     if not _path.exists():  # pragma: no cover - a broken checkout, not a code path
         raise FileNotFoundError(f"{_path} is missing. Restore the asset copy with:\n  python scripts/sync_assets.py")

@@ -30,15 +30,18 @@ from isaaclab_physx.sim.schemas import (
 )
 from isaaclab_physx.sim.spawners.materials import PhysxRigidBodyMaterialCfg
 
-from techtory_cobotta_isaaclab.assets import HAMMER_USD, SHELF_USD, SODA_CAN_USD, WORKCELL_USD
+from techtory_cobotta_isaaclab.assets import HAMMER_USD, PALLET_USD, SHELF_USD, SODA_CAN_USD, WORKCELL_USD
 from techtory_cobotta_isaaclab.robot.robot_cfg import COBOTTA_RG6_CFG
-from techtory_cobotta_isaaclab.scene.layout import HAMMER_BODY, SHELF, SODA_CAN_BODY
+from techtory_cobotta_isaaclab.scene.layout import HAMMER_BODY, PALLET, SHELF, SODA_CAN_BODY, SPAWN_ZONE, TABLE_TOP_Z
 from techtory_cobotta_isaaclab.spawners import GraspableUsdFileCfg, StaticUsdFileCfg
 
 __all__ = [
+    "GRASPABLE_OBJECT_CFGS",
     "HAMMER_CFG",
+    "PALLET_CFG",
     "SHELF_CFG",
     "SODA_CAN_CFG",
+    "SPAWN_ZONE_MARKER_CFG",
     "WORKCELL_CFG",
     "WRIST_FT_CFG",
     "TechtoryCellSceneCfg",
@@ -54,8 +57,18 @@ WORKCELL_CFG = AssetBaseCfg(
         usd_path=str(WORKCELL_USD),
         # The cell's two colliders are authored as convex hulls of whole links; the
         # cell_link hull is a box around the entire room, robot included. Static
-        # colliders may use the exact triangle mesh, so they do.
-        collision_props=PhysxCollisionPropertiesCfg(mesh_collision_property=PhysxTriangleMeshPropertiesCfg()),
+        # colliders may use the exact triangle mesh, so they do -- ~470k triangles.
+        #
+        # 5 mm contact offset: PhysX's default is several centimetres, and against a
+        # mesh that dense (the table top is a slotted plate, 16 mm grooves every 52 mm)
+        # it generated a flood of speculative contacts. At 1024 environments that
+        # overflowed the GPU collision stack, and even with room about 1 hammer in 250
+        # lying on the table was kicked over in its first steps. With 5 mm: no
+        # overflow, 0 of 8192 resets go wrong, and stepping is ~50% faster
+        # (scripts/check_pick_to_bin.py --resets).
+        collision_props=PhysxCollisionPropertiesCfg(
+            mesh_collision_property=PhysxTriangleMeshPropertiesCfg(), contact_offset=0.005, rest_offset=0.0
+        ),
     ),
 )
 """The Techtory cell, at the environment origin (its frame is the cell frame)."""
@@ -67,6 +80,25 @@ SHELF_CFG = AssetBaseCfg(
     init_state=AssetBaseCfg.InitialStateCfg(pos=SHELF.pos, rot=SHELF.rot),
 )
 """The shelf, standing on the table."""
+
+PALLET_CFG = AssetBaseCfg(
+    prim_path="{ENV_REGEX_NS}/Pallet",
+    # Box colliders already; the converter's rigid body and articulation root are switched off.
+    spawn=StaticUsdFileCfg(usd_path=str(PALLET_USD)),
+    init_state=AssetBaseCfg.InitialStateCfg(pos=PALLET.pos, rot=PALLET.rot),
+)
+"""The blue pallet (the "bin") on the table. Not part of :class:`TechtoryCellSceneCfg`; tasks that need it add it."""
+
+SPAWN_ZONE_MARKER_CFG = AssetBaseCfg(
+    prim_path="{ENV_REGEX_NS}/SpawnZone",
+    # No collision_props: drawn only, nothing touches it.
+    spawn=sim_utils.CuboidCfg(
+        size=(2.0 * SPAWN_ZONE.half[0], 2.0 * SPAWN_ZONE.half[1], 0.0005),
+        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.1, 0.7, 0.2), opacity=0.35),
+    ),
+    init_state=AssetBaseCfg.InitialStateCfg(pos=(*SPAWN_ZONE.center, TABLE_TOP_Z + 0.0005)),
+)
+"""A green rectangle on the table showing :data:`layout.SPAWN_ZONE`, where pick tasks lay their object."""
 
 ##
 # Objects.
@@ -101,6 +133,9 @@ SODA_CAN_CFG = RigidObjectCfg(
     init_state=RigidObjectCfg.InitialStateCfg(pos=SODA_CAN_BODY.pos, rot=SODA_CAN_BODY.rot),
 )
 """A full 0.35 kg soda can standing on the shelf's middle board, within reach."""
+
+GRASPABLE_OBJECT_CFGS: dict[str, RigidObjectCfg] = {"hammer": HAMMER_CFG, "soda_can": SODA_CAN_CFG}
+"""The objects a pick task can be given, by the names in :data:`grasp_objects.GRASP_OBJECTS`."""
 
 ##
 # Sensors.

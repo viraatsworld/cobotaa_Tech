@@ -28,16 +28,31 @@ import math
 from typing import NamedTuple
 
 __all__ = [
+    "BIN_FLOOR_Z",
+    "BIN_FOOTPRINT",
+    "BIN_INTERIOR",
+    "BIN_RELEASE_HEIGHT",
+    "BIN_RIM_Z",
+    "BIN_TARGET",
     "HAMMER_BODY",
     "HAMMER_BODY_OFFSET",
     "HAMMER_ON_SHELF",
     "IDENTITY",
+    "PALLET",
+    "PALLET_FOOTPRINT",
+    "ROBOT_BASE_PLATE",
     "ROBOT_MOUNT",
     "SHELF",
+    "SHELF_FOOTPRINT",
     "SODA_CAN_BODY",
     "SODA_CAN_ON_SHELF",
+    "SPAWN_ZONE",
+    "TABLE_TOP",
+    "TABLE_TOP_Z",
+    "Box2D",
     "Pose",
     "compose",
+    "quat_conj",
     "quat_from_rotate_xyz_deg",
     "quat_mul",
     "quat_rotate",
@@ -165,3 +180,95 @@ robot base horizontally -- well inside the reach the hammer is at the edge of.
 
 SODA_CAN_BODY = compose(SHELF, SODA_CAN_ON_SHELF)
 """Where the soda can's rigid body starts, in the cell frame."""
+
+##
+# The table, the bin and the spawn zone, for the pick-to-bin tasks.
+##
+
+
+def quat_conj(q: Quat) -> Quat:
+    """The inverse of the unit quaternion ``q``."""
+    return (-q[0], -q[1], -q[2], q[3])
+
+
+class Box2D(NamedTuple):
+    """An axis-aligned rectangle in the cell frame's x/y plane [m]."""
+
+    center: tuple[float, float]
+    half: tuple[float, float]
+
+    def shrunk(self, margin: float) -> Box2D:
+        return Box2D(self.center, (self.half[0] - margin, self.half[1] - margin))
+
+    def contains(self, x: float, y: float) -> bool:
+        return abs(x - self.center[0]) <= self.half[0] and abs(y - self.center[1]) <= self.half[1]
+
+
+TABLE_TOP_Z = 0.942
+"""Top face of the cell's table [m]: the surface the pallet, the shelf and the robot's plate stand on.
+
+Measured by raycasting the workcell's collision mesh: flat at 0.942 over
+x in [-0.78, 0.78], y in [-0.76, 0.82]. The workcell URDF mounts the plate,
+shelf and pallet at 0.94, 2 mm into it -- harmless between static colliders.
+"""
+
+TABLE_TOP = Box2D((0.0, 0.03), (0.78, 0.79))
+"""The flat part of the table top, from the same raycast.
+
+It is a slotted plate: grooves 16 mm wide and at least 12 mm deep run along x,
+every 52 mm. ``WORKCELL_CFG`` explains what that means for contacts.
+"""
+
+ROBOT_BASE_PLATE = Box2D((-0.275, -0.24), (0.15, 0.15))
+"""The robot's base plate on the table (its collision mesh spans x [-0.425, -0.125], y [-0.39, -0.09])."""
+
+SHELF_FOOTPRINT = Box2D((0.61, 0.27), (0.15, 0.5))
+"""The shelf's boards seen from above: the shelf frame's [-0.5, 0.5] x [-0.15, 0.15], turned 90 deg.
+
+Its 40 mm legs stand inside this footprint (``shelf.urdf``).
+"""
+
+PALLET = Pose((-0.16, 0.3, 0.94))
+"""The blue pallet ("bin"): footprint centre on the table, its frame unrotated.
+
+From ``techtory_cobotta_workcell.urdf.xacro`` and the Isaac Sim demo's
+``spawn_objects.add_pallet``. In the robot base frame this is (0.54, -0.115):
+the real system's ``bin_place`` (``techtory_cobotta_system/config/poses_hammer.yaml``).
+"""
+
+PALLET_FOOTPRINT = Box2D(PALLET.pos[:2], (0.30, 0.20))
+"""The pallet's outer walls seen from above (``assets/urdf/pallet.urdf``: 0.60 x 0.40 m)."""
+
+BIN_INTERIOR = Box2D(PALLET.pos[:2], (0.285, 0.185))
+"""Inside the pallet's 15 mm walls: 0.57 x 0.37 m."""
+
+BIN_FLOOR_Z = PALLET.pos[2] + 0.015
+"""Top of the pallet's floor plate [m]."""
+
+BIN_RIM_Z = PALLET.pos[2] + 0.075
+"""Top of the pallet's walls [m]."""
+
+BIN_FOOTPRINT = BIN_INTERIOR.shrunk(0.03)
+"""The interior less a 3 cm margin. The gripper only lets go once every corner
+of the object is over it, so nothing is dropped across the rim."""
+
+BIN_RELEASE_HEIGHT = 0.15
+"""How far above the rim the object's lowest corner may be when it is released [m]."""
+
+BIN_TARGET: Vec3 = (BIN_FOOTPRINT.center[0], BIN_FOOTPRINT.center[1], BIN_RIM_Z + 0.12)
+"""Where the object's box centre is carried to: over the bin, 12 cm above the rim.
+
+Above the rim on purpose. A target on the bin floor would make straight-line
+distance shaping pay for dragging the object along the table into the wall.
+"""
+
+SPAWN_ZONE = Box2D((0.175, -0.19), (0.267, 0.267))
+"""The fixed area of the table top where pick tasks lay their object, cell frame.
+
+The whole object stays inside it, at any yaw: its centre is drawn from the zone
+shrunk by the object's footprint radius. On the table the pallet stands on, in
+front of and to the right of the robot: robot base frame x in [-0.22, 0.32],
+y in [-0.72, -0.18]. It clears the base plate, the pallet and the shelf by at
+least 1.5 cm (``tests/test_pick_to_bin_layout.py``). ``SPAWN_ZONE_MARKER_CFG``
+draws it.
+"""

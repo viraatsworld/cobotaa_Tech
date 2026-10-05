@@ -14,12 +14,21 @@ custom term: only ``finger_joint`` is driven -- PhysX moves the five mimic joint
 
 from __future__ import annotations
 
+from isaaclab.controllers.differential_ik_cfg import DifferentialIKControllerCfg
 from isaaclab.envs import mdp
+from isaaclab.envs.mdp.actions.actions_cfg import DifferentialInverseKinematicsActionCfg
 from isaaclab.utils.configclass import configclass
 
-from techtory_cobotta_isaaclab.robot.robot_cfg import ARM_JOINTS, GRIPPER_CLOSED, GRIPPER_JOINT, GRIPPER_OPEN
+from techtory_cobotta_isaaclab.robot.robot_cfg import (
+    ARM_JOINTS,
+    GRIPPER_CLOSED,
+    GRIPPER_JOINT,
+    GRIPPER_OPEN,
+    TCP_BODY,
+    TCP_OFFSET,
+)
 
-__all__ = ["ActionsCfg"]
+__all__ = ["ActionsCfg", "TopDownTcpTargetActionCfg"]
 
 
 @configclass
@@ -50,3 +59,46 @@ class ActionsCfg:
         use_default_offset=False,
         clip={GRIPPER_JOINT: (GRIPPER_OPEN, GRIPPER_CLOSED)},
     )
+
+
+@configclass
+class TopDownTcpTargetActionCfg(DifferentialInverseKinematicsActionCfg):
+    """4-D arm action ``[dx, dy, dz, dyaw]``: steps of a top-down TCP target, in the robot base frame.
+
+    See :class:`~techtory_cobotta_isaaclab.robot.tcp_action.TopDownTcpTargetAction`.
+    The defaults keep a full-scale action inside the arm's MoveIt speed limits
+    (0.33-0.60 rad/s) at a 25 Hz policy; the term also rate-limits the joint
+    targets, so the limits hold whatever the IK asks for.
+    """
+
+    # Named lazily: the term's module imports pxr, which must wait for Kit.
+    class_type: type | str = "techtory_cobotta_isaaclab.robot.tcp_action:TopDownTcpTargetAction"
+
+    asset_name: str = "robot"
+    joint_names: list[str] = list(ARM_JOINTS)
+    body_name: str = TCP_BODY
+    body_offset: DifferentialInverseKinematicsActionCfg.OffsetCfg = DifferentialInverseKinematicsActionCfg.OffsetCfg(
+        pos=TCP_OFFSET
+    )
+    # Absolute pose mode: the term hands the controller its integrated target.
+    controller: DifferentialIKControllerCfg = DifferentialIKControllerCfg(
+        command_type="pose", use_relative_mode=False, ik_method="dls"
+    )
+
+    pos_step: float = 0.005
+    """Largest TCP step per policy step [m]: 0.125 m/s at 25 Hz."""
+
+    yaw_step: float = 0.012
+    """Largest yaw step per policy step [rad]: 0.3 rad/s at 25 Hz, under the slowest joint's 0.33 rad/s."""
+
+    max_lead_pos: float = 0.03
+    """How far the commanded target may lead the actual TCP [m], per axis."""
+
+    max_lead_yaw: float = 0.1
+    """How far the commanded yaw may lead the actual TCP yaw [rad]."""
+
+    workspace_min: tuple[float, float, float] | None = None
+    """Lower corner of the box the commanded TCP is kept in [m], robot base frame. None: no bound."""
+
+    workspace_max: tuple[float, float, float] | None = None
+    """Upper corner of that box [m], robot base frame."""
