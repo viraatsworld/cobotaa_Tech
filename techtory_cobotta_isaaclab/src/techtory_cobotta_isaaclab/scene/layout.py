@@ -34,6 +34,8 @@ __all__ = [
     "BIN_RELEASE_HEIGHT",
     "BIN_RIM_Z",
     "BIN_TARGET",
+    "CELL_FRAME_INNER",
+    "CELL_FRAME_TOP_Z",
     "HAMMER_BODY",
     "HAMMER_BODY_OFFSET",
     "HAMMER_ON_SHELF",
@@ -218,6 +220,19 @@ TABLE_TOP = Box2D((0.0, 0.03), (0.78, 0.79))
 It is a slotted plate: grooves 16 mm wide and at least 12 mm deep run along x,
 every 52 mm. ``WORKCELL_CFG`` explains what that means for contacts.
 """
+
+CELL_FRAME_INNER: dict[str, float] = {"+x": 0.82, "-x": -0.82, "+y": 0.87, "-y": -0.80}
+"""Inner faces of the cell's aluminium frame on each side [m]: x for the +/-x sides, y for the +/-y sides.
+
+Measured by raycasting the workcell's collision mesh outwards from the cell's
+centre. Each side is a bottom rail (table top to ~1.0 m), a top rail
+(~2.0-2.04 m), corner posts and, on the +/-y sides, a middle post; the openings
+in between (~70% of each side) hold glass in the real cell, which the mesh
+does not have. ``CELL_GLASS_CFGS`` adds it.
+"""
+
+CELL_FRAME_TOP_Z = 2.04
+"""Top of the cell's top rail [m], from the same raycast."""
 
 ROBOT_BASE_PLATE = Box2D((-0.275, -0.24), (0.15, 0.15))
 """The robot's base plate on the table (its collision mesh spans x [-0.425, -0.125], y [-0.39, -0.09])."""

@@ -23,6 +23,7 @@ __all__ = [
     "object_quat_b",
     "object_yaw_sincos",
     "tcp_pos_b",
+    "tcp_target_lead",
     "tcp_yaw_sincos",
     # rewards
     "ApproachProgress",
@@ -31,6 +32,8 @@ __all__ = [
     "PlacedInBin",
     "ReachedObject",
     "TransportProgress",
+    "action_rate",
+    "joint_acceleration",
     "lost_in_transport",
     "per_step",
     "termination_event",
@@ -57,6 +60,7 @@ from .observations import (
     object_quat_b,
     object_yaw_sincos,
     tcp_pos_b,
+    tcp_target_lead,
     tcp_yaw_sincos,
 )
 from .rewards import (
@@ -66,6 +70,8 @@ from .rewards import (
     PlacedInBin,
     ReachedObject,
     TransportProgress,
+    action_rate,
+    joint_acceleration,
     lost_in_transport,
     per_step,
     termination_event,

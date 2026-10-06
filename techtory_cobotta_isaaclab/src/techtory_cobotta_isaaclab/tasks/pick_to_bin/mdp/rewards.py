@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 import torch
 
+from isaaclab.envs import mdp
 from isaaclab.managers import ManagerTermBase, RewardTermCfg
 
 from . import state
@@ -32,6 +33,8 @@ __all__ = [
     "PlacedInBin",
     "ReachedObject",
     "TransportProgress",
+    "action_rate",
+    "joint_acceleration",
     "lost_in_transport",
     "per_step",
     "termination_event",
@@ -41,6 +44,21 @@ __all__ = [
 def per_step(env: ManagerBasedRLEnv) -> torch.Tensor:
     """1 per step (weight = reward per step, e.g. a time penalty)."""
     return torch.full((env.num_envs,), 1.0 / env.step_dt, device=env.device)
+
+
+def action_rate(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """``|a_t - a_(t-1)|^2`` per step: the most effective single smoothness term."""
+    return mdp.action_rate_l2(env) / env.step_dt
+
+
+def joint_acceleration(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """``|q_target''|^2`` of the arm's commanded joint targets [rad^2/s^4], per step.
+
+    The commanded acceleration, not the simulator's measured one: the stiff
+    servos micro-vibrate at ~10 rad/s^2 whatever the command (measured in free
+    air), which the policy cannot change and a penalty should not chase.
+    """
+    return env.action_manager.get_term("arm").joint_target_acceleration_sq / env.step_dt
 
 
 def termination_event(env: ManagerBasedRLEnv, term_name: str) -> torch.Tensor:

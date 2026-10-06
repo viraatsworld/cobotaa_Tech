@@ -19,7 +19,8 @@ class PPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
     Batch: 4096 environments x 32 steps = 131k transitions per iteration, in 4
     mini-batches of 32k -- small next to the 20 GB of GPU memory, as the networks
-    are small. 3000 iterations are ~390M steps.
+    are small. 3000 iterations are ~390M steps: about 5 hours on an RTX 4000 Ada
+    (measured 5.85 s per iteration, 12.7 GB peak GPU memory).
     """
 
     num_steps_per_env = 32

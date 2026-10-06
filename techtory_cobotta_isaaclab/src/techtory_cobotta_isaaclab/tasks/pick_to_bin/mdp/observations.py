@@ -42,6 +42,7 @@ __all__ = [
     "object_quat_b",
     "object_yaw_sincos",
     "tcp_pos_b",
+    "tcp_target_lead",
     "tcp_yaw_sincos",
 ]
 
@@ -84,6 +85,15 @@ def tcp_pos_b(env: ManagerBasedEnv) -> torch.Tensor:
 def tcp_yaw_sincos(env: ManagerBasedEnv) -> torch.Tensor:
     """TCP heading as ``(sin, cos)`` ``(N, 2)``."""
     return _sincos(state.tcp_yaw(env) - _base_yaw(env))
+
+
+def tcp_target_lead(env: ManagerBasedEnv) -> torch.Tensor:
+    """Commanded TCP target minus actual TCP ``[dx, dy, dz, dyaw]`` ``(N, 4)``, robot base frame.
+
+    The arm action's own state: it says whether the arm is still catching up with
+    what was commanded. Known on the real robot too (command minus forward kinematics).
+    """
+    return env.action_manager.get_term("arm").target_lead
 
 
 def gripper_closed(env: ManagerBasedEnv) -> torch.Tensor:

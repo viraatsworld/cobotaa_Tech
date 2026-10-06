@@ -28,20 +28,20 @@ def test_task_registration() -> None:
 
 
 @pytest.mark.parametrize(
-    ("task", "cfg"),
+    ("task", "cfg", "agent"),
     [
-        ("TechtoryCobottaIsaaclab-HammerToBin-COBOTTA", "HammerToBinEnvCfg"),
-        ("TechtoryCobottaIsaaclab-HammerToBin-COBOTTA-Play", "HammerToBinEnvCfg_PLAY"),
+        ("TechtoryCobottaIsaaclab-HammerToBin-COBOTTA", "HammerToBinEnvCfg", "PPORunnerCfg"),
+        ("TechtoryCobottaIsaaclab-HammerToBin-COBOTTA-Play", "HammerToBinEnvCfg_PLAY", "PPORunnerCfg"),
+        ("TechtoryCobottaIsaaclab-SodaCanToBin-COBOTTA", "SodaCanToBinEnvCfg", "SodaCanPPORunnerCfg"),
+        ("TechtoryCobottaIsaaclab-SodaCanToBin-COBOTTA-Play", "SodaCanToBinEnvCfg_PLAY", "SodaCanPPORunnerCfg"),
     ],
 )
-def test_hammer_to_bin_registration(task: str, cfg: str) -> None:
+def test_pick_to_bin_registration(task: str, cfg: str, agent: str) -> None:
     spec = gym.spec(task)
     assert spec.entry_point == "isaaclab.envs:ManagerBasedRLEnv"
-    assert (
-        spec.kwargs["env_cfg_entry_point"]
-        == f"techtory_cobotta_isaaclab.tasks.hammer_to_bin.config.cobotta.env_cfg:{cfg}"
-    )
-    assert "rsl_rl_cfg_entry_point" in spec.kwargs
+    module = "techtory_cobotta_isaaclab.tasks.pick_to_bin.config.cobotta"
+    assert spec.kwargs["env_cfg_entry_point"] == f"{module}.env_cfg:{cfg}"
+    assert spec.kwargs["rsl_rl_cfg_entry_point"] == f"{module}.agents.rsl_rl_ppo_cfg:{agent}"
 
 
 def test_isaaclab_cli_discovers_the_package() -> None:

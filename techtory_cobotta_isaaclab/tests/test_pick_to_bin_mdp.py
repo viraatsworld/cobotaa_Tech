@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Hammer-to-bin's MDP logic, without the simulator.
+"""Pick-to-bin's MDP logic, without the simulator.
 
-The terms read the scene through :mod:`...hammer_to_bin.mdp.state`; these tests
+The terms read the scene through :mod:`...pick_to_bin.mdp.state`; these tests
 replace those reads with scripted values, so what is checked is the
 bookkeeping: angles, the arm action's limits, progress shaping, one-off
 bonuses, the gripper rule's state machine and the terminations.
@@ -25,6 +25,7 @@ from isaaclab.managers import RewardTermCfg, TerminationTermCfg
 from techtory_cobotta_isaaclab.robot.robot_cfg import GRIPPER_CLOSED, GRIPPER_OPEN
 from techtory_cobotta_isaaclab.robot.top_down import (
     rate_limit,
+    smooth_step,
     step_target,
     top_down_quat,
     wrap_half_turn,
@@ -33,7 +34,7 @@ from techtory_cobotta_isaaclab.robot.top_down import (
 
 # By module path: `from ...mdp import actions` would hand back Isaac Lab's own
 # mdp.actions, because the task's mdp package forwards unknown names to it.
-_MDP = "techtory_cobotta_isaaclab.tasks.hammer_to_bin.mdp"
+_MDP = "techtory_cobotta_isaaclab.tasks.pick_to_bin.mdp"
 actions = importlib.import_module(f"{_MDP}.actions")
 rewards = importlib.import_module(f"{_MDP}.rewards")
 state = importlib.import_module(f"{_MDP}.state")
@@ -68,6 +69,13 @@ def _feed(monkeypatch: pytest.MonkeyPatch, **values) -> dict[str, list]:
 def test_yaw_error_is_modulo_a_half_turn(angle: float, expected: float) -> None:
     """The jaw and the handle look the same turned by 180 deg: 0 and pi are both a perfect grasp."""
     assert wrap_half_turn(torch.tensor([angle])).item() == pytest.approx(expected, abs=1e-6)
+
+
+def test_round_objects_have_no_yaw_to_get_right() -> None:
+    """The soda can has no grasp axis: any jaw yaw grasps it, without reading the scene."""
+    env = _env(2, cfg=SimpleNamespace(grasp_object="soda_can"))
+    assert state.grasp_yaw_error(env).tolist() == [0.0, 0.0]
+    assert state.object_yaw(env).tolist() == [0.0, 0.0]
 
 
 @pytest.mark.parametrize("yaw", [-3.0, -1.2, 0.0, 0.7, 2.9])
@@ -116,6 +124,40 @@ def test_joint_targets_never_outrun_the_velocity_limit() -> None:
     assert out.tolist() == pytest.approx([0.0040, -0.0033, 0.002, -0.002, 0.0050, -0.0060])
 
 
+def _drive(goal: float, ticks: int = 400, v: float = 0.4, a: float = 1.0, dt: float = 0.01):
+    """Move a joint target from 0 towards ``goal`` with :func:`smooth_step`; return positions and steps."""
+    max_step, max_change = torch.tensor([v * dt]), torch.tensor([a * dt * dt])
+    pos, step = torch.zeros(1), torch.zeros(1)
+    positions, steps = [], []
+    for _ in range(ticks):
+        step = smooth_step(step, torch.tensor([goal]) - pos, max_step, max_change)
+        pos = pos + step
+        positions.append(pos.item())
+        steps.append(step.item())
+    return positions, steps
+
+
+def test_joint_targets_respect_speed_and_acceleration() -> None:
+    v, a, dt = 0.4, 1.0, 0.01
+    _, steps = _drive(1.0)
+    assert max(abs(s) for s in steps) <= v * dt + 1e-9
+    changes = [abs(b - c) for b, c in zip([0.0, *steps], steps, strict=False)]
+    assert max(changes) <= a * dt * dt + 1e-9
+    # From rest it takes v / a = 0.4 s to reach full speed, not one tick
+    assert steps[0] == pytest.approx(a * dt * dt)
+    assert steps[39] == pytest.approx(v * dt, rel=1e-3)
+
+
+@pytest.mark.parametrize("goal", [1.0, -0.3, 0.02])
+def test_joint_targets_arrive_without_overshoot(goal: float) -> None:
+    positions, steps = _drive(goal)
+    # Never past the goal by more than rounding: one tick's acceleration, 1e-4 rad (0.1 mm at 1 m);
+    # the naive sqrt(2 a e) bound overshot 2e-3 rad.
+    assert max(abs(p) for p in positions) <= abs(goal) + 1.0 * 0.01 * 0.01
+    assert positions[-1] == pytest.approx(goal, abs=1e-5)
+    assert abs(steps[-1]) < 1e-6  # and stopped
+
+
 ##
 # Rewards.
 ##
@@ -131,7 +173,7 @@ def test_progress_telescopes_and_starts_at_zero(monkeypatch: pytest.MonkeyPatch)
         monkeypatch,
         grasp_distance=distances,
         grasp_yaw_error=[0.0] * 4,
-        hammer_grasped=[False] * 4,
+        object_grasped=[False] * 4,
     )
     env = _env()
     term = _reward(rewards.ApproachProgress, env, yaw_weight=0.1)
@@ -141,7 +183,7 @@ def test_progress_telescopes_and_starts_at_zero(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_progress_restarts_after_reset(monkeypatch: pytest.MonkeyPatch) -> None:
-    _feed(monkeypatch, grasp_distance=[0.5, 0.4, 0.9], grasp_yaw_error=[0.0] * 3, hammer_grasped=[False] * 3)
+    _feed(monkeypatch, grasp_distance=[0.5, 0.4, 0.9], grasp_yaw_error=[0.0] * 3, object_grasped=[False] * 3)
     env = _env()
     term = _reward(rewards.ApproachProgress, env)
     term(env), term(env)
@@ -151,7 +193,7 @@ def test_progress_restarts_after_reset(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_approach_counts_yaw(monkeypatch: pytest.MonkeyPatch) -> None:
     """Turning the jaw onto the handle pays, as moving closer does: 0.1 m per rad."""
-    _feed(monkeypatch, grasp_distance=[0.1, 0.1], grasp_yaw_error=[1.0, 0.5], hammer_grasped=[False] * 2)
+    _feed(monkeypatch, grasp_distance=[0.1, 0.1], grasp_yaw_error=[1.0, 0.5], object_grasped=[False] * 2)
     env = _env()
     term = _reward(rewards.ApproachProgress, env, yaw_weight=0.1)
     term(env, yaw_weight=0.1)
@@ -160,7 +202,7 @@ def test_approach_counts_yaw(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_transport_pays_only_while_carried(monkeypatch: pytest.MonkeyPatch) -> None:
     grasped = [False, True, True, False, True]
-    _feed(monkeypatch, bin_target_distance=[0.8, 0.7, 0.6, 0.4, 0.3], hammer_grasped=grasped)
+    _feed(monkeypatch, bin_target_distance=[0.8, 0.7, 0.6, 0.4, 0.3], object_grasped=grasped)
     env = _env()
     term = _reward(rewards.TransportProgress, env)
     paid = [term(env).item() * DT for _ in grasped]
@@ -169,9 +211,9 @@ def test_transport_pays_only_while_carried(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_milestone_pays_once_per_episode(monkeypatch: pytest.MonkeyPatch) -> None:
-    _feed(monkeypatch, hammer_picked=[False, True, True, False, True, True])
+    _feed(monkeypatch, object_picked=[False, True, True, False, True, True])
     env = _env()
-    term = _reward(rewards.PickedHammer, env)
+    term = _reward(rewards.PickedObject, env)
     paid = [term(env).item() for _ in range(4)]
     assert paid == [0.0, 1.0 / DT, 0.0, 0.0]  # grasp -> drop -> re-grasp cannot farm it
     term.reset([0])
@@ -188,7 +230,7 @@ def test_weights_are_the_reward() -> None:
 def test_lost_in_transport_comes_from_the_rule(monkeypatch: pytest.MonkeyPatch) -> None:
     rule = SimpleNamespace(lost_this_step=torch.tensor([True, True, False]))
     monkeypatch.setattr(state, "gripper_rule", lambda env: rule)
-    monkeypatch.setattr(state, "hammer_near_bin", lambda env: torch.tensor([False, True, False]))
+    monkeypatch.setattr(state, "object_near_bin", lambda env: torch.tensor([False, True, False]))
     # lost far from the bin: penalised; at the bin: that is the release; not lost: nothing
     assert (rewards.lost_in_transport(_env(3)) * DT).tolist() == pytest.approx([1.0, 0.0, 0.0])
 
@@ -204,9 +246,9 @@ def _termination(term_cls, env):
 
 def _scene(monkeypatch: pytest.MonkeyPatch, rule, *, in_bin: bool, speed: float = 0.0, lowest: float = 1.0):
     monkeypatch.setattr(state, "gripper_rule", lambda env: rule)
-    monkeypatch.setattr(state, "hammer_in_bin", lambda env: torch.tensor([in_bin]))
-    monkeypatch.setattr(state, "hammer_speed", lambda env: torch.tensor([speed]))
-    monkeypatch.setattr(state, "hammer_corners", lambda env: torch.full((1, 8, 3), lowest))
+    monkeypatch.setattr(state, "object_in_bin", lambda env: torch.tensor([in_bin]))
+    monkeypatch.setattr(state, "object_speed", lambda env: torch.tensor([speed]))
+    monkeypatch.setattr(state, "object_corners", lambda env: torch.full((1, 8, 3), lowest))
 
 
 def test_holding_still_outside_the_bin_is_not_a_drop(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -228,11 +270,11 @@ def test_falling_off_the_table_ends_the_episode(monkeypatch: pytest.MonkeyPatch)
     assert _termination(terminations.DroppedOutsideBin, env)(env).item()
 
 
-def test_success_needs_the_hammer_to_settle_and_is_logged(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_success_needs_the_object_to_settle_and_is_logged(monkeypatch: pytest.MonkeyPatch) -> None:
     rule = SimpleNamespace(closed=torch.tensor([False]), picked_ever=torch.tensor([True]))
     _scene(monkeypatch, rule, in_bin=True)
     env = _env()
-    term = _termination(terminations.HammerResting, env)
+    term = _termination(terminations.ObjectResting, env)
     fired = [term(env, hold_steps=3).item() for _ in range(3)]
     assert fired == [False, False, True]
     term.reset([0])
@@ -261,8 +303,8 @@ def _rule(monkeypatch: pytest.MonkeyPatch, **scene):
     env = _env(scene={"robot": robot})
     rule = actions.ProximityGripperAction(actions.ProximityGripperActionCfg(), env)
     defaults = dict(
-        grasp_distance=0.1, at_grasp_pose=False, hammer_grasped=False, jaw_closed_on_nothing=False,
-        hammer_lift=0.0, hammer_over_bin=False,
+        grasp_distance=0.1, at_grasp_pose=False, object_grasped=False, jaw_closed_on_nothing=False,
+        object_lift=0.0, object_over_bin=False,
     )  # fmt: skip
     values = {**defaults, **scene}
     for name in defaults:
@@ -304,13 +346,13 @@ def test_rule_gives_up_on_a_jaw_stalled_on_something_else(monkeypatch: pytest.Mo
 def test_rule_releases_over_the_bin_for_good_and_reports_losses(monkeypatch: pytest.MonkeyPatch) -> None:
     rule, robot, scene = _rule(monkeypatch, at_grasp_pose=True, grasp_distance=0.005)
     rule.apply_actions()
-    scene.update(hammer_grasped=True, hammer_lift=0.05, at_grasp_pose=False)
+    scene.update(object_grasped=True, object_lift=0.05, at_grasp_pose=False)
     rule.apply_actions()
     assert rule.picked_ever.item()
 
     # slips out on the way: the jaw closes on nothing -> reported once for this policy step
     rule.process_actions(torch.zeros(1, 0))
-    scene.update(hammer_grasped=False, jaw_closed_on_nothing=True)
+    scene.update(object_grasped=False, jaw_closed_on_nothing=True)
     rule.apply_actions()
     assert rule.lost_this_step.item()
     rule.process_actions(torch.zeros(1, 0))
@@ -321,7 +363,7 @@ def test_rule_releases_over_the_bin_for_good_and_reports_losses(monkeypatch: pyt
     rule.apply_actions()
     scene.update(grasp_distance=0.005, at_grasp_pose=True)
     rule.apply_actions()
-    scene.update(hammer_grasped=True, hammer_over_bin=True)
+    scene.update(object_grasped=True, object_over_bin=True)
     rule.apply_actions()
     assert rule.released.item() and robot.target == GRIPPER_OPEN
     rule.apply_actions()

@@ -35,46 +35,77 @@ reset → hammer at random (x, y, yaw) on the table, arm at home, gripper openin
 → policy lifts the hammer (now "picked"), carries it to a point **above** the bin → rule opens when all hammer corners are inside
 → success when the hammer rests inside the bin for 0.4 s (episode ends).
 
-## As built (2026-10-05)
+## As built (2026-10-06)
 
-Implemented as planned below, with these changes. Each was found by measuring in simulation:
+Implemented as planned below, then reworked on review. The task is now **pick-to-bin**, generic
+over the object (`tasks/pick_to_bin/`, `scene/grasp_objects.py`), with the hammer and the soda can
+registered. Changes from the plan, each found by measuring in simulation:
 
-- **TCP Jacobian fix.** Isaac Lab's `DifferentialInverseKinematicsAction` shifts the Jacobian to the TCP with
-  the offset as given in the body frame, but the Jacobian is in the root frame. With the RG6 pointing down,
-  the 0.25 m TCP offset counted as 0.25 m *up*, and the TCP sank onto the table while the target sat 3 cm
-  above it. `TopDownTcpTargetAction._compute_frame_jacobian` rotates the offset into the root frame first.
-- **Grasp height 25 mm** above the handle centreline (was 11 mm). The RG6's pad tips drop as the jaw closes:
-  22 mm above the TCP fully open, 32 mm below it at the handle's width. Lower grasps hit the table first.
-  This matches the real `pick` pose at 33 mm above the table.
-- **Close condition 8 mm horizontal, 6 mm vertical, 15° yaw** (was a 1.5 cm sphere). Off-centre closes
-  shoved the light hammer round before the second pad arrived. "Grasped" also requires the jaw to stall
-  within the handle's width (`JAW_ON_HANDLE`, +0.38 to +0.56 rad). The rule reopens after 3 s closed
-  without a grasp.
-- **Grip 15 N·m** on `finger_joint` in this task (base task: 5 N·m). Near closed, each pad moves about
-  79 mm/rad, so 5 N·m is only ~32 N per pad, and the handle slipped out as soon as it left the table.
-  15 N·m is ~95 N per pad, inside the RG6's 25–120 N.
-- **No collisions with the cell's mesh.** Its 470k-triangle collider overflowed PhysX's GPU collision stack
-  at 1024 envs (needed ~600 MB). Even with bigger buffers, about 1 in 250 hammers was thrown in its first
-  steps, from poses that were fine in other envs. The task uses `WORKCELL_VISUAL_CFG` plus invisible boxes
-  for the table top and the base plate, with default PhysX buffers: 1024/1024 resets are clean.
-- **Workspace box** on the commanded TCP (robot base frame x ∈ [−0.20, 0.80], y ∈ [−0.72, 0.27],
-  z ∈ [0.005, 0.45]). It stands in for the cell's frame and keeps exploration where the task is.
+- **Any object.** Every term reads a `GraspableObject` description: bounding box, grasp point,
+  grasp axis (`None` for round objects), grasp height, the jaw range it stalls at, resting pose.
+  The scene entity is `object`; the env config's `grasp_object` names it. Reward terms are
+  `reached_object` / `picked_object`.
+- **Fixed spawn zone** (`layout.SPAWN_ZONE`): a 0.53 × 0.53 m area of the table top the pallet stands
+  on, robot base frame x ∈ [−0.22, 0.32], y ∈ [−0.72, −0.18]. The object's centre is drawn so the
+  whole object stays inside it at any yaw. It is drawn as a green rectangle (visual only).
+- **Cell collisions: PhysX, exact triangle mesh, 5 mm contact offset.** With PhysX's default offset
+  of several centimetres, the dense mesh (the table top is a slotted plate) produced contacts
+  everywhere. At 1024 envs that overflowed the GPU collision stack (~600 MB needed), and ~1 object
+  in 250 was kicked over on its first steps. At 5 mm: 0 bad resets out of 8192, ~50% faster.
+  An earlier iteration that dropped the cell collisions for boxes is gone.
+- **TCP Jacobian fix.** Isaac Lab's `DifferentialInverseKinematicsAction` shifts the Jacobian to the
+  TCP with the offset in the body frame, but the Jacobian is in the root frame. With the RG6 pointing
+  down, the 0.25 m TCP offset counted as 0.25 m *up*. `TopDownTcpTargetAction._compute_frame_jacobian`
+  rotates it first.
+- **Grasp height** (hammer 25 mm above the handle centreline). The RG6's pad tips drop as the jaw
+  closes: 22 mm above the TCP fully open, 32 mm below at 25 mm. Lower grasps hit the table first.
+- **Close condition 8 mm horizontal, 6 mm vertical, 15° yaw.** "Grasped" also requires the jaw to
+  stall within the object's range. The rule reopens after 3 s closed without a grasp.
+- **Grip 15 N·m** on `finger_joint` (base task: 5 N·m). At 5 N·m, ~32 N per pad near closed, and the
+  handle slipped out once lifted. 15 N·m is ~95 N per pad, inside the RG6's 25–120 N.
+- **Acceleration limits, twice.** The action is now the *velocity* of the commanded TCP target (±0.125 m/s,
+  ±0.3 rad/s yaw). The target ramps to it at most at 0.5 m/s² (yaw 1 rad/s²) and moves every physics step,
+  instead of jumping up to 5 mm once per policy step and leaving the IK to chase it in a burst. The joint
+  targets then move by `smooth_step`: at most MoveIt's velocity, at most its 1.0 rad/s² `max_acceleration`
+  per joint, and never faster than they can still stop on the IK solution (the discrete bound
+  `s ≤ (−a + √(a² + 8a|e|))/2`; the continuous `√(2a|e|)` overshot by 2 mrad). They are also clipped to the
+  soft joint limits (J2, J3, J5 ±150°, as in the catalogue). The arm then lags its command a little, so the
+  policy observes the lead (`tcp_target_lead`, 39 policy values). A controller has to brake for that lag;
+  the scripted probe was changed to (a non-braking one overshot: 1/32 successes; braking, 30/32). Measured
+  on the probe, commanded joint accelerations p99 2.25 rad/s² (RMS of 6 joints) with the limit, 17.6 without.
+- **Smoothness penalties**: `action_rate` (−0.0005) and `joint_acceleration` (−0.0001) per step. The
+  latter is on the *commanded* joint-target acceleration: the simulator's measured joint acceleration is
+  dominated by the stiff servos' micro-vibration (~9 rad/s² on J1 while it barely moves), which the
+  policy cannot change. An action low-pass filter and a deadband were left out: the limits already
+  smooth the motion, a filter adds lag, and zero action already holds still (0.00 mm drift). Action
+  delay and noise belong to the sim-to-real randomisation.
+- **Glass in the cell's sides.** The cell mesh (like the workcell URDF and the Isaac Sim demo) has only
+  the aluminium frame, ~70% of each side open. `CELL_GLASS_CFGS` adds a 10 mm pane per side, table top to
+  top rail, behind the frame's inner face; PhysX colliders, faintly drawn, in every cell scene.
+- **Workspace box** on the commanded TCP (robot base frame x ∈ [−0.25, 0.80], y ∈ [−0.75, 0.27],
+  z ∈ [0.005, 0.45]). It keeps exploration where the task is; the cell itself still collides.
 - **`lost_in_transport`** comes from the gripper rule seeing the jaw close on nothing after a pick, not
-  from a dip in "grasped". "Grasped" reads the jaw's speed, which jitters under load and gave false −5s.
-- **"Picked"** is measured against the table rest height, which every reset lays the hammer at, instead of
-  a height recorded at reset.
-- **Spawn area**: robot base frame x ∈ [−0.10, 0.20], y ∈ [−0.60, −0.30] (box centre, any yaw), clear of the
-  pallet, shelf and plate by ≥ 1.5 cm at any yaw (`tests/test_hammer_to_bin_layout.py`).
-- **Reward weights are per event or per step.** Every term divides by `step_dt`, the time penalty included,
-  so −0.005 is per step, as in the reward table.
+  from a dip in "grasped". The jaw's speed jitters under load and gave false −5s.
+- **Reward weights are per event or per step.** Every term divides by `step_dt`.
+- **Checks verify the setup, not success.** The scripted probe fails only if no episode can succeed,
+  a one-off reward pays twice, or the arm drifts or overspeeds. Its success rate is information.
+- **Size: 4096 environments, 20 s episodes.** Measured here (RTX 4000 Ada 20 GB, 125 GB RAM):
 
-Measured results:
+  | Envs | Steps/s (zero action) | GPU memory | RAM |
+  | ---: | ---: | ---: | ---: |
+  | 1024 | 13k | 9.8 GB | — |
+  | 2048 | 20k | 10.5 GB | — |
+  | 4096 | 23k | 12.3 GB | 45 GB |
+  | 8192 | 26k | 14.5 GB | 86 GB |
 
-- `check_hammer_to_bin.py --resets --num_envs 1024`: PASS (tilt ≤ 0.6°, all hammers in their area, jaws open).
-- `--hold`: 0.00 mm TCP drift over 10 s.
-- Scripted pick-and-place on 64 envs: 62 successes. Both failures were slips in transport.
-  Hold drift while holding the hammer ≤ 0.7 mm. Arm joint speed ≤ 1.00× its limit.
-- `isaaclab train`: 1024 envs at ~2.15 s per PPO iteration (32 steps), so ~2.4 h for 4000 iterations.
+  Beyond 4096: +12% for twice the RAM. PPO: 4096 × 32 = 131k transitions per iteration, 3000
+  iterations (~390M steps). Episodes: a scripted pick-and-place takes 10–14 s at the real joint speed
+  limits; 20 s leaves room for a second grasp attempt.
+- **Verified at full size** (2026-10-06): 4096 resets with the glass and the 5 mm cell offset clean for
+  both objects; real training at 4096 envs 5.85 s per iteration (~22k steps/s), 12.7 GB peak GPU memory,
+  46 GB RAM, no buffer overflow — ~5 h for 3000 iterations. Per-step limits pinned in
+  `tests/test_motion_limits.py` (MoveIt at 100%: 0.0033–0.0060 rad per physics step, 0.013–0.024 rad per
+  policy step; TCP 5 mm / 0.012 rad per policy step).
 
 ## Implementation
 

@@ -121,12 +121,13 @@ class ObservationsCfg:
 
     @configclass
     class PolicyCfg(ObsGroup):
-        """35 values: ``6 + 6 + 3 + 2 + 1 + 3 + 2 + 3 + 2 + 3 + 4``, concatenated in this order."""
+        """39 values: ``6 + 6 + 3 + 2 + 4 + 1 + 3 + 2 + 3 + 2 + 3 + 4``, concatenated in this order."""
 
         arm_pos = ObsTerm(func=mdp.joint_pos, params={"asset_cfg": _ARM})
         arm_vel = ObsTerm(func=mdp.joint_vel, params={"asset_cfg": _ARM})
         tcp_pos = ObsTerm(func=mdp.tcp_pos_b)
         tcp_yaw = ObsTerm(func=mdp.tcp_yaw_sincos)
+        tcp_target_lead = ObsTerm(func=mdp.tcp_target_lead)
         gripper_closed = ObsTerm(func=mdp.gripper_closed)
         grasp_target = ObsTerm(func=mdp.grasp_target_b)
         object_yaw = ObsTerm(func=mdp.object_yaw_sincos)
@@ -189,6 +190,11 @@ class RewardsCfg:
     lost_in_transport = RewTerm(func=mdp.lost_in_transport, weight=-5.0)
     # Efficiency
     time_penalty = RewTerm(func=mdp.per_step, weight=-0.005)
+    # Smoothness: small, so the policy still learns to reach the goal first; raise once
+    # it does if the motion is still jerky. A jittery start (|a_t - a_(t-1)|^2 ~ 8) costs
+    # ~2 over an episode, against +5..+50 for the milestones.
+    action_rate = RewTerm(func=mdp.action_rate, weight=-0.0005)
+    joint_acceleration = RewTerm(func=mdp.joint_acceleration, weight=-1.0e-4)
 
 
 @configclass

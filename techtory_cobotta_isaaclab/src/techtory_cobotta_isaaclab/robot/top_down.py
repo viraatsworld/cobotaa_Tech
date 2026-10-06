@@ -27,6 +27,7 @@ from isaaclab.utils.math import quat_apply, quat_from_euler_xyz, quat_mul
 __all__ = [
     "POINTING_DOWN",
     "rate_limit",
+    "smooth_step",
     "step_target",
     "top_down_quat",
     "wrap_half_turn",
@@ -96,3 +97,27 @@ def step_target(
 def rate_limit(current: torch.Tensor, desired: torch.Tensor, max_step: torch.Tensor) -> torch.Tensor:
     """Move ``current`` towards ``desired`` by at most ``max_step`` per element."""
     return current + (desired - current).clamp(-max_step, max_step)
+
+
+def smooth_step(
+    previous_step: torch.Tensor, error: torch.Tensor, max_step: torch.Tensor, max_step_change: torch.Tensor
+) -> torch.Tensor:
+    """This tick's move towards ``error`` under a speed and an acceleration limit.
+
+    Per element, in units per tick: the step is at most ``max_step`` (velocity x
+    dt) and differs from ``previous_step`` by at most ``max_step_change``
+    (acceleration x dt^2). It is also never more than what still lets it stop
+    within ``error`` after this tick, so the target is approached on a
+    trapezoidal profile and not overshot. A plain clip on the step change would
+    carry the speed past the goal and oscillate around it.
+
+    The stopping bound is the discrete one: braking from a step ``s`` by ``a``
+    per tick covers ``s^2 / 2a - s / 2`` more, so ``s + s^2 / 2a - s / 2 <= |error|``
+    gives ``s <= (-a + sqrt(a^2 + 8 a |error|)) / 2``. The continuous
+    ``sqrt(2 a |error|)`` overshoots by about one tick's step.
+    """
+    a = max_step_change
+    stopping = 0.5 * (torch.sqrt(a * a + 8.0 * a * error.abs()) - a)
+    reach = torch.minimum(torch.minimum(error.abs(), max_step), stopping)
+    desired = torch.sign(error) * reach
+    return torch.maximum(torch.minimum(desired, previous_step + max_step_change), previous_step - max_step_change)

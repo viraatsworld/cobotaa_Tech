@@ -12,6 +12,10 @@ scene of your own::
     @configclass
     class MySceneCfg(InteractiveSceneCfg):
         workcell = WORKCELL_CFG
+    glass_x_pos = CELL_GLASS_CFGS["+x"]
+    glass_x_neg = CELL_GLASS_CFGS["-x"]
+    glass_y_pos = CELL_GLASS_CFGS["+y"]
+    glass_y_neg = CELL_GLASS_CFGS["-y"]
         robot = COBOTTA_RG6_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         wrist_ft = WRIST_FT_CFG
 """
@@ -32,10 +36,20 @@ from isaaclab_physx.sim.spawners.materials import PhysxRigidBodyMaterialCfg
 
 from techtory_cobotta_isaaclab.assets import HAMMER_USD, PALLET_USD, SHELF_USD, SODA_CAN_USD, WORKCELL_USD
 from techtory_cobotta_isaaclab.robot.robot_cfg import COBOTTA_RG6_CFG
-from techtory_cobotta_isaaclab.scene.layout import HAMMER_BODY, PALLET, SHELF, SODA_CAN_BODY, SPAWN_ZONE, TABLE_TOP_Z
+from techtory_cobotta_isaaclab.scene.layout import (
+    CELL_FRAME_INNER,
+    CELL_FRAME_TOP_Z,
+    HAMMER_BODY,
+    PALLET,
+    SHELF,
+    SODA_CAN_BODY,
+    SPAWN_ZONE,
+    TABLE_TOP_Z,
+)
 from techtory_cobotta_isaaclab.spawners import GraspableUsdFileCfg, StaticUsdFileCfg
 
 __all__ = [
+    "CELL_GLASS_CFGS",
     "GRASPABLE_OBJECT_CFGS",
     "HAMMER_CFG",
     "PALLET_CFG",
@@ -72,6 +86,47 @@ WORKCELL_CFG = AssetBaseCfg(
     ),
 )
 """The Techtory cell, at the environment origin (its frame is the cell frame)."""
+
+_GLASS_THICKNESS = 0.01
+
+
+def _glass(side: str) -> AssetBaseCfg:
+    """One side's glass: a thin box from the table top to the top rail, its inner face on the frame's."""
+    plane = CELL_FRAME_INNER[side]
+    outward = 1.0 if plane > 0 else -1.0
+    center_z = (TABLE_TOP_Z + CELL_FRAME_TOP_Z) / 2.0
+    height = CELL_FRAME_TOP_Z - TABLE_TOP_Z
+    if side.endswith("x"):  # spans the cell in y, between the -y and +y frames
+        y0, y1 = CELL_FRAME_INNER["-y"], CELL_FRAME_INNER["+y"]
+        size = (_GLASS_THICKNESS, y1 - y0, height)
+        pos = (plane + outward * _GLASS_THICKNESS / 2.0, (y0 + y1) / 2.0, center_z)
+    else:  # spans the cell in x, between the -x and +x frames
+        x0, x1 = CELL_FRAME_INNER["-x"], CELL_FRAME_INNER["+x"]
+        size = (x1 - x0, _GLASS_THICKNESS, height)
+        pos = ((x0 + x1) / 2.0, plane + outward * _GLASS_THICKNESS / 2.0, center_z)
+    name = {"+x": "XPos", "-x": "XNeg", "+y": "YPos", "-y": "YNeg"}[side]
+    return AssetBaseCfg(
+        prim_path=f"{{ENV_REGEX_NS}}/CellGlass{name}",
+        # No rigid body: a static collider, like the cell's own.
+        spawn=sim_utils.CuboidCfg(
+            size=size,
+            collision_props=PhysxCollisionPropertiesCfg(collision_enabled=True),
+            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.75, 0.88, 0.95), opacity=0.12),
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=pos),
+    )
+
+
+CELL_GLASS_CFGS: dict[str, AssetBaseCfg] = {side: _glass(side) for side in ("+x", "-x", "+y", "-y")}
+"""The glass in the frame's four sides, which the cell's mesh does not have.
+
+The real cell is glazed between its aluminium posts and rails; the cell USD
+(and the workcell URDF it came from) has only the frame, so the arm could reach
+out through ~70% of each side. Each pane is a 10 mm box over the whole side,
+table top to top rail, with its inner face on the frame's inner face
+(``layout.CELL_FRAME_INNER``): behind the posts, so it changes nothing where the
+frame already collides.
+"""
 
 SHELF_CFG = AssetBaseCfg(
     prim_path="{ENV_REGEX_NS}/Shelf",
@@ -176,6 +231,10 @@ class TechtoryCellSceneCfg(InteractiveSceneCfg):
     )
 
     workcell = WORKCELL_CFG
+    glass_x_pos = CELL_GLASS_CFGS["+x"]
+    glass_x_neg = CELL_GLASS_CFGS["-x"]
+    glass_y_pos = CELL_GLASS_CFGS["+y"]
+    glass_y_neg = CELL_GLASS_CFGS["-y"]
     shelf = SHELF_CFG
     robot = COBOTTA_RG6_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
     hammer = HAMMER_CFG

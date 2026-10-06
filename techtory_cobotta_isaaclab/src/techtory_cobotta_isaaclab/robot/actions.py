@@ -86,16 +86,41 @@ class TopDownTcpTargetActionCfg(DifferentialInverseKinematicsActionCfg):
     )
 
     pos_step: float = 0.005
-    """Largest TCP step per policy step [m]: 0.125 m/s at 25 Hz."""
+    """Largest TCP move per policy step [m]: 0.125 m/s at 25 Hz."""
 
     yaw_step: float = 0.012
-    """Largest yaw step per policy step [rad]: 0.3 rad/s at 25 Hz, under the slowest joint's 0.33 rad/s."""
+    """Largest yaw move per policy step [rad]: 0.3 rad/s at 25 Hz, under the slowest joint's 0.33 rad/s."""
+
+    tcp_acceleration: float = 0.5
+    """Largest acceleration of the commanded TCP target [m/s^2], per axis.
+
+    The action sets the target's velocity; it ramps to it at this rate, and the
+    target glides there physics step by physics step instead of jumping once per
+    policy step. Full speed (0.125 m/s) in 0.25 s. About what MoveIt's 1 rad/s^2
+    joint limit allows at the Cobotta's ~0.6 m working reach.
+    """
+
+    yaw_acceleration: float = 1.0
+    """Largest acceleration of the commanded TCP yaw [rad/s^2]: MoveIt's joint limit, as yaw is mostly J6."""
 
     max_lead_pos: float = 0.03
     """How far the commanded target may lead the actual TCP [m], per axis."""
 
     max_lead_yaw: float = 0.1
     """How far the commanded yaw may lead the actual TCP yaw [rad]."""
+
+    joint_acceleration_limit: float | tuple[float, ...] | None = 1.0
+    """Largest acceleration of each arm joint's target [rad/s^2], one value or one per joint; None: off.
+
+    MoveIt's ``max_acceleration`` for every Cobotta joint
+    (``techtory_cobotta_moveit/config/joint_limits.yaml``). The joint targets
+    brake in time to stop on the IK solution rather than overshoot it. It makes
+    the arm lag its commanded TCP target a little; the policy sees that lag
+    (``tcp_target_lead``) and a controller must brake for it -- one that does not
+    overshoots (measured: a non-braking scripted probe fell to 1/32 successes; a
+    braking one makes 30/32, with commanded joint accelerations within the limit).
+    The joint targets always keep the velocity limits and the soft joint limits.
+    """
 
     workspace_min: tuple[float, float, float] | None = None
     """Lower corner of the box the commanded TCP is kept in [m], robot base frame. None: no bound."""
